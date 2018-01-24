@@ -5585,7 +5585,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     } else {
                         v = wPoint.M;
                     }
-                    PolylineBreak aPLB = (PolylineBreak) ls.getLegenBreak(v);
+                    PolylineBreak aPLB = (PolylineBreak) ls.findLegendBreak(v);
                     Color aColor = aPLB.getColor();
                     Float size = aPLB.getSize();
                     float[] dashPattern = getDashPattern(aPLB.getStyle());

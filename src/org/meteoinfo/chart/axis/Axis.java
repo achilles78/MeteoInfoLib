@@ -1383,14 +1383,17 @@ public class Axis implements Cloneable {
                                 laby = (float) (miny - len);
                             }
                         }
+                        Dimension dim = Draw.getStringDimension(chartText.getText(), g);
                         for (String dstr : chartText.getTexts()) {
                             labx = (float) x;
                             if (this.location == Location.BOTTOM) {
-                                laby = laby + space;
+                                laby += space;
                                 Draw.outString(g, labx, laby, dstr, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle);
+                                laby += dim.getHeight();
                             } else {
                                 laby = laby - space;
                                 Draw.outString(g, labx, laby, dstr, XAlign.CENTER, YAlign.BOTTOM, this.tickLabelAngle);
+                                laby -= dim.getHeight();
                             }
                         }
                     }

@@ -685,7 +685,7 @@ public class GraphicFactory {
             ps = new PointShape();
             ps.setPoint(new PointD(xdata.getDouble(i), ydata.getDouble(i)));
             z = zdata.getDouble(i);
-            cb = ls.getLegenBreak(z);
+            cb = ls.findLegendBreak(z);
             graphics.add(new Graphic(ps, cb));
         }
         graphics.setSingleLegend(false);
@@ -775,7 +775,7 @@ public class GraphicFactory {
                 ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
             }
             c = cdata.getDouble(i);
-            cb = ls.getLegenBreak(c);
+            cb = ls.findLegendBreak(c);
             graphics.add(new Graphic(ps, cb));
         }
         graphics.setSingleLegend(false);
@@ -904,7 +904,7 @@ public class GraphicFactory {
                 ps.setPoints(points);
                 ps.lowValue = z;
                 ps.highValue = ps.lowValue;
-                pb = (PolygonBreak) ls.getLegenBreak(z);
+                pb = (PolygonBreak) ls.findLegendBreak(z);
                 //pb.setDrawOutline(true);
                 Graphic graphic = new Graphic(ps, pb);
                 graphics.add(graphic);
@@ -1806,7 +1806,7 @@ public class GraphicFactory {
 
         wContour.Global.PolyLine aLine;
         double v;
-        ColorBreak cbb = ls.getLegenBreak(0);
+        ColorBreak cbb = ls.findLegendBreak(0);
         GraphicCollection graphics = new GraphicCollection();
         for (int i = 0; i < ContourLines.size(); i++) {
             aLine = ContourLines.get(i);
@@ -1934,7 +1934,7 @@ public class GraphicFactory {
             aPolyline.setPoints(pList);
             aPolyline.setValue(v);
             aPolyline.setExtent(MIMath.getPointsExtent(pList));
-            cbb = ls.getLegenBreak(v);
+            cbb = ls.findLegendBreak(v);
             graphics.add(new Graphic(aPolyline, cbb));
         }
         graphics.setSingleLegend(false);
@@ -2037,7 +2037,7 @@ public class GraphicFactory {
             aPolyline.setPoints(pList);
             aPolyline.setValue(v);
             aPolyline.setExtent(MIMath.getPointsExtent(pList));
-            cbb = ls.getLegenBreak(v);
+            cbb = ls.findLegendBreak(v);
             graphics.add(new Graphic(aPolyline, cbb));
         }
         graphics.setSingleLegend(false);
@@ -2078,7 +2078,7 @@ public class GraphicFactory {
         List<wContour.Global.Polygon> contourPolygons = ContourDraw.tracingPolygons(gridData.data, contourLines, borders, cValues);
 
         double v;
-        ColorBreak cbb = ls.getLegenBreak(0);
+        ColorBreak cbb = ls.findLegendBreak(0);
         GraphicCollection graphics = new GraphicCollection();
         for (int i = 0; i < contourPolygons.size(); i++) {
             wContour.Global.Polygon poly = contourPolygons.get(i);
@@ -2317,7 +2317,7 @@ public class GraphicFactory {
             }
 
             v = aPolygonShape.lowValue;
-            cbb = ls.getLegenBreak(v);
+            cbb = ls.findLegendBreak(v);
             graphics.add(new Graphic(aPolygonShape, cbb));
         }
         graphics.setSingleLegend(false);
@@ -2489,7 +2489,7 @@ public class GraphicFactory {
             }
 
             v = aPolygonShape.lowValue;
-            cbb = ls.getLegenBreak(v);
+            cbb = ls.findLegendBreak(v);
             graphics.add(new Graphic(aPolygonShape, cbb));
         }
         graphics.setSingleLegend(false);
@@ -2930,7 +2930,7 @@ public class GraphicFactory {
                     } else {
                         v = cdata.getDouble(i);
                         aWB.setValue(v);
-                        cb = ls.getLegenBreak(v);
+                        cb = ls.findLegendBreak(v);
                     }
                     Graphic graphic = new Graphic(aWB, cb);
                     gc.add(graphic);
@@ -3006,7 +3006,7 @@ public class GraphicFactory {
                     } else {
                         v = cdata.getDouble(i);
                         wa.setValue(v);
-                        cb = ls.getLegenBreak(v);
+                        cb = ls.findLegendBreak(v);
                     }
                     Graphic graphic = new Graphic(wa, cb);
                     gc.add(graphic);
@@ -3050,6 +3050,7 @@ public class GraphicFactory {
         float ex;
         double dx, dy, ldx, ldy, r = 1;
         String label, pct = null;
+        LegendScheme ls = new LegendScheme(ShapeTypes.Polygon);
         for (int i = 0; i < n; i++) {
             v = xdata.getDouble(i);
             if (Double.isNaN(v)){
@@ -3097,6 +3098,7 @@ public class GraphicFactory {
             pgb.setCaption(label);
             Graphic graphic = new Graphic(aShape, pgb);
             gc.add(graphic);
+            ls.addLegendBreak(pgb);
 
             //Label text
             ChartText ps = new ChartText();
@@ -3136,6 +3138,7 @@ public class GraphicFactory {
             startAngle += sweepAngle;
         }
         gc.setSingleLegend(false);
+        gc.setLegendScheme(ls);
         gc.getLabelSet().setLabelFont(labelFont);
         gc.getLabelSet().setLabelColor(labelColor);
         dx = r * 0.1;
