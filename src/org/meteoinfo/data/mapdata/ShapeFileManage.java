@@ -49,6 +49,7 @@ import org.meteoinfo.projection.ProjectionInfo;
 import org.meteoinfo.projection.proj4j.CRSFactory;
 import org.meteoinfo.projection.proj4j.CoordinateReferenceSystem;
 import org.meteoinfo.shape.PointM;
+import org.meteoinfo.shape.PointZShape;
 import org.meteoinfo.shape.PolygonMShape;
 import org.meteoinfo.shape.PolygonZShape;
 
@@ -127,6 +128,9 @@ public class ShapeFileManage {
         switch (aST) {
             case Point://single point                                                              
                 aLayer = readPointShapes(br, shapeNum);
+                break;
+            case PointZ:
+                aLayer = readPointZShapes(br, shapeNum);
                 break;
             case Polyline:    //Polyline layer       
                 aLayer = readPolylineShapes(br, shapeNum);
@@ -220,6 +224,44 @@ public class ShapeFileManage {
             PointD aPoint = new PointD();
             aPoint.X = x;
             aPoint.Y = y;
+            aP.setPoint(aPoint);
+            aLayer.addShape(aP);
+        }
+
+        //Create legend scheme            
+        aLayer.setLegendScheme(LegendManage.createSingleSymbolLegendScheme(ShapeTypes.Point, Color.black, 5));
+        return aLayer;
+    }
+    
+    private static VectorLayer readPointZShapes(DataInputStream br, int shapeNum) throws IOException {
+        int RecordNum, ContentLength, aShapeType;
+        double x, y, z, m;
+        VectorLayer aLayer = new VectorLayer(ShapeTypes.PointZ);
+        byte[] bytes = new byte[44 * shapeNum];
+        br.read(bytes);
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        
+        for (int i = 0; i < shapeNum; i++) {
+
+            //br.ReadBytes(12); //记录头8个字节和一个int(4个字节)的shapetype 
+            buffer.order(ByteOrder.BIG_ENDIAN);
+            RecordNum = buffer.getInt();
+            ContentLength = buffer.getInt();
+            
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            aShapeType = buffer.getInt();
+
+            x = buffer.getDouble();
+            y = buffer.getDouble();
+            z = buffer.getDouble();
+            m = buffer.getDouble();
+
+            PointZShape aP = new PointZShape();
+            PointZ aPoint = new PointZ();
+            aPoint.X = x;
+            aPoint.Y = y;
+            aPoint.Z = z;
+            aPoint.M = m;
             aP.setPoint(aPoint);
             aLayer.addShape(aP);
         }
