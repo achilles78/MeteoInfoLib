@@ -39,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ public class ShapeFileManage {
         br.read(arr);
         ByteBuffer buffer = ByteBuffer.wrap(arr);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        buffer.position(32);
+        ((Buffer)buffer).position(32);
         //br.skipBytes(32);  //先读出36个字节,紧接着是Box边界合 
         int aShapeType = buffer.getInt();
         ShapeTypes aST = ShapeTypes.valueOf(aShapeType);
