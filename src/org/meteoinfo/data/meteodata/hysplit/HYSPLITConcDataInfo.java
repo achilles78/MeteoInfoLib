@@ -674,9 +674,9 @@ public class HYSPLITConcDataInfo extends DataInfo implements IGridDataInfo {
 
             br.close();
 
-            for (i = 0; i < xNum; i++) {
-                for (j = 0; j < yNum; j++) {
-                    data[i * yNum + j] = dataArray[j][i];
+            for (i = 0; i < yNum; i++) {
+                for (j = 0; j < xNum; j++) {
+                    data[i * xNum + j] = dataArray[j][i];
                 }
             }
             
