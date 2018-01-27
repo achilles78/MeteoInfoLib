@@ -13,8 +13,13 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.meteoinfo.chart.ChartPanel;
 import org.meteoinfo.chart.ChartText;
 import org.meteoinfo.chart.Location;
@@ -43,6 +48,11 @@ import org.meteoinfo.shape.Graphic;
 import org.meteoinfo.shape.PointShape;
 import org.meteoinfo.shape.PolygonShape;
 import org.meteoinfo.shape.PolylineShape;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -900,9 +910,42 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         return null;
     }
 
-//    @Override
-//    public void zoomToExtentScreen(double minX, double maxX, double minY, double maxY){
-//        this.mapView.zoomToExtentScreen(minX, maxX, minY, maxY, 1);
-//    }
+    /**
+     * Load MeteoInfo project file
+     * @param fn MeteoInfo project file name
+     * @param mfidx Map frame index
+     * @throws org.xml.sax.SAXException
+     * @throws java.io.IOException
+     * @throws javax.xml.parsers.ParserConfigurationException
+     */
+    public void loadMIProjectFile(String fn, int mfidx) throws SAXException, IOException, ParserConfigurationException{
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.parse(new File(fn));
+
+        Element root = doc.getDocumentElement();
+        
+        Element mapFrames = (Element) root.getElementsByTagName("MapFrames").item(0);
+        if (mapFrames == null) {
+            this.mapFrame.importProjectXML(root);
+        } else {
+            NodeList mfNodes = mapFrames.getElementsByTagName("MapFrame");
+            Node mfNode = mfNodes.item(mfidx);
+            this.mapFrame.importProjectXML((Element) mfNode);            
+        }
+        this.setDrawExtent(this.mapView.getViewExtent());
+        this.setExtent(this.mapView.getViewExtent());
+    }
+    
+    /**
+     * Load MeteoInfo project file
+     * @param fn MeteoInfo project file name
+     * @throws org.xml.sax.SAXException
+     * @throws java.io.IOException
+     * @throws javax.xml.parsers.ParserConfigurationException
+     */
+    public void loadMIProjectFile(String fn) throws SAXException, IOException, ParserConfigurationException{
+        this.loadMIProjectFile(fn, 0);
+    }
     // </editor-fold>
 }
