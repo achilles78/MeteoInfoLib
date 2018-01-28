@@ -770,9 +770,10 @@ public class GeoTiff {
                 double lat_1 = projStdParallel1.valueD(0);
                 GeoKey projStdParallel2 = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjStdParallel2);
                 double lat_2 = projStdParallel2.valueD(0);
-                //GeoKey projCenterLong = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjCenterLong);
-                //double lon_0 = projCenterLong == null ? 0 : projCenterLong.valueD(0);
                 GeoKey projCenterLong = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjNatOriginLong);
+                if (projCenterLong == null){
+                    projCenterLong = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjCenterLong);
+                }
                 double lon_0 = projCenterLong == null ? 0 : projCenterLong.valueD(0);
                 GeoKey projNatOriginLat = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjNatOriginLat);
                 double lat_0 = projNatOriginLat == null ? 0 : projNatOriginLat.valueD(0);
