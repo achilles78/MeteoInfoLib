@@ -1321,7 +1321,7 @@ public class Axis implements Cloneable {
         double maxx = area.getX() + area.getWidth();
         double maxy = area.getY() + area.getHeight();
         float labx, laby;
-        int space = 2;
+        int space = 4;
 
         //Draw x axis
         //Draw axis line
@@ -1656,7 +1656,7 @@ public class Axis implements Cloneable {
         double maxx = area.getX() + area.getWidth();
         double maxy = area.getY() + area.getHeight();
         float labx, laby;
-        int space = 2;
+        int space = 4;
 
         //Draw y axis
         //Draw axis line
@@ -1705,26 +1705,28 @@ public class Axis implements Cloneable {
                 //Draw tick label
                 if (this.drawTickLabel && n < this.tickLabels.size()) {
                     drawStr = this.tickLabels.get(n).getText();
-                    //dim = new Dimension(metrics.stringWidth(drawStr), metrics.getHeight());
                     g.setFont(this.tickLabelFont);
-                    dim = Draw.getStringDimension(drawStr, g);
+                    //dim = Draw.getStringDimension(drawStr, g);
                     if (this.location == Location.LEFT) {
-                        labx = (float) (sx - dim.width - space - space);
+                        //labx = (float) (sx - dim.width - space - space);
+                        labx = (float) (sx - space);
                         if (!this.isInsideTick()) {
                             labx -= len;
                         }
-                        laby = (float) (y + dim.height / 3);
-                        //g.drawString(drawStr, labx, laby);
+                        //laby = (float) (y + dim.height / 3);
+                        laby = (float)y;
+                        Draw.outString(g, labx, laby, drawStr, XAlign.RIGHT, YAlign.CENTER, this.tickLabelAngle);
                     } else {
-                        labx = (float) (sx + space + space);
+                        labx = (float) (sx + space);
                         if (!this.isInsideTick()) {
                             labx += len;
                         }
-                        laby = (float) (y + dim.height / 3);
-                        //g.drawString(drawStr, labx, laby);
+                        //laby = (float) (y + dim.height / 3);
+                        laby = (float)y;
+                        Draw.outString(g, labx, laby, drawStr, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle);
                     }
-                    Draw.drawTickLabel_Y(labx, laby, this.tickLabelFont, drawStr, this.tickLabelColor,
-                            this.tickLabelAngle, g);
+                    //Draw.drawTickLabel_Y(labx, laby, this.tickLabelFont, drawStr, this.tickLabelColor,
+                    //        this.tickLabelAngle, g);                    
                 }
                 n += this.getTickLabelGap();
 

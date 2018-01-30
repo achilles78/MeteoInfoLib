@@ -468,7 +468,7 @@ public class PolarPlot extends Plot2D {
                 String label = this.xTickLabels.get(i);
                 Dimension dim = Draw.getStringDimension(label, g);
                 float w = dim.width;
-                float h = dim.height * 0.6f;
+                float h = dim.height;
                 if (angle == 0 || angle == 180){
                     y = y + h * 0.5;
                     if (angle == 0)

@@ -36,6 +36,8 @@ import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 import org.meteoinfo.chart.plot.PlotOrientation;
+import org.meteoinfo.chart.plot.XAlign;
+import org.meteoinfo.chart.plot.YAlign;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.legend.LegendType;
 import org.meteoinfo.shape.ShapeTypes;
@@ -781,7 +783,7 @@ public class ChartLegend {
     }
 
     private void drawVerticalLegend(Graphics2D g, LegendScheme aLS) {
-        String caption = "";
+        String caption;
         Dimension aSF;
         float leftSpace = _leftSpace;
         float breakSpace = _breakSpace;
@@ -835,6 +837,11 @@ public class ChartLegend {
                     Draw.drawPolylineSymbol_S(new PointF(x, y), symbolWidth, symbolHeight, aPLB, g);
                 } else if (cb instanceof PolygonBreak) {
                     Draw.drawPolygonSymbol(new PointF(x, y), symbolWidth, symbolHeight, (PolygonBreak) cb, g);
+                } else {
+                    PolygonBreak pgb = new PolygonBreak();
+                    pgb.setColor(cb.getColor());
+                    pgb.setOutlineColor(Color.black);                    
+                    Draw.drawPolygonSymbol(new PointF(x, y), symbolWidth, symbolHeight, pgb, g);
                 }
 
                 PointF sP = new PointF(0, 0);
@@ -843,7 +850,8 @@ public class ChartLegend {
                 g.setColor(labelColor);
                 g.setFont(labelFont);
                 aSF = Draw.getStringDimension(caption, g);
-                Draw.drawString(g, caption, sP.X + 5, sP.Y + aSF.height / 4);
+                //Draw.drawString(g, caption, sP.X + 5, sP.Y + aSF.height / 4);
+                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER);
                 y += breakHeight + breakSpace;
 
                 i += 1;
