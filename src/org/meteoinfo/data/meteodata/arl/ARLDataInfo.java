@@ -81,8 +81,8 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
     /// <summary>
     /// Record length
     /// </summary>
-    public int recLen;
-    private int indexLen;
+    public long recLen;
+    private long indexLen;
     /// <summary>
     /// Record number per time
     /// </summary>
@@ -838,7 +838,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
             //Read label
             aDL = ARLDataInfo.readDataLabel(br);
             //Read Data
-            dataBytes = new byte[recLen - 50];
+            dataBytes = new byte[(int)recLen - 50];
             br.read(dataBytes);
             br.close();
             float[] data = unpackARLData(dataBytes, xNum, yNum, aDL);
@@ -898,7 +898,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
             aDL = ARLDataInfo.readDataLabel(br);
 
             //Read Data
-            dataBytes = new byte[recLen - 50];
+            dataBytes = new byte[(int)recLen - 50];
             br.read(dataBytes);
 
             br.close();
@@ -951,7 +951,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 aDL = ARLDataInfo.readDataLabel(br);
 
                 //Read Data
-                dataBytes = new byte[recLen - 50];
+                dataBytes = new byte[(int)recLen - 50];
                 br.read(dataBytes);
                 theData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
                 for (int i = 0; i < yNum; i++) {
@@ -1010,7 +1010,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 aDL = ARLDataInfo.readDataLabel(br);
 
                 //Read Data
-                dataBytes = new byte[recLen - 50];
+                dataBytes = new byte[(int)recLen - 50];
                 br.read(dataBytes);
                 theData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
                 for (int j = 0; j < xNum; j++) {
@@ -1067,7 +1067,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 aDL = ARLDataInfo.readDataLabel(br);
 
                 //Read Data
-                dataBytes = new byte[recLen - 50];
+                dataBytes = new byte[(int)recLen - 50];
                 br.read(dataBytes);
                 theData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
                 for (int j = 0; j < yNum; j++) {
@@ -1124,7 +1124,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 aDL = ARLDataInfo.readDataLabel(br);
 
                 //Read Data
-                dataBytes = new byte[recLen - 50];
+                dataBytes = new byte[(int)recLen - 50];
                 br.read(dataBytes);
                 theData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
                 for (int j = 0; j < xNum; j++) {
@@ -1184,7 +1184,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                     aDL = ARLDataInfo.readDataLabel(br);
 
                     //Read Data
-                    dataBytes = new byte[recLen - 50];
+                    dataBytes = new byte[(int)recLen - 50];
                     br.read(dataBytes);
                     theData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
 
@@ -1254,7 +1254,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 aDL = ARLDataInfo.readDataLabel(br);
 
                 //Read Data
-                dataBytes = new byte[recLen - 50];
+                dataBytes = new byte[(int)recLen - 50];
                 br.read(dataBytes);
                 gridData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
 
@@ -1309,7 +1309,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 aDL = ARLDataInfo.readDataLabel(br);
 
                 //Read Data
-                dataBytes = new byte[recLen - 50];
+                dataBytes = new byte[(int)recLen - 50];
                 br.read(dataBytes);
                 gridData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
                 aValue = gridData[latIdx][lonIdx];
@@ -1364,7 +1364,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
             aDL = ARLDataInfo.readDataLabel(br);
 
             //Read Data
-            dataBytes = new byte[recLen - 50];
+            dataBytes = new byte[(int)recLen - 50];
             br.read(dataBytes);
             gridData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
 
@@ -1420,7 +1420,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
             aDL = ARLDataInfo.readDataLabel(br);
 
             //Read Data
-            dataBytes = new byte[recLen - 50];
+            dataBytes = new byte[(int)recLen - 50];
             br.read(dataBytes);
             gridData = unpackARLGridData(dataBytes, xNum, yNum, aDL);
 
