@@ -20,6 +20,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.TexturePaint;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
@@ -1112,6 +1113,7 @@ public class Plot2D extends AbstractPlot2D {
         int y = (int) xy1[1];
         int width = (int) (xy2[0] - xy1[0]);
         int height = (int) (xy2[1] - xy1[1]);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, ishape.getInterpolation());
         g.drawImage(image, x, y, width, height, null);
     }
 

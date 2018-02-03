@@ -19,6 +19,7 @@ import org.meteoinfo.global.util.GlobalUtil;
 import org.meteoinfo.shape.ShapeTypes;
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.BufferedReader;
@@ -47,6 +48,7 @@ public class ImageLayer extends MapLayer {
     private String _worldFileName;
     private boolean _isSetTransColor;
     private Color _transparencyColor;
+    private Object interp;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 
@@ -59,6 +61,7 @@ public class ImageLayer extends MapLayer {
         this.setShapeType(ShapeTypes.Image);
         _isSetTransColor = false;
         _transparencyColor = Color.black;
+        this.interp = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
@@ -175,6 +178,7 @@ public class ImageLayer extends MapLayer {
      * Set upper-left x
      *
      * @param value The value
+     * @throws java.io.IOException
      */
     public void setXUL(double value) throws IOException {
         _worldFilePara.xUL = value;
@@ -200,6 +204,7 @@ public class ImageLayer extends MapLayer {
      * Set upper-left y
      *
      * @param value The value
+     * @throws java.io.IOException
      */
     public void setYUL(double value) throws IOException {
         _worldFilePara.yUL = value;
@@ -225,6 +230,7 @@ public class ImageLayer extends MapLayer {
      * Set x scale
      *
      * @param value The value
+     * @throws java.io.IOException
      */
     public void setXScale(double value) throws IOException {
         _worldFilePara.xScale = value;
@@ -306,6 +312,40 @@ public class ImageLayer extends MapLayer {
             writeImageWorldFile(_worldFileName, _worldFilePara);
         }
     }
+    
+    /**
+     * Get interpolation
+     * @return Interpolation
+     */
+    public Object getInterpolation(){
+        return this.interp;
+    }
+    
+    /**
+     * Set interpolation object
+     * @param value Interpolation object
+     */
+    public void setInterpolation(Object value){
+        this.interp = value;
+    }
+    
+    /**
+     * Set interpolation string
+     * @param value Interpolation string
+     */
+    public void setInterpolation(String value){
+        switch (value){
+            case "nearest":
+                this.interp = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+                break;
+            case "bilinear":
+                this.interp = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+                break;
+            case "bicubic":
+                this.interp = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+                break;
+        }
+    }
     // </editor-fold>
     // <editor-fold desc="Methods">
 
@@ -313,6 +353,7 @@ public class ImageLayer extends MapLayer {
      * Read image world file
      *
      * @param aIFile Image world file path
+     * @throws java.io.FileNotFoundException
      */
     public void readImageWorldFile(String aIFile) throws FileNotFoundException, IOException {
         BufferedReader sr = new BufferedReader(new FileReader(new File(aIFile)));
@@ -331,6 +372,7 @@ public class ImageLayer extends MapLayer {
      *
      * @param aFile File path
      * @param aWFP WorldFilePara
+     * @throws java.io.IOException
      */
     public void writeImageWorldFile(String aFile, WorldFilePara aWFP) throws IOException {
         BufferedWriter sw = new BufferedWriter(new FileWriter(new File(aFile)));
@@ -355,13 +397,13 @@ public class ImageLayer extends MapLayer {
      * @return Colors
      */
     public List<Color> getColorsFromPaletteFile(String pFile) {
-        BufferedReader sr = null;
+        BufferedReader sr;
         try {
             sr = new BufferedReader(new InputStreamReader(new FileInputStream(pFile)));
             sr.readLine();
             String aLine = sr.readLine();
             String[] dataArray;
-            List<Color> colors = new ArrayList<Color>();
+            List<Color> colors = new ArrayList<>();
             while (aLine != null) {
                 if (aLine.isEmpty()) {
                     aLine = sr.readLine();
@@ -622,6 +664,7 @@ public class ImageLayer extends MapLayer {
          * Set upper-left x
          *
          * @param value The value
+         * @throws java.io.IOException
          */
         public void setXUL(double value) throws IOException {
             _worldFilePara.xUL = value;
@@ -647,6 +690,7 @@ public class ImageLayer extends MapLayer {
          * Set upper-left y
          *
          * @param value The value
+         * @throws java.io.IOException
          */
         public void setYUL(double value) throws IOException {
             _worldFilePara.yUL = value;
@@ -672,6 +716,7 @@ public class ImageLayer extends MapLayer {
          * Set x scale
          *
          * @param value The value
+         * @throws java.io.IOException
          */
         public void setXScale(double value) throws IOException {
             _worldFilePara.xScale = value;

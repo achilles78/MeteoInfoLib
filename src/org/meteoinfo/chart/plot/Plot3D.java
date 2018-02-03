@@ -1240,6 +1240,7 @@ public class Plot3D extends Plot {
                 transform.scale(xscale / Math.cos(angle), yscale / Math.cos(angle_y));
                 break;
         }
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, ishape.getInterpolation());
         g.drawImage(image, transform, null);
     }
 

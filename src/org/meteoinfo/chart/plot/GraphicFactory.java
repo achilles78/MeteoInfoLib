@@ -1579,11 +1579,15 @@ public class GraphicFactory {
      * @param data RGB data array list
      * @param offset Offset in z axis
      * @param zdir Z direction - x, y or z
+     * @param interpolation Interpolation
      * @return Graphics
      */
     public static GraphicCollection createImage(Array x, Array y, List<Array> data, double offset,
-            String zdir) {
+            String zdir, String interpolation) {
         Graphic gg = createImage(x, y, data);
+        if (interpolation != null){
+            ((ImageShape)gg.getShape()).setInterpolation(interpolation);
+        }
         Shape shape = gg.getShape();
         Extent extent = shape.getExtent();
         Extent3D ex3 = new Extent3D();
@@ -1743,11 +1747,15 @@ public class GraphicFactory {
      * @param offset Offset of z axis
      * @param zdir Z direction - x, y or z
      * @param sePoint Start and end points [xstart, ystart, xend, yend]
+     * @param interpolation Interpolation
      * @return Graphics
      */
     public static GraphicCollection createImage(GridArray gdata, LegendScheme ls, double offset,
-            String zdir, List<Number> sePoint) {
+            String zdir, List<Number> sePoint, String interpolation) {
         Graphic gg = createImage(gdata, ls);
+        if (interpolation != null){
+            ((ImageShape)gg.getShape()).setInterpolation(interpolation);
+        }
         Shape shape = gg.getShape();
         Extent extent = shape.getExtent();
         Extent3D ex3 = new Extent3D();
