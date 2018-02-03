@@ -516,7 +516,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }        
+        }
     }
 
     private static Array addDouble(Array a, double b) {
@@ -581,7 +581,7 @@ public class ArrayMath {
                 int n = r.getRank();
                 int na = a.getRank();
                 int nb = b.getRank();
-                int[] current;                
+                int[] current;
                 if (isComplex(a)) {
                     if (isComplex(b)) {
                         Complex v1, v2;
@@ -627,7 +627,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }                
+        }
     }
 
     private static Array addComplex(Array a, double b) {
@@ -812,7 +812,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }        
+        }
     }
 
     private static Array subInt(Array a, int b) {
@@ -926,7 +926,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }                
+        }
     }
 
     private static Array subDouble(Array a, double b) {
@@ -996,7 +996,7 @@ public class ArrayMath {
                 int n = r.getRank();
                 int na = a.getRank();
                 int nb = b.getRank();
-                int[] current;                
+                int[] current;
                 if (isComplex(a)) {
                     if (isComplex(b)) {
                         Complex v1, v2;
@@ -1042,7 +1042,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }                   
+        }
     }
 
     private static Array subComplex(Array a, double b) {
@@ -1216,7 +1216,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }        
+        }
     }
 
     private static Array mulInt(Array a, int b) {
@@ -1268,7 +1268,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }        
+        }
     }
 
     private static Array mulFloat(Array a, float b) {
@@ -1320,7 +1320,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }          
+        }
     }
 
     private static Array mulDouble(Array a, double b) {
@@ -1385,7 +1385,7 @@ public class ArrayMath {
                 int n = r.getRank();
                 int na = a.getRank();
                 int nb = b.getRank();
-                int[] current;                
+                int[] current;
                 if (isComplex(a)) {
                     if (isComplex(b)) {
                         Complex v1, v2;
@@ -1431,7 +1431,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }               
+        }
     }
 
     private static Array mulComplex(Array a, double b) {
@@ -1738,7 +1738,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }             
+        }
     }
 
     private static Array divDouble(Array a, double b) {
@@ -1808,7 +1808,7 @@ public class ArrayMath {
                 int n = r.getRank();
                 int na = a.getRank();
                 int nb = b.getRank();
-                int[] current;                
+                int[] current;
                 if (isComplex(a)) {
                     if (isComplex(b)) {
                         Complex v1, v2;
@@ -1854,7 +1854,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }             
+        }
     }
 
     private static Array divComplex(Array a, double b) {
@@ -2193,7 +2193,7 @@ public class ArrayMath {
                 int n = r.getRank();
                 int na = a.getRank();
                 int nb = b.getRank();
-                int[] current;                
+                int[] current;
                 if (isComplex(a)) {
                     if (isComplex(b)) {
                         Complex v1, v2;
@@ -2239,7 +2239,7 @@ public class ArrayMath {
                 return r;
             default:
                 return null;
-        }           
+        }
     }
 
     private static Array powComplex(Array a, double b) {
@@ -2659,6 +2659,27 @@ public class ArrayMath {
     }
 
     /**
+     * Return the array with the value of 1 when the input array element value
+     * in the list b, otherwise set value as 0.
+     *
+     * @param a Array a
+     * @param b List b
+     * @return Result array
+     */
+    public static Array inValues(Array a, List b) {
+        Array r = Array.factory(DataType.INT, a.getShape());
+        for (int i = 0; i < a.getSize(); i++) {
+            if (b.contains(a.getObject(i))) {
+                r.setDouble(i, 1);
+            } else {
+                r.setDouble(i, 0);
+            }
+        }
+
+        return r;
+    }
+
+    /**
      * Return the indices of the elements that are non-zero.
      *
      * @param a Input array
@@ -2710,7 +2731,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit and & operation
      *
@@ -2726,7 +2747,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit or | operation
      *
@@ -2742,7 +2763,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit or | operation
      *
@@ -2758,7 +2779,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit exclusive or ^ operation
      *
@@ -2774,7 +2795,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit exclusive or | operation
      *
@@ -2790,7 +2811,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit inversion ~ operation
      *
@@ -2804,8 +2825,8 @@ public class ArrayMath {
         }
 
         return r;
-    }    
-    
+    }
+
     /**
      * Bit left shift << operation
      *
@@ -2821,7 +2842,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit left shift << operation
      *
@@ -2837,7 +2858,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit right shift >> operation
      *
@@ -2853,7 +2874,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Bit right shift >> operation
      *
@@ -3325,7 +3346,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Convert cartesian to polar coordinate
      *
@@ -3337,15 +3358,15 @@ public class ArrayMath {
         Array r = Array.factory(DataType.DOUBLE, x.getShape());
         Array B = Array.factory(DataType.DOUBLE, x.getShape());
         double[] rr;
-        for (int i = 0; i < x.getSize(); i++){
+        for (int i = 0; i < x.getSize(); i++) {
             rr = cartesianToPolar(x.getDouble(i), y.getDouble(i));
             r.setDouble(i, rr[1]);
             B.setDouble(i, rr[0]);
         }
-        
+
         return new Array[]{B, r};
     }
-    
+
     /**
      * Convert poar to cartesian coordinate
      *
@@ -3357,7 +3378,7 @@ public class ArrayMath {
         Array x = Array.factory(DataType.DOUBLE, r.getShape());
         Array y = Array.factory(DataType.DOUBLE, r.getShape());
         double[] rr;
-        for (int i = 0; i < r.getSize(); i++){
+        for (int i = 0; i < r.getSize(); i++) {
             rr = polarToCartesian(B.getDouble(i), r.getDouble(i));
             x.setDouble(i, rr[0]);
             y.setDouble(i, rr[1]);
@@ -3365,7 +3386,7 @@ public class ArrayMath {
 
         return new Array[]{x, y};
     }
-    
+
     /**
      * Convert cartesian to polar coordinate
      *
@@ -3484,7 +3505,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Take elements from an array.
      *
@@ -3499,14 +3520,14 @@ public class ArrayMath {
         Array r = Array.factory(a.getDataType(), shape);
         Index index = a.getIndex();
         int[] current = new int[n];
-        for (int i = 0; i < nn; i++){
-            for (int j = 0; j < n; j++){
+        for (int i = 0; i < nn; i++) {
+            for (int j = 0; j < n; j++) {
                 current[j] = ranges.get(j).get(i);
             }
             index.set(current);
             r.setObject(i, a.getObject(index));
         }
-        
+
         return r;
     }
 
@@ -3796,7 +3817,7 @@ public class ArrayMath {
         }
         return max;
     }
-    
+
     /**
      * Compute sum value of an array along an axis (dimension)
      *
@@ -3843,7 +3864,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Compute sum value of an array
      *
@@ -3863,12 +3884,12 @@ public class ArrayMath {
                 n += 1;
             }
         }
-        if (n == 0) {            
+        if (n == 0) {
             s = Double.NaN;
         }
         return s;
     }
-    
+
     /**
      * Compute the sum arry from a list of arrays
      *
@@ -4000,7 +4021,7 @@ public class ArrayMath {
         }
         return sum / n;
     }
-    
+
     /**
      * Get the index of the minimum value into the flattened array.
      *
@@ -4013,10 +4034,10 @@ public class ArrayMath {
         int idx = 0;
         IndexIterator iterator = a.getIndexIterator();
         int i = 0;
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             v = iterator.getDoubleNext();
-            if (!Double.isNaN(v)){
-                if (min > v){
+            if (!Double.isNaN(v)) {
+                if (min > v) {
                     min = v;
                     idx = i;
                 }
@@ -4025,7 +4046,7 @@ public class ArrayMath {
         }
         return idx;
     }
-    
+
     /**
      * Get the indices of the minimum values along an axis.
      *
@@ -4034,7 +4055,7 @@ public class ArrayMath {
      * @return Indices
      * @throws ucar.ma2.InvalidRangeException
      */
-    public static Array argMin(Array a, int axis) throws InvalidRangeException {        
+    public static Array argMin(Array a, int axis) throws InvalidRangeException {
         int[] dataShape = a.getShape();
         int[] shape = new int[dataShape.length - 1];
         int idx;
@@ -4071,7 +4092,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Get the index of the maximum value into the flattened array.
      *
@@ -4084,10 +4105,10 @@ public class ArrayMath {
         int idx = 0;
         IndexIterator iterator = a.getIndexIterator();
         int i = 0;
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             v = iterator.getDoubleNext();
-            if (!Double.isNaN(v)){
-                if (max < v){
+            if (!Double.isNaN(v)) {
+                if (max < v) {
                     max = v;
                     idx = i;
                 }
@@ -4096,7 +4117,7 @@ public class ArrayMath {
         }
         return idx;
     }
-    
+
     /**
      * Get the indices of the maximum values along an axis.
      *
@@ -4105,7 +4126,7 @@ public class ArrayMath {
      * @return Indices
      * @throws ucar.ma2.InvalidRangeException
      */
-    public static Array argMax(Array a, int axis) throws InvalidRangeException {        
+    public static Array argMax(Array a, int axis) throws InvalidRangeException {
         int[] dataShape = a.getShape();
         int[] shape = new int[dataShape.length - 1];
         int idx;
@@ -4271,7 +4292,7 @@ public class ArrayMath {
         }
         return mean;
     }
-    
+
     /**
      * Compute standard deviation value of an array along an axis (dimension)
      *
@@ -4318,7 +4339,7 @@ public class ArrayMath {
 
         return r;
     }
-    
+
     /**
      * Compute standard deviation value of an array
      *
@@ -4343,10 +4364,11 @@ public class ArrayMath {
         } else {
             mean = Double.NaN;
         }
-        
-        if (Double.isNaN(mean))
+
+        if (Double.isNaN(mean)) {
             return Double.NaN;
-        
+        }
+
         double sum = 0;
         ii = a.getRangeIterator(ranges);
         while (ii.hasNext()) {
@@ -4356,7 +4378,7 @@ public class ArrayMath {
             }
         }
         sum = Math.sqrt(sum / n);
-        
+
         return sum;
     }
 
@@ -5208,8 +5230,8 @@ public class ArrayMath {
      *
      * @param xData X data array
      * @param yData Y data array
-     * @return Slope, intercept, correlation coefficent, two-sided p-value, 
-     *      the standard error of the estimate for the slope, valid data number
+     * @return Slope, intercept, correlation coefficent, two-sided p-value, the
+     * standard error of the estimate for the slope, valid data number
      */
     public static double[] lineRegress(Array xData, Array yData) {
         double x_sum = 0;
@@ -5245,7 +5267,7 @@ public class ArrayMath {
         double t = r * Math.sqrt(df / ((1.0 - r + TINY) * (1.0 + r + TINY)));
         //two-sided p-value for a hypothesis test whose null hypothesis is that the slope is zero
         double p = studpval(t, df);
-        
+
         // more statistical analysis
         double xbar = x_sum / n;
         double ybar = y_sum / n;
@@ -5259,7 +5281,7 @@ public class ArrayMath {
             ssr += (fit - ybar) * (fit - ybar);
             xxbar += (xi.get(i) - xbar) * (xi.get(i) - xbar);
         }
-        double svar  = rss / df;
+        double svar = rss / df;
         double svar1 = svar / xxbar;
         double svar0 = svar / n + xbar * xbar * svar1;
         svar0 = Math.sqrt(svar0);    //the standard error of the estimate for the intercept
@@ -5290,7 +5312,6 @@ public class ArrayMath {
 //        double a0 = 0;
 //        double Ta = (ahat - a0) / sea;        
 //        p = studpval(Ta, n);
-
         return new double[]{slope, intercept, r, p, svar1, n};
     }
 
