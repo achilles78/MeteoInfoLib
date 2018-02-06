@@ -354,8 +354,9 @@ public abstract class AbstractPlot2D extends Plot {
      * Set x axis
      *
      * @param axis Axis
+     * @throws java.lang.CloneNotSupportedException
      */
-    public void setXAxis(Axis axis) {
+    public void setXAxis(Axis axis) throws CloneNotSupportedException {
         axis.setLocation(Location.BOTTOM);
         this.axis.put(Location.BOTTOM, axis);
         Axis topAxis = (Axis) axis.clone();
@@ -376,8 +377,9 @@ public abstract class AbstractPlot2D extends Plot {
      * Set y axis
      *
      * @param axis Axis
+     * @throws java.lang.CloneNotSupportedException
      */
-    public void setYAxis(Axis axis) {
+    public void setYAxis(Axis axis) throws CloneNotSupportedException {
         axis.setLocation(Location.LEFT);
         this.axis.put(Location.LEFT, axis);
         Axis rightAxis = (Axis) axis.clone();
@@ -852,10 +854,10 @@ public abstract class AbstractPlot2D extends Plot {
         }
 
         //Get x axis space
-        bottom += this.getXAxisHeight(g, space);
+        bottom += this.getXAxisHeight(g);
 
         //Get y axis space
-        left += this.getYAxisWidth(g, space);
+        left += this.getYAxisWidth(g);
 
         //Set right space
         if (this.getXAxis().isVisible()) {
@@ -905,10 +907,10 @@ public abstract class AbstractPlot2D extends Plot {
         }
 
         //Get x axis space
-        bottom += this.getXAxisHeight(g, space);
+        bottom += this.getXAxisHeight(g);
 
         //Get y axis space
-        left += this.getYAxisWidth(g, space);
+        left += this.getYAxisWidth(g);
 
         //Set right space
         if (this.getXAxis().isVisible()) {
@@ -1003,10 +1005,10 @@ public abstract class AbstractPlot2D extends Plot {
         }
 
         //Get x axis space
-        bottom += this.getXAxisHeight(g, space);
+        bottom += this.getXAxisHeight(g);
 
         //Get y axis space
-        left += this.getYAxisWidth(g, space);
+        left += this.getYAxisWidth(g);
 
         //Set right space
         if (this.getXAxis().isVisible()) {
@@ -1019,68 +1021,14 @@ public abstract class AbstractPlot2D extends Plot {
         Rectangle2D plotArea = new Rectangle2D.Double(left, top,
                 area.getWidth() - left - right, area.getHeight() - top - bottom);
         return plotArea;
+    }    
+    
+    int getXAxisHeight(Graphics2D g) {
+        return this.getXAxis().getXAxisHeight(g);
     }
-
-    int getXAxisHeight(Graphics2D g, int space) {
-        Axis xAxis = this.getXAxis();
-        if (!xAxis.isVisible()) {
-            return 0;
-        }
-
-        int height = space;
-        if (xAxis.isDrawTickLabel()) {
-            g.setFont(xAxis.getTickLabelFont());
-            String maxLabel = xAxis.getMaxLenLable();
-            Dimension dim = Draw.getStringDimension(maxLabel, xAxis.getTickLabelAngle(), g);
-            height += dim.height + space;
-//            if (xAxis.getTickLabelAngle() == 0) {
-//                height += dim.height + space;
-//            } else {
-//                height += dim.height + space + (int) (dim.getWidth()
-//                        * Math.sin(xAxis.getTickLabelAngle() * Math.PI / 180));
-//            }
-            if (xAxis instanceof TimeAxis) {
-                height += dim.height + space;
-            }
-            int tlln = xAxis.getMaxTickLableLines();
-            if (tlln > 1){
-                for (int i = 0; i < tlln; i++){
-                    height += dim.height + space;
-                }
-            }
-        }
-        if (!xAxis.isInsideTick()) {
-            height += xAxis.getTickLength();
-        }
-        if (xAxis.isDrawLabel()) {
-            g.setFont(xAxis.getLabelFont());
-            Dimension dim = Draw.getStringDimension(xAxis.getLabel().getText(), g);
-            height += dim.height + space + 5;
-        }
-
-        return height;
-    }
-
-    int getYAxisWidth(Graphics2D g, int space) {
-        Axis yAxis = this.getYAxis();
-        if (!yAxis.isVisible()) {
-            return 0;
-        }
-
-        int width = space;
-        if (yAxis.isDrawTickLabel()) {
-            width += yAxis.getMaxLabelLength(g) + space + space;
-        }
-        if (!yAxis.isInsideTick()) {
-            width += this.getYAxis().getTickLength();
-        }
-        if (yAxis.isDrawLabel()) {
-            g.setFont(yAxis.getLabelFont());
-            Dimension dim = Draw.getStringDimension(yAxis.getLabel().getText(), g);
-            width += dim.height + 10 - space;
-        }
-
-        return width;
+    
+    int getYAxisWidth(Graphics2D g) {
+        return this.getYAxis().getYAxisWidth(g);
     }
 
     float drawTitle(Graphics2D g, Rectangle2D graphArea) {
@@ -1301,7 +1249,7 @@ public abstract class AbstractPlot2D extends Plot {
                 break;
             case LOWER_CENTER_OUTSIDE:
                 x = (float) (area.getX() + area.getWidth() / 2 - dim.width / 2);
-                y = (float) (area.getY() + area.getHeight() + this.getXAxisHeight(g, 1) + 10);
+                y = (float) (area.getY() + area.getHeight() + this.getXAxisHeight(g) + 10);
                 break;
             case LEFT_OUTSIDE:
                 x = 10;

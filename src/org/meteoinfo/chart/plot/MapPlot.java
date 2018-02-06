@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -77,8 +79,12 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         super();
         this.antialias = false;
         this.setAutoAspect(false);
-        this.setXAxis(new LonLatAxis("Longitude", true));
-        this.setYAxis(new LonLatAxis("Latitude", false));
+        try {
+            this.setXAxis(new LonLatAxis("Longitude", true));
+            this.setYAxis(new LonLatAxis("Latitude", false));
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(MapPlot.class.getName()).log(Level.SEVERE, null, ex);
+        }        
         this.getAxis(Location.TOP).setDrawTickLabel(false);
         this.getAxis(Location.RIGHT).setDrawTickLabel(false);
         this.setDrawNeatLine(true);
@@ -861,11 +867,12 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
     }
     
     @Override
-    int getXAxisHeight(Graphics2D g, int space) {
+    int getXAxisHeight(Graphics2D g) {
         if (this.isLonLatMap()){
-            return super.getXAxisHeight(g, space);
+            return super.getXAxisHeight(g);
         }
         
+        int space = 4;
         if (this.mapFrame.isDrawGridLabel()) {
             int height = space;
             height += mapFrame.getTickLineLength() + mapFrame.getGridLabelShift();
@@ -878,11 +885,12 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
     }
     
     @Override
-    int getYAxisWidth(Graphics2D g, int space) {
+    int getYAxisWidth(Graphics2D g) {
         if (this.isLonLatMap()){
-            return super.getYAxisWidth(g, space);
+            return super.getYAxisWidth(g);
         }
         
+        int space = 4;
         if (this.mapFrame.isDrawGridLabel()) {
             int width = space;
             width += mapFrame.getTickLineLength() + mapFrame.getGridLabelShift();

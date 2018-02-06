@@ -784,7 +784,6 @@ public class ChartLegend {
 
     private void drawVerticalLegend(Graphics2D g, LegendScheme aLS) {
         String caption;
-        Dimension aSF;
         float leftSpace = _leftSpace;
         float breakSpace = _breakSpace;
         float breakHeight = this.getBreakHeight(g);
@@ -807,12 +806,6 @@ public class ChartLegend {
         rowNums[0] = aLS.getVisibleBreakNum() - num;
 
         //Draw legend                        
-        Color labelColor = Color.black;
-        Font labelFont = new Font("Arial", Font.PLAIN, 14);
-        if (this.label != null){
-            labelColor = this.label.getColor();
-            labelFont = this.label.getFont();
-        }
         float x, y;
         i = 0;
         for (int col = 0; col < rowColNum; col++) {
@@ -847,10 +840,8 @@ public class ChartLegend {
                 PointF sP = new PointF(0, 0);
                 sP.X = x + symbolWidth / 2;
                 sP.Y = y;               
-                g.setColor(labelColor);
-                g.setFont(labelFont);
-                aSF = Draw.getStringDimension(caption, g);
-                //Draw.drawString(g, caption, sP.X + 5, sP.Y + aSF.height / 4);
+                g.setColor(this.tickLabelColor);
+                g.setFont(this.tickLabelFont);
                 Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER);
                 y += breakHeight + breakSpace;
 
@@ -880,13 +871,6 @@ public class ChartLegend {
         colNums[rowColNum - 1] = aLS.getVisibleBreakNum() - num;
 
         //Draw legend    
-        Color labelColor = Color.black;
-        Font labelFont = new Font("Arial", Font.PLAIN, 14);
-        if (this.label != null){
-            labelColor = this.label.getColor();
-            labelFont = this.label.getFont();
-        }
-        FontMetrics metrics = g.getFontMetrics(labelFont);
         float x, y;
         y = this._breakSpace + breakHeight / 2;
         i = 0;
@@ -915,11 +899,11 @@ public class ChartLegend {
                 PointF sP = new PointF(0, 0);
                 sP.X = x + symbolWidth / 2;
                 sP.Y = y;
-                g.setColor(labelColor);
-                g.setFont(labelFont);
-                Draw.drawString(g, caption, sP.X + 5, sP.Y + metrics.getHeight() / 4);
-
-                x += this.symbolDimension.width + metrics.stringWidth(caption) + 15;
+                g.setColor(this.tickLabelColor);
+                g.setFont(this.tickLabelFont);
+                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER);
+                Dimension dim = Draw.getStringDimension(caption, g);
+                x += this.symbolDimension.width + dim.width + 15;
                 i += 1;
             }
             y += breakHeight + this._breakSpace * 2;
@@ -1365,17 +1349,12 @@ public class ChartLegend {
         String caption;
         Dimension aSF;
         int bNum = legendScheme.getBreakNum();
-        //FontMetrics metrics = g.getFontMetrics(tickFont);
-        //aSF = new Dimension(metrics.stringWidth(caption), metrics.getHeight());
         int labWidth = 0;
-        Font labFont = new Font("Arial", Font.PLAIN, 14);
-        if (this.label != null)
-            labFont = this.label.getFont();
+        g.setFont(this.tickLabelFont);
         for (int i = 0; i < bNum; i++) {
             caption = legendScheme.getLegendBreaks().get(i).getCaption();
             boolean isValid = true;
-            if (isValid) {
-                g.setFont(labFont);
+            if (isValid) {                
                 aSF = Draw.getStringDimension(caption, this.tickLabelAngle, g);
                 int labwidth = aSF.width;
                 if (labWidth < labwidth) {
@@ -1388,8 +1367,9 @@ public class ChartLegend {
     }
 
     private int getBreakHeight(Graphics2D g) {
-        FontMetrics metrics = g.getFontMetrics(tickLabelFont);
-        return Math.max(metrics.getHeight(), this.symbolDimension.height);
+        g.setFont(tickLabelFont);
+        Dimension dim = Draw.getStringDimension(this.legendScheme.getLegendBreak(0).getCaption(), g);
+        return Math.max(dim.height, this.symbolDimension.height);
     }
 
     /**

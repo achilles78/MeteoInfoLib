@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.meteoinfo.data.GridArray;
 import org.meteoinfo.data.meteodata.MeteoDataType;
+import org.meteoinfo.global.util.BigDecimalUtil;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.IndexIterator;
@@ -103,16 +104,18 @@ public class ASCIIGridDataInfo extends DataInfo implements IGridDataInfo {
 
             this.setMissingValue(nodata_value);
             double[] X = new double[ncols];
-            for (i = 0; i < ncols; i++) {
-                X[i] = xllCorner + i * cellSize;
+            X[0] = xllCorner;
+            for (i = 1; i < ncols; i++) {
+                X[i] = BigDecimalUtil.add(X[i - 1], cellSize);
             }
             if (X[ncols - 1] + cellSize - X[0] == 360) {
                 this.setGlobal(true);
             }
 
             double[] Y = new double[nrows];
-            for (i = 0; i < nrows; i++) {
-                Y[i] = yllCorner + i * cellSize;
+            Y[0] = yllCorner;
+            for (i = 1; i < nrows; i++) {
+                Y[i] = BigDecimalUtil.add(Y[i-1], cellSize);
             }
 
             this.addAttribute(new Attribute("data_format", "ASCII grid data"));

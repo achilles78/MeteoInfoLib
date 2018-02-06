@@ -199,7 +199,7 @@ public class GridArray {
      * @return xArray delt
      */
     public double getXDelt() {
-        return xArray[1] - xArray[0];
+        return BigDecimalUtil.sub(xArray[1], xArray[0]);
     }
 
     /**
@@ -208,7 +208,7 @@ public class GridArray {
      * @return yArray delt
      */
     public double getYDelt() {
-        return yArray[1] - yArray[0];
+        return BigDecimalUtil.sub(yArray[1], yArray[0]);
     }
 
     /**

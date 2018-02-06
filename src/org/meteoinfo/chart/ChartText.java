@@ -454,6 +454,23 @@ public class ChartText extends Shape {
     }
     
     /**
+     * Get width
+     * @param g Graphics2D
+     * @return Width
+     */
+    public int getWidth(Graphics2D g){
+        g.setFont(this.font);
+        int w = 0;
+        for (String line : this.text){
+            Dimension dim = Draw.getStringDimension(line, g);
+            if (w < dim.width)
+                w = dim.width;
+        }
+        
+        return w;
+    }
+    
+    /**
      * Get height
      * @param g Graphics2D
      * @return Height
@@ -461,9 +478,14 @@ public class ChartText extends Shape {
     public int getHeight(Graphics2D g) {
         g.setFont(this.font);
         int h = 0;
-        for (String line : this.text){
-            Dimension dim = Draw.getStringDimension(line, g);
-            h += dim.height + this.lineSpace;
+        if (this.angle != 0){
+            Dimension dim = Draw.getStringDimension(this.getText(), angle, g);
+            h += dim.height;
+        } else {
+            for (String line : this.text){
+                Dimension dim = Draw.getStringDimension(line, g);
+                h += dim.height + this.lineSpace;
+            }
         }
         return h - this.lineSpace;
     }
