@@ -28,6 +28,7 @@ import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.Extent3D;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;
+import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.layer.VectorLayer;
 import org.meteoinfo.legend.BarBreak;
 import org.meteoinfo.legend.ColorBreak;
@@ -1379,15 +1380,14 @@ public class GraphicFactory {
     /**
      * Create image
      *
-     * @param x X data array
-     * @param y Y data array
      * @param gdata data array
+     * @param extent Extent
      * @return Image graphic
      */
-    public static Graphic createImage(Array x, Array y, Array gdata) {
+    public static Graphic createImage(Array gdata, List<Number> extent) {
         int width, height;
-        width = (int) x.getSize();
-        height = (int) y.getSize();
+        width = gdata.getShape()[1];
+        height = gdata.getShape()[0];
         Color undefColor = Color.white;
         BufferedImage aImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Color color;
@@ -1462,25 +1462,35 @@ public class GraphicFactory {
         }
 
         ImageShape ishape = new ImageShape();
-        ishape.setPoint(new PointD(x.getDouble(0), y.getDouble(0)));
+        double minx, maxx, miny, maxy;
+        if (extent == null){
+            minx = 0;
+            maxx = width;
+            miny = 0;
+            maxy = height;
+        } else {
+            minx = extent.get(0).doubleValue();
+            maxx = extent.get(1).doubleValue();
+            miny = extent.get(2).doubleValue();
+            maxy = extent.get(3).doubleValue();
+        }
+        ishape.setPoint(new PointD(minx, miny));
         ishape.setImage(aImage);
-        ishape.setExtent(new Extent(x.getDouble(0), x.getDouble((int) x.getSize() - 1),
-                y.getDouble(0), y.getDouble((int) y.getSize() - 1)));
+        ishape.setExtent(new Extent(minx, maxx, miny, maxy));
         return new Graphic(ishape, new ColorBreak());
     }
 
     /**
      * Create image by RGB data array
      *
-     * @param x X data array
-     * @param y Y data array
      * @param data RGB data array list
+     * @param extent Exent
      * @return Image graphic
      */
-    public static Graphic createImage(Array x, Array y, List<Array> data) {
+    public static Graphic createImage(List<Array> data, List<Number> extent) {
         int width, height;
-        width = (int) x.getSize();
-        height = (int) y.getSize();
+        width = data.get(0).getShape()[1];
+        height = data.get(0).getShape()[0];
         Color undefColor = Color.white;
         BufferedImage aImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Color color;
@@ -1564,10 +1574,21 @@ public class GraphicFactory {
         }
 
         ImageShape ishape = new ImageShape();
-        ishape.setPoint(new PointD(x.getDouble(0), y.getDouble(0)));
+        double minx, maxx, miny, maxy;
+        if (extent == null){
+            minx = 0;
+            maxx = width;
+            miny = 0;
+            maxy = height;
+        } else {
+            minx = extent.get(0).doubleValue();
+            maxx = extent.get(1).doubleValue();
+            miny = extent.get(2).doubleValue();
+            maxy = extent.get(3).doubleValue();
+        }
+        ishape.setPoint(new PointD(minx, miny));
         ishape.setImage(aImage);
-        ishape.setExtent(new Extent(x.getDouble(0), x.getDouble((int) x.getSize() - 1),
-                y.getDouble(0), y.getDouble((int) y.getSize() - 1)));
+        ishape.setExtent(new Extent(minx, maxx, miny, maxy));
         return new Graphic(ishape, new ColorBreak());
     }
 
@@ -1584,7 +1605,7 @@ public class GraphicFactory {
      */
     public static GraphicCollection createImage(Array x, Array y, List<Array> data, double offset,
             String zdir, String interpolation) {
-        Graphic gg = createImage(x, y, data);
+        Graphic gg = createImage(data, null);
         if (interpolation != null){
             ((ImageShape)gg.getShape()).setInterpolation(interpolation);
         }
@@ -1614,16 +1635,15 @@ public class GraphicFactory {
     /**
      * Create image
      *
-     * @param x X data array
-     * @param y Y data array
      * @param gdata Grid data array
      * @param ls Legend scheme
+     * @param extent Extent
      * @return Image graphic
      */
-    public static Graphic createImage(Array x, Array y, Array gdata, LegendScheme ls) {
+    public static Graphic createImage(Array gdata, LegendScheme ls, List<Number> extent) {
         int width, height, breakNum;
-        width = (int) x.getSize();
-        height = (int) y.getSize();
+        width = gdata.getShape()[1];
+        height = gdata.getShape()[0];
         breakNum = ls.getBreakNum();
         double[] breakValue = new double[breakNum];
         Color[] breakColor = new Color[breakNum];
@@ -1669,10 +1689,21 @@ public class GraphicFactory {
         }
 
         ImageShape ishape = new ImageShape();
-        ishape.setPoint(new PointD(x.getDouble(0), y.getDouble(0)));
+        double minx, maxx, miny, maxy;
+        if (extent == null){
+            minx = 0;
+            maxx = width;
+            miny = 0;
+            maxy = height;
+        } else {
+            minx = extent.get(0).doubleValue();
+            maxx = extent.get(1).doubleValue();
+            miny = extent.get(2).doubleValue();
+            maxy = extent.get(3).doubleValue();
+        }
+        ishape.setPoint(new PointD(minx, miny));
         ishape.setImage(aImage);
-        ishape.setExtent(new Extent(x.getDouble(0), x.getDouble((int) x.getSize() - 1),
-                y.getDouble(0), y.getDouble((int) y.getSize() - 1)));
+        ishape.setExtent(new Extent(minx, maxx, miny, maxy));
         return new Graphic(ishape, new ColorBreak());
     }
 
@@ -1732,10 +1763,15 @@ public class GraphicFactory {
         }
 
         ImageShape ishape = new ImageShape();
-        ishape.setPoint(new PointD(gdata.xArray[0], gdata.yArray[0]));
+        double xdelta = BigDecimalUtil.mul(gdata.getXDelt(), 0.5);
+        double xmin = BigDecimalUtil.sub(gdata.xArray[0], xdelta);
+        double xmax = BigDecimalUtil.add(gdata.getXMax(), xdelta);
+        double ydelta = BigDecimalUtil.mul(gdata.getYDelt(), 0.5);
+        double ymin = BigDecimalUtil.sub(gdata.yArray[0], ydelta);
+        double ymax = BigDecimalUtil.add(gdata.getYMax(), ydelta);
+        ishape.setPoint(new PointD(xmin, ymin));
         ishape.setImage(aImage);
-        ishape.setExtent(new Extent(gdata.xArray[0], gdata.xArray[gdata.xArray.length - 1],
-                gdata.yArray[0], gdata.yArray[gdata.yArray.length - 1]));
+        ishape.setExtent(new Extent(xmin, xmax, ymin, ymax));
         return new Graphic(ishape, new ColorBreak());
     }
 

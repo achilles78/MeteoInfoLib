@@ -29,7 +29,6 @@ import org.meteoinfo.chart.Location;
 import org.meteoinfo.chart.Margin;
 import org.meteoinfo.chart.axis.Axis;
 import org.meteoinfo.chart.axis.LogAxis;
-import org.meteoinfo.chart.axis.TimeAxis;
 import static org.meteoinfo.chart.plot.Plot.MINIMUM_HEIGHT_TO_DRAW;
 import static org.meteoinfo.chart.plot.Plot.MINIMUM_WIDTH_TO_DRAW;
 import org.meteoinfo.drawing.Draw;
@@ -1068,7 +1067,8 @@ public abstract class AbstractPlot2D extends Plot {
 
         //Draw x grid lines
         if (this.gridLine.isDrawXLine()) {
-            this.getXAxis().updateLabelGap(g, area);
+            this.getXAxis().updateTickLabels();
+            //this.getXAxis().updateLabelGap(g, area);
             int n = 0;
             while (n < this.getXAxis().getTickValues().length) {
                 double value = this.getXAxis().getTickValues()[n];
@@ -1090,7 +1090,8 @@ public abstract class AbstractPlot2D extends Plot {
 
         //Draw y grid lines
         if (this.gridLine.isDrawYLine()) {
-            this.getYAxis().updateLabelGap(g, area);
+            this.getYAxis().updateTickLabels();
+            //this.getYAxis().updateLabelGap(g, area);
             int n = 0;
             while (n < this.getYAxis().getTickValues().length) {
                 double value = this.getYAxis().getTickValues()[n];

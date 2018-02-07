@@ -1423,7 +1423,7 @@ public class Axis implements Cloneable {
                             }
                             laby -= this.tickSpace;
                         }
-                        Dimension dim = Draw.getStringDimension(chartText.getText(), g);
+                        Dimension dim = Draw.getStringDimension(chartText.getText(), this.tickLabelAngle, g);
                         labx = (float) x;
                         for (String dstr : chartText.getTexts()) {                            
                             if (this.location == Location.BOTTOM) {
