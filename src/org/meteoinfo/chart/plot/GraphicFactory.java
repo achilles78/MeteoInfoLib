@@ -1161,6 +1161,114 @@ public class GraphicFactory {
 
         return graphics;
     }
+    
+    /**
+     * Create horizontal bar graphics
+     *
+     * @param ydata Y data array
+     * @param xdata X data array
+     * @param autoHeight Is auto height or not
+     * @param heights Heights
+     * @param drawError Is draw error or not
+     * @param error Error
+     * @param drawLeft Is draw left or not
+     * @param left Left
+     * @param bbs Bar breaks
+     * @return Bar graphics
+     */
+    public static GraphicCollection createHBars(Array ydata, Array xdata, boolean autoHeight,
+            Array heights, boolean drawError, Array error, boolean drawLeft, Array left,
+            List<BarBreak> bbs) {
+        GraphicCollection graphics = new GraphicCollection();
+        int n = (int) ydata.getSize();
+        double x, y;
+        BarBreak bb = bbs.get(0);
+        PolylineBreak ebreak = new PolylineBreak();
+        ebreak.setColor(bb.getErrorColor());
+        ebreak.setSize(bb.getErrorSize());
+        double height = heights.getDouble(0);
+        if (autoHeight && ydata.getSize() > 1) {
+            height = (ydata.getDouble(1) - ydata.getDouble(0)) * height;
+        }
+        double bot = 0;
+        if (drawLeft) {
+            bot = left.getDouble(0);
+        }
+        double minx = 0;
+        boolean baseLine = false;
+        for (int i = 0; i < n; i++) {
+            x = xdata.getDouble(i);
+            y = ydata.getDouble(i);
+            // Add bar
+            if (drawLeft) {
+                if (left.getSize() > i) {
+                    bot = left.getDouble(i);
+                }
+                minx = bot;
+                x += minx;
+            }
+            if (x < minx) {
+                baseLine = true;
+            }
+            if (heights.getSize() > 1 && heights.getSize() > i) {
+                height = heights.getDouble(i);
+            }
+            List<PointD> pList = new ArrayList<>();
+            pList.add(new PointD(minx, y));
+            pList.add(new PointD(x, y));
+            pList.add(new PointD(x, y + height));
+            pList.add(new PointD(minx, y + height));
+            pList.add(new PointD(minx, y));
+            PolygonShape pgs = new PolygonShape();
+            pgs.setPoints(pList);
+            if (bbs.size() > i) {
+                bb = bbs.get(i);
+            }
+            graphics.add(new Graphic(pgs, bb));
+
+            if (drawError) {
+                //Add error line
+                double e = error.getDouble(i);
+                pList = new ArrayList<>();
+                pList.add(new PointD(x -e, y + height * 0.5));
+                pList.add(new PointD(x + e, y + height * 0.5));
+                PolylineShape pls = new PolylineShape();
+                pls.setPoints(pList);
+                graphics.add(new Graphic(pls, ebreak));
+                //Add cap
+                pList = new ArrayList<>();
+                pList.add(new PointD(x -e, y + height * 0.25));
+                pList.add(new PointD(x - e, y + height * 0.75));
+                pls = new PolylineShape();
+                pls.setPoints(pList);
+                graphics.add(new Graphic(pls, ebreak));
+                pList = new ArrayList<>();
+                pList.add(new PointD(x + e, y + height * 0.25));
+                pList.add(new PointD(x + e, y + height * 0.75));
+                pls = new PolylineShape();
+                pls.setPoints(pList);
+                graphics.add(new Graphic(pls, ebreak));
+            }
+        }
+
+        if (baseLine) {
+            List<PointD> pList = new ArrayList<>();
+            double y1 = ydata.getDouble(0);
+            double y2 = ydata.getDouble((int) ydata.getSize() - 1);
+            y1 -= (y2 - y1);
+            y2 += (y2 - y1);
+            pList.add(new PointD(minx, y1));
+            pList.add(new PointD(minx, y2));
+            PolylineShape pls = new PolylineShape();
+            pls.setPoints(pList);
+            ebreak = new PolylineBreak();
+            ebreak.setColor(Color.black);
+            graphics.add(new Graphic(pls, ebreak));
+        }
+        graphics.setSingleLegend(false);
+
+        return graphics;
+    }
 
     /**
      * Create bar graphics
