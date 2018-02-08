@@ -4456,6 +4456,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                 mx = new AffineTransform(cw, shy, shx, ch, sX, sY);
             }
             dg.setTransform(mx);
+            dg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, aILayer.getInterpolation());
             dg.drawImage(vImage, 0, 0, null);
             dg.dispose();
 
@@ -5021,12 +5022,6 @@ public class MapView extends JPanel implements IWebMapPanel {
         RenderingHints rend = g.getRenderingHints();
         if (this._pointAntiAlias) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            //g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            //g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-            //g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-            //g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            //g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            //g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
         }
 
         PointF aPoint = new PointF();
@@ -5101,20 +5096,6 @@ public class MapView extends JPanel implements IWebMapPanel {
             }
         }
 
-//        //Draw identifer shape
-//        if (_drawIdentiferShape) {
-//            PointShape aPS = (PointShape) aLayer.getShapes().get(aLayer.getIdentiferShape());
-//            float[] screenXY = projToScreen(aPS.getPoint().X, aPS.getPoint().Y, LonShift);
-//            aPoint.X = screenXY[0];
-//            aPoint.Y = screenXY[1];
-//            PointBreak aPB = new PointBreak();
-//            aPB.setOutlineColor(Color.red);
-//            aPB.setSize(10);
-//            aPB.setStyle(PointStyle.Square);
-//            aPB.setDrawFill(false);
-//
-//            Draw.drawPoint(aPoint, aPB, g);
-//        }
         if (this._pointAntiAlias) {
             g.setRenderingHints(rend);
         }
@@ -8936,6 +8917,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         Attr transparencyPerc = m_Doc.createAttribute("TransparencyPerc");
         Attr transparencyColor = m_Doc.createAttribute("TransparencyColor");
         Attr setTransColor = m_Doc.createAttribute("SetTransColor");
+        Attr attrInterpolation = m_Doc.createAttribute("Interpolation");
 
         Handle.setValue(String.valueOf(aILayer.getHandle()));
         LayerName.setValue(aILayer.getLayerName());
@@ -8951,6 +8933,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         transparencyPerc.setValue(String.valueOf(aILayer.getTransparency()));
         transparencyColor.setValue(ColorUtil.toHexEncoding(aILayer.getTransparencyColor()));
         setTransColor.setValue(String.valueOf(aILayer.isUseTransColor()));
+        attrInterpolation.setValue(aILayer.getInterpolationStr());
 
         Layer.setAttributeNode(Handle);
         Layer.setAttributeNode(LayerName);
@@ -8962,6 +8945,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         Layer.setAttributeNode(transparencyPerc);
         Layer.setAttributeNode(transparencyColor);
         Layer.setAttributeNode(setTransColor);
+        Layer.setAttributeNode(attrInterpolation);
 
         //Add visible scale
         exportVisibleScale(m_Doc, Layer, aILayer.getVisibleScale());
@@ -8989,6 +8973,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         Attr transparencyPerc = m_Doc.createAttribute("TransparencyPerc");
         Attr transparencyColor = m_Doc.createAttribute("TransparencyColor");
         Attr setTransColor = m_Doc.createAttribute("SetTransColor");
+        Attr attrInterpolation = m_Doc.createAttribute("Interpolation");
 
         Handle.setValue(String.valueOf(aILayer.getHandle()));
         LayerName.setValue(aILayer.getLayerName());
@@ -9004,6 +8989,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         transparencyPerc.setValue(String.valueOf(aILayer.getTransparency()));
         transparencyColor.setValue(ColorUtil.toHexEncoding(aILayer.getTransparencyColor()));
         setTransColor.setValue(String.valueOf(aILayer.isUseTransColor()));
+        attrInterpolation.setValue(aILayer.getInterpolationStr());
 
         Layer.setAttributeNode(Handle);
         Layer.setAttributeNode(LayerName);
@@ -9015,6 +9001,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         Layer.setAttributeNode(transparencyPerc);
         Layer.setAttributeNode(transparencyColor);
         Layer.setAttributeNode(setTransColor);
+        Layer.setAttributeNode(attrInterpolation);
 
         //Add legend scheme            
         aILayer.getLegendScheme().exportToXML(m_Doc, Layer);
@@ -9341,7 +9328,10 @@ public class MapView extends JPanel implements IWebMapPanel {
                 aLayer.setTransparency(Integer.parseInt(aILayer.getAttributes().getNamedItem("TransparencyPerc").getNodeValue()));
                 aLayer.setTransparencyColor(ColorUtil.parseToColor(aILayer.getAttributes().getNamedItem("TransparencyColor").getNodeValue()));
                 aLayer.setUseTransColor(Boolean.parseBoolean(aILayer.getAttributes().getNamedItem("SetTransColor").getNodeValue()));
-
+                Node attrInterp = aILayer.getAttributes().getNamedItem("Interpolation");
+                if (attrInterp != null)
+                    aLayer.setInterpolation(attrInterp.getNodeValue());
+                
                 //Load visible scale
                 NodeList visScaleNodes = ((Element) aILayer).getElementsByTagName("VisibleScale");
                 if (visScaleNodes.getLength() > 0) {
@@ -9389,7 +9379,10 @@ public class MapView extends JPanel implements IWebMapPanel {
                 aLayer.setTransparency(Integer.parseInt(aILayer.getAttributes().getNamedItem("TransparencyPerc").getNodeValue()));
                 aLayer.setTransparencyColor(ColorUtil.parseToColor(aILayer.getAttributes().getNamedItem("TransparencyColor").getNodeValue()));
                 aLayer.setUseTransColor(Boolean.parseBoolean(aILayer.getAttributes().getNamedItem("SetTransColor").getNodeValue()));
-
+                Node attrInterp = aILayer.getAttributes().getNamedItem("Interpolation");
+                if (attrInterp != null)
+                    aLayer.setInterpolation(attrInterp.getNodeValue());
+                
                 //Load legend scheme
                 Node LS = (Node) ((Element) aILayer).getElementsByTagName("LegendScheme").item(0);
                 LegendScheme ls = new LegendScheme(aLayer.getShapeType());

@@ -370,7 +370,16 @@ public class Plot2D extends AbstractPlot2D {
         PointD p = aPS.getPoint();
         double[] sXY = projToScreen(p.X, p.Y, area);
         PointF pf = new PointF((float) sXY[0], (float) sXY[1]);
+        RenderingHints rend = g.getRenderingHints();
+        boolean rc = false;
+        if (this.symbolAntialias && rend.get(RenderingHints.KEY_ANTIALIASING) != RenderingHints.VALUE_ANTIALIAS_ON) {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            rc = true;
+        }
         Draw.drawPoint(pf, aPB, g);
+        if (rc){
+            g.setRenderingHints(rend);
+        }
     }
     
     void drawText(ChartText text, Graphics2D g, Rectangle2D area) {

@@ -47,6 +47,7 @@ public class Chart {
     private boolean drawLegend;
     private Rectangle2D plotArea;
     private boolean antiAlias;
+    private boolean symbolAntialias;
     private ChartPanel parent;
 
     // </editor-fold>
@@ -59,6 +60,7 @@ public class Chart {
         this.background = Color.white;
         this.drawBackground = true;
         this.antiAlias = false;
+        this.symbolAntialias = true;
         this.rowNum = 1;
         this.columnNum = 1;
         this.plots = new ArrayList<>();
@@ -72,15 +74,7 @@ public class Chart {
      * @param parent ChartPanel parent
      */
     public Chart(ChartPanel parent) {
-        this.drawLegend = false;
-        this.background = Color.white;
-        this.drawBackground = true;
-        this.antiAlias = false;
-        this.rowNum = 1;
-        this.columnNum = 1;
-        this.plots = new ArrayList<>();
-        this.currentPlot = -1;
-        this.texts = new ArrayList<>();
+        this();
         this.parent = parent;
     }
 
@@ -373,6 +367,22 @@ public class Chart {
     public void setAntiAlias(boolean value) {
         this.antiAlias = value;
     }
+    
+    /**
+     * Get symbol antialias
+     * @return Boolean
+     */
+    public boolean isSymbolAntialias() {
+        return this.symbolAntialias;
+    }
+    
+    /**
+     * Set symbol antialias
+     * @param value Boolean
+     */
+    public void setSymbolAntialias(boolean value) {
+        this.symbolAntialias = value;
+    }   
 
     // </editor-fold>
     // <editor-fold desc="Methods">
@@ -452,9 +462,7 @@ public class Chart {
             Margin shrink = this.getPlotsShrink(g, plotArea);
             for (int i = 0; i < this.plots.size(); i++) {
                 Plot plot = this.plots.get(i);
-                //plot.setPositionAreaZoom(zoom);
-                //plot.setTightInset(tightInset);
-                //plot.updatePositionArea();
+                plot.setSymbolAntialias(this.symbolAntialias);
                 if (plot.isOuterPosActive()){
                     if (plot.isSubPlot || plot.isSameShrink()) {
                         plot.setPlotShrink(shrink);
