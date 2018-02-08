@@ -1882,6 +1882,83 @@ public class GraphicFactory {
         ishape.setExtent(new Extent(xmin, xmax, ymin, ymax));
         return new Graphic(ishape, new ColorBreak());
     }
+    
+    /**
+     * Create image
+     *
+     * @param gdata Grid data array
+     * @param ls Legend scheme
+     * @param extent Extent
+     * @return Image graphic
+     */
+    public static Graphic createImage(GridArray gdata, LegendScheme ls, List<Number> extent) {
+        int width, height, breakNum;
+        width = gdata.getXNum();
+        height = gdata.getYNum();
+        breakNum = ls.getBreakNum();
+        double[] breakValue = new double[breakNum];
+        Color[] breakColor = new Color[breakNum];
+        Color undefColor = Color.white;
+        for (int i = 0; i < breakNum; i++) {
+            breakValue[i] = Double.parseDouble(ls.getLegendBreaks().get(i).getEndValue().toString());
+            breakColor[i] = ls.getLegendBreaks().get(i).getColor();
+            if (ls.getLegendBreaks().get(i).isNoData()) {
+                undefColor = ls.getLegendBreaks().get(i).getColor();
+            }
+        }
+        Color defaultColor = breakColor[breakNum - 1];    //默认颜色为最后一个颜色
+        BufferedImage aImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        double oneValue;
+        Color oneColor;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                //oneValue = gdata.data[i][j];
+                oneValue = gdata.getDoubleValue(i, j);
+                if (Double.isNaN(oneValue) || MIMath.doubleEquals(oneValue, gdata.missingValue)) {
+                    oneColor = undefColor;
+                } else {
+                    oneColor = defaultColor;
+                    if (ls.getLegendType() == LegendType.GraduatedColor) {
+                        //循环只到breakNum-1 是因为最后一个LegendBreaks的EndValue和StartValue是一样的
+                        for (int k = 0; k < breakNum - 1; k++) {
+                            if (oneValue < breakValue[k]) {
+                                oneColor = breakColor[k];
+                                break;
+                            }
+                        }
+                    } else {
+                        for (int k = 0; k < breakNum - 1; k++) {
+                            if (oneValue == breakValue[k]) {
+                                oneColor = breakColor[k];
+                                break;
+                            }
+                        }
+                    }
+                }
+                aImage.setRGB(j, height - i - 1, oneColor.getRGB());
+            }
+        }
+
+        ImageShape ishape = new ImageShape();
+        double xmin, xmax, ymin, ymax;
+        if (extent == null){
+            double xdelta = BigDecimalUtil.mul(gdata.getXDelt(), 0.5);
+            xmin = BigDecimalUtil.sub(gdata.xArray[0], xdelta);
+            xmax = BigDecimalUtil.add(gdata.getXMax(), xdelta);
+            double ydelta = BigDecimalUtil.mul(gdata.getYDelt(), 0.5);
+            ymin = BigDecimalUtil.sub(gdata.yArray[0], ydelta);
+            ymax = BigDecimalUtil.add(gdata.getYMax(), ydelta);
+        } else {
+            xmin = extent.get(0).doubleValue();
+            xmax = extent.get(1).doubleValue();
+            ymin = extent.get(2).doubleValue();
+            ymax = extent.get(3).doubleValue();
+        }
+        ishape.setPoint(new PointD(xmin, ymin));
+        ishape.setImage(aImage);
+        ishape.setExtent(new Extent(xmin, xmax, ymin, ymax));
+        return new Graphic(ishape, new ColorBreak());
+    }
 
     /**
      * Create image
