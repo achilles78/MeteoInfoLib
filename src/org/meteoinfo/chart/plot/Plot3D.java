@@ -1913,7 +1913,7 @@ public class Plot3D extends Plot {
         int space = 2;
 
         if (this.title != null) {
-            top += this.title.getHeight(g) + 10;
+            top += this.title.getTrueDimension(g).height + 10;
         }
 
         if (!this.legends.isEmpty()) {

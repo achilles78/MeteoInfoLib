@@ -842,7 +842,7 @@ public class ChartLegend {
                 sP.Y = y;               
                 g.setColor(this.tickLabelColor);
                 g.setFont(this.tickLabelFont);
-                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER);
+                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, true);
                 y += breakHeight + breakSpace;
 
                 i += 1;
@@ -901,7 +901,7 @@ public class ChartLegend {
                 sP.Y = y;
                 g.setColor(this.tickLabelColor);
                 g.setFont(this.tickLabelFont);
-                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER);
+                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, true);
                 Dimension dim = Draw.getStringDimension(caption, g);
                 x += this.symbolDimension.width + dim.width + 15;
                 i += 1;

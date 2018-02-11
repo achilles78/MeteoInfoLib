@@ -469,7 +469,7 @@ public class ChartColorBar extends ChartLegend {
                     sP.X = aP.X;
                     sP.Y = aP.Y + _hBarHeight / 2 + 5;
                     //Draw.drawString(g, caption, sP.X - aSF.width / 2, sP.Y + aSF.height * 3 / 4);
-                    Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle);
+                    Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
                 } else {
                     sP.X = aP.X + _vBarWidth / 2;
                     sP.Y = aP.Y + _hBarHeight / 2;
@@ -478,27 +478,27 @@ public class ChartColorBar extends ChartLegend {
                         if (i < bNum - 1) {
                             this.drawTickLine(g, sP, tickLen, true, 0);
                             //Draw.drawString(g, caption, sP.X - aSF.width / 2, sP.Y + aSF.height * 3 / 4);
-                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle);
+                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
                             if (this.drawMinLabel && i == 0) {
                                 this.drawTickLine(g, ssP, tickLen, true, -this._vBarWidth);
                                 caption = DataConvert.removeTailingZeros(cb.getStartValue().toString());
                                 //Draw.drawString(g, caption, sP.X - aSF.width / 2 - this._vBarWidth, sP.Y + aSF.height * 3 / 4);
-                                Draw.outString(g, ssP.X - this._vBarWidth, ssP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle);
+                                Draw.outString(g, ssP.X - this._vBarWidth, ssP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
                             }
                         } else if (this.drawMaxLabel) {
                             this.drawTickLine(g, sP, tickLen, true, 0);
                             //Draw.drawString(g, caption, sP.X - aSF.width / 2, sP.Y + aSF.height * 3 / 4);
-                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle);
+                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
                         }
                     } else {
                         if (i == 0 && this.tickLocations.get(idx) == Double.parseDouble(cb.getStartValue().toString())) {
                             this.drawTickLine(g, sP, tickLen, true, -this._vBarWidth);
                             //Draw.drawString(g, caption, sP.X - aSF.width / 2 - this._vBarWidth, sP.Y + aSF.height * 3 / 4);
-                            Draw.outString(g, sP.X - this._vBarWidth, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle);
+                            Draw.outString(g, sP.X - this._vBarWidth, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
                         } else {
                             this.drawTickLine(g, sP, tickLen, true, 0);
                             //Draw.drawString(g, caption, sP.X - aSF.width / 2, sP.Y + aSF.height * 3 / 4);
-                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle);
+                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
                         }
                     }
                 }
@@ -716,7 +716,7 @@ public class ChartColorBar extends ChartLegend {
                     sP.X = aP.X + _vBarWidth / 2 + 5;
                     sP.Y = aP.Y;
                     g.setColor(Color.black);
-                    Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle);
+                    Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
                 } else {
                     sP.X = aP.X + _vBarWidth / 2;
                     sP.Y = aP.Y - _hBarHeight / 2;
@@ -724,23 +724,23 @@ public class ChartColorBar extends ChartLegend {
                     if (this.autoTick) {
                         if (i < bNum - 1) {
                             this.drawTickLine(g, sP, tickLen, false, 0);
-                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle);
+                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
                             if (this.drawMinLabel && i == 0) {                                
                                 this.drawTickLine(g, ssP, tickLen, false, this._hBarHeight);
                                 caption = DataConvert.removeTailingZeros(cb.getStartValue().toString());
-                                Draw.outString(g, ssP.X, ssP.Y + this._hBarHeight, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle);
+                                Draw.outString(g, ssP.X, ssP.Y + this._hBarHeight, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
                             }
                         } else if (this.drawMaxLabel) {
                             this.drawTickLine(g, sP, tickLen, false, 0);
-                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle);
+                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
                         }
                     } else {
                         if (i == 0 && this.tickLocations.get(idx) == Double.parseDouble(cb.getStartValue().toString())) {
                             this.drawTickLine(g, sP, tickLen, false, this._hBarHeight);
-                            Draw.outString(g, sP.X, sP.Y + this._hBarHeight, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle);
+                            Draw.outString(g, sP.X, sP.Y + this._hBarHeight, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
                         } else {
                             this.drawTickLine(g, sP, tickLen, false, 0);
-                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle);
+                            Draw.outString(g, sP.X, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
                         }
                     }
                 }

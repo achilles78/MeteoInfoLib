@@ -1188,8 +1188,9 @@ public class Draw {
      * @param s the string to draw
      * @param x_align the alignment in x direction
      * @param y_align the alignment in y direction
+     * @param useExternalFont Use external font or not
      */
-    public static void outString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align) {
+    public static void outString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align, boolean useExternalFont) {
         Dimension dim = Draw.getStringDimension(s, g);
         switch (y_align) {
             case TOP:
@@ -1201,13 +1202,13 @@ public class Draw {
         }
         switch (x_align) {
             case LEFT:
-                drawString(g, s, x, y);
+                drawString(g, s, x, y, useExternalFont);
                 break;
             case RIGHT:
-                drawString(g, s, x - (float) dim.getWidth(), y);
+                drawString(g, s, x - (float) dim.getWidth(), y, useExternalFont);
                 break;
             case CENTER:
-                drawString(g, s, x - (float) dim.getWidth() / 2, y);
+                drawString(g, s, x - (float) dim.getWidth() / 2, y, useExternalFont);
                 break;
         }
     }
@@ -1222,10 +1223,11 @@ public class Draw {
      * @param x_align X align
      * @param y_align Y align
      * @param angle Angle
+     * @param useExternalFont Use external font or not
      */
-    public static void outString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align, float angle) {
+    public static void outString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align, float angle, boolean useExternalFont) {
         if (angle == 0) {
-            outString(g, x, y, s, x_align, y_align);
+            outString(g, x, y, s, x_align, y_align, useExternalFont);
         } else {
             Dimension dim = getStringDimension(s, g);
             AffineTransform tempTrans = g.getTransform();
@@ -1270,7 +1272,7 @@ public class Draw {
             myTrans.translate(tempTrans.getTranslateX() + x, tempTrans.getTranslateY() + y);
             myTrans.rotate(-angle * Math.PI / 180);
             g.setTransform(myTrans);
-            Draw.drawString(g, s, 0, 0);
+            Draw.drawString(g, s, 0, 0, useExternalFont);
             g.setTransform(tempTrans);
         }
     }

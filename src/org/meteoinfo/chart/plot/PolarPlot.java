@@ -285,7 +285,7 @@ public class PolarPlot extends Plot2D {
         int left = 2, bottom = 2, right = 2, top = 5;        
 
         if (this.getTitle() != null) {
-            top += this.getTitle().getHeight(g) + 10;
+            top += this.getTitle().getTrueDimension(g).height + 10;
         }
 
         if (!this.getLegends().isEmpty()) {
@@ -333,7 +333,7 @@ public class PolarPlot extends Plot2D {
         int space = 10;
 
         if (this.getTitle() != null) {
-            top += this.getTitle().getHeight(g) + 10;
+            top += this.getTitle().getTrueDimension(g).height + 10;
         }
 
         if (!this.getLegends().isEmpty()) {

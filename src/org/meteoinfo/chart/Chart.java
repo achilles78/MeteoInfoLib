@@ -541,7 +541,7 @@ public class Chart {
         int right = edge;
         int bottom = edge;
         if (this.title != null) {
-            top += this.title.getHeight(g) + 12;
+            top += this.title.getTrueDimension(g).height + 12;
         }        
         pArea.setRect(left, top, area.getWidth() - left - right, area.getHeight() - top - bottom);
 
@@ -556,7 +556,7 @@ public class Chart {
         int right = edge;
         int bottom = edge;
         if (this.title != null) {
-            top += this.title.getHeight(g) + 10;
+            top += this.title.getTrueDimension(g).height + 10;
         }
         if (this.drawLegend) {
             Dimension dim = this.legend.getLegendDimension(g, new Dimension((int) area.getWidth(), (int) area.getHeight()));

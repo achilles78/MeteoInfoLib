@@ -829,7 +829,7 @@ public abstract class AbstractPlot2D extends Plot {
         int space = 2;
 
         if (this.title != null) {
-            top += this.title.getHeight(g) + 10;
+            top += this.title.getTrueDimension(g).height + 10;
         }
 
         if (!this.legends.isEmpty()) {
@@ -981,7 +981,7 @@ public abstract class AbstractPlot2D extends Plot {
         int space = 5;
 
         if (this.title != null) {
-            top += this.title.getHeight(g) + 10;
+            top += this.title.getTrueDimension(g).height + 10;
         }
 
         if (!this.legends.isEmpty()) {
@@ -1037,13 +1037,7 @@ public abstract class AbstractPlot2D extends Plot {
             g.setFont(title.getFont());
             float x = (float) (graphArea.getX() + graphArea.getWidth() / 2);
             y += 5;
-            for (String text : title.getTexts()) {
-                Dimension dim = Draw.getStringDimension(text, g);
-                y += dim.height;
-                Draw.drawString(g, text, x - dim.width / 2, y, title.isUseExternalFont());
-                g.setFont(title.getFont());
-                y += title.getLineSpace();
-            }
+            title.draw(g, x, y);
         }
         return y;
     }
@@ -1167,55 +1161,16 @@ public abstract class AbstractPlot2D extends Plot {
                 break;
         }
     }
-
+    
     void drawText(ChartText text, Graphics2D g, float x, float y) {        
-        float angle = text.getAngle();
-        AffineTransform tempTrans = g.getTransform();
-        if (angle != 0){            
-            AffineTransform myTrans = new AffineTransform();
-            myTrans.translate(tempTrans.getTranslateX() + x, tempTrans.getTranslateY() + y);
-            myTrans.rotate(-angle * Math.PI / 180);
-            g.setTransform(myTrans);
-            x = 0;
-            y = 0;
-        }
-        g.setFont(text.getFont());
-        Dimension dim = Draw.getStringDimension(text.getText(), g);
-        float gap = text.getGap();
-        Rectangle.Double rect = new Rectangle.Double(x, y - dim.getHeight() * 0.8, dim.getWidth(), dim.getHeight());
-        rect.setRect(rect.x - gap, rect.y - (gap - 3), rect.width + gap * 2,
-                rect.height + (gap - 3) * 2);
-        if (text.isFill()) {
-            g.setColor(text.getBackground());
-            g.fill(rect);
-        }
-        if (text.isDrawNeatline()) {
-            g.setColor(text.getNeatlineColor());
-            Stroke oldStroke = g.getStroke();
-            g.setStroke(new BasicStroke(text.getNeatlineSize()));
-            g.draw(rect);
-            g.setStroke(oldStroke);
-        }
-        g.setColor(text.getColor());
-        Draw.drawString(g, text.getText(), x, y, text.isUseExternalFont());
-        if (angle != 0){   
-            g.setTransform(tempTrans);
-        }
+        g.setFont(text.getFont());        
+        text.draw(g, x, y);
     }
 
     void drawLegend(Graphics2D g, Rectangle2D area, Rectangle2D graphArea, float y) {
         if (!this.legends.isEmpty()) {
             Object rendering = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//            switch (this.legend.getPosition()) {
-//                case UPPER_CENTER_OUTSIDE:
-//                case LOWER_CENTER_OUTSIDE:
-//                    this.legend.setPlotOrientation(PlotOrientation.HORIZONTAL);
-//                    break;
-//                default:
-//                    this.legend.setPlotOrientation(PlotOrientation.VERTICAL);
-//                    break;
-//            }
             for (ChartLegend legend : this.legends) {
                 if (legend.isColorbar()) {
                     if (legend.getPlotOrientation() == PlotOrientation.VERTICAL) {
