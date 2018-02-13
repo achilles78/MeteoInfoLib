@@ -14,6 +14,7 @@ import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;
 import org.meteoinfo.layer.VectorLayer;
+import org.meteoinfo.ma.ArrayBoolean;
 import org.meteoinfo.math.Complex;
 import org.meteoinfo.shape.PolygonShape;
 import org.python.core.PyComplex;
@@ -2403,12 +2404,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array equal(Array a, Array b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) == b.getDouble(i)) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2423,22 +2425,23 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array equal(Array a, Number b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         double v = b.doubleValue();
         if (Double.isNaN(v)) {
             for (int i = 0; i < a.getSize(); i++) {
                 if (Double.isNaN(a.getDouble(i))) {
-                    r.setDouble(i, 1);
+                    r.setBoolean(i, true);
                 } else {
-                    r.setDouble(i, 0);
+                    r.setBoolean(i, false);
                 }
             }
         } else {
             for (int i = 0; i < a.getSize(); i++) {
                 if (a.getDouble(i) == v) {
-                    r.setDouble(i, 1);
+                    r.setBoolean(i, true);
                 } else {
-                    r.setDouble(i, 0);
+                    r.setBoolean(i, false);
                 }
             }
         }
@@ -2454,12 +2457,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array lessThan(Array a, Array b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) < b.getDouble(i)) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2474,12 +2478,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array lessThan(Array a, Number b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) < b.doubleValue()) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2494,12 +2499,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array lessThanOrEqual(Array a, Array b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) <= b.getDouble(i)) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2514,12 +2520,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array lessThanOrEqual(Array a, Number b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) <= b.doubleValue()) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2534,12 +2541,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array greaterThan(Array a, Array b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) > b.getDouble(i)) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2554,12 +2562,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array greaterThan(Array a, Number b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) > b.doubleValue()) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2574,12 +2583,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array greaterThanOrEqual(Array a, Array b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) >= b.getDouble(i)) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2594,12 +2604,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array greaterThanOrEqual(Array a, Number b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) >= b.doubleValue()) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2614,12 +2625,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array notEqual(Array a, Array b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (a.getDouble(i) != b.getDouble(i)) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
@@ -2634,22 +2646,23 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array notEqual(Array a, Number b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         double v = b.doubleValue();
         if (Double.isNaN(v)) {
             for (int i = 0; i < a.getSize(); i++) {
                 if (Double.isNaN(a.getDouble(i))) {
-                    r.setDouble(i, 0);
+                    r.setBoolean(i, false);
                 } else {
-                    r.setDouble(i, 1);
+                    r.setBoolean(i, true);
                 }
             }
         } else {
             for (int i = 0; i < a.getSize(); i++) {
                 if (a.getDouble(i) != v) {
-                    r.setDouble(i, 1);
+                    r.setBoolean(i, true);
                 } else {
-                    r.setDouble(i, 0);
+                    r.setBoolean(i, false);
                 }
             }
         }
@@ -2666,16 +2679,34 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array inValues(Array a, List b) {
-        Array r = Array.factory(DataType.INT, a.getShape());
+        //Array r = Array.factory(DataType.BOOLEAN, a.getShape());
+        Array r = new ArrayBoolean(a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             if (b.contains(a.getObject(i))) {
-                r.setDouble(i, 1);
+                r.setBoolean(i, true);
             } else {
-                r.setDouble(i, 0);
+                r.setBoolean(i, false);
             }
         }
 
         return r;
+    }
+    
+    /**
+     * Check if the array contains NaN value
+     * @param a Input array
+     * @return Boolean
+     */
+    public static boolean containsNaN(Array a){
+        boolean hasNaN = false;
+        for (int i = 0; i < a.getSize(); i++){
+            if (Double.isNaN(a.getDouble(i))) {
+                hasNaN = true;
+                break;
+            }
+        }
+        
+        return hasNaN;
     }
 
     /**
@@ -2739,7 +2770,13 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitAnd(Array a, Array b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r;
+        DataType dt = a.getDataType();
+        if (dt == DataType.BOOLEAN)
+            r = new ArrayBoolean(a.getShape());
+        else
+            r = Array.factory(a.getDataType(), a.getShape());
+        
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) & b.getInt(i));
         }
@@ -4795,9 +4832,17 @@ public class ArrayMath {
      * @param value Value
      */
     public static void setValue(Array a, Array b, Number value) {
-        for (int i = 0; i < a.getSize(); i++) {
-            if (b.getInt(i) == 1) {
-                a.setObject(i, value);
+        if (b.getDataType() == DataType.BOOLEAN){
+            for (int i = 0; i < a.getSize(); i++) {
+                if (b.getBoolean(i)) {
+                    a.setObject(i, value);
+                }
+            }
+        } else {
+            for (int i = 0; i < a.getSize(); i++) {
+                if (b.getInt(i) == 1) {
+                    a.setObject(i, value);
+                }
             }
         }
     }
@@ -4810,9 +4855,17 @@ public class ArrayMath {
      * @param value Value array
      */
     public static void setValue(Array a, Array b, Array value) {
-        for (int i = 0; i < a.getSize(); i++) {
-            if (b.getInt(i) == 1) {
-                a.setObject(i, value.getObject(i));
+        if (b.getDataType() == DataType.BOOLEAN){
+            for (int i = 0; i < a.getSize(); i++) {
+                if (b.getBoolean(i)) {
+                    a.setObject(i, value.getObject(i));
+                }
+            }
+        } else {
+            for (int i = 0; i < a.getSize(); i++) {
+                if (b.getInt(i) == 1) {
+                    a.setObject(i, value.getObject(i));
+                }
             }
         }
     }
@@ -4841,6 +4894,11 @@ public class ArrayMath {
             case DOUBLE:
                 while (iterA.hasNext()) {
                     r.add(iterA.getDoubleNext());
+                }
+                break;
+            case BOOLEAN:
+                while (iterA.hasNext()){
+                    r.add(iterA.getBooleanNext());
                 }
                 break;
             case OBJECT:
