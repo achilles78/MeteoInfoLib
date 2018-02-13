@@ -47,6 +47,8 @@ public class ArrayMath {
             return DataType.FLOAT;
         } else if (o instanceof Double) {
             return DataType.DOUBLE;
+        } else if (o instanceof Boolean) {
+            return DataType.BOOLEAN;
         } else {
             return DataType.OBJECT;
         }
@@ -95,11 +97,8 @@ public class ArrayMath {
             case LONG:
             case DOUBLE:
                 return 8;
-            case OBJECT:
-                return 0;
             default:
-                System.out.println("internal error in typeToNBytes");
-                return -1;
+                return 0;
         }
     }
 
@@ -3429,6 +3428,17 @@ public class ArrayMath {
     // </editor-fold>
     // <editor-fold desc="Section/Flip/Transpos...">
     /**
+     * Copy array
+     * @param a Input array
+     * @return Copied array
+     */
+    public static Array copy(Array a){
+        Array r = Array.factory(a.getDataType(), a.getShape());
+        MAMath.copy(r, a);
+        return r;
+    }
+    
+    /**
      * Section array
      *
      * @param a Array a
@@ -3572,6 +3582,148 @@ public class ArrayMath {
             index.incr();
         }
         r = Array.factory(a.getDataType(), a.getShape(), r.getStorage());
+        return r;
+    }
+    
+    /**
+     * Set section
+     *
+     * @param a Array a
+     * @param ranges Ranges
+     * @param v Number value
+     * @return Result array
+     */
+    public static Array setSection_Mix(Array a, List<Object> ranges, Number v) {
+        Array r = Array.factory(a.getDataType(), a.getShape());
+        int n = a.getRank();
+        IndexIterator iter = r.getIndexIterator();
+        Index aidx = a.getIndex();
+        int[] current;
+        boolean isIn;
+        while (iter.hasNext()){
+            iter.next();
+            current = iter.getCurrentCounter();
+            isIn = true;
+            for (int i = 0; i < n; i++) {
+                Object k = ranges.get(i);
+                if (k instanceof Range) {
+                    if (!((Range) k).contains(current[i])){
+                        isIn = false;
+                        break;
+                    }                    
+                } else {
+                    if (!((List<Integer>) k).contains(current[i])) {
+                        isIn = false;
+                        break;
+                    }
+                }
+            }
+            aidx.set(current);
+            if (isIn){
+                iter.setObjectCurrent(v);
+            } else {
+                iter.setObjectCurrent(a.getObject(aidx));
+            }
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Set section
+     *
+     * @param a Array a
+     * @param ranges Ranges
+     * @param v Array value
+     * @return Result array
+     */
+    public static Array setSection_Mix(Array a, List<Object> ranges, Array v) {
+        Array r = Array.factory(a.getDataType(), a.getShape());
+        int n = a.getRank();
+        IndexIterator iter = r.getIndexIterator();
+        Index aidx = a.getIndex();
+        Index vidx = v.getIndex();
+        int[] current;
+        boolean isIn;
+        while (iter.hasNext()){
+            iter.next();
+            current = iter.getCurrentCounter();
+            isIn = true;
+            for (int i = 0; i < n; i++) {
+                Object k = ranges.get(i);
+                if (k instanceof Range) {
+                    if (!((Range) k).contains(current[i])){
+                        isIn = false;
+                        break;
+                    }                    
+                } else {
+                    if (!((List<Integer>) k).contains(current[i])) {
+                        isIn = false;
+                        break;
+                    }
+                }
+            }
+            aidx.set(current);
+            if (isIn){
+                iter.setObjectCurrent(v.getObject(vidx));
+                vidx.incr();
+            } else {
+                iter.setObjectCurrent(a.getObject(aidx));
+            }
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Set section
+     *
+     * @param a Array a
+     * @param ranges Ranges
+     * @param v Number value
+     * @return Result array
+     */
+    public static Array setSection_List(Array a, List<List<Integer>> ranges, Number v) {
+        Array r = copy(a);
+        int n = r.getRank();
+        int[] count = new int[n];
+        Index index = Index.factory(count);
+        int m = ranges.get(0).size();
+        for (int i = 0; i < m; i++){
+            for (int j = 0; j < n; j++){
+                count[j] = ranges.get(j).get(i);
+            }
+            index.set(count);
+            r.setObject(index, v);
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Set section
+     *
+     * @param a Array a
+     * @param ranges Ranges
+     * @param v Array value
+     * @return Result array
+     */
+    public static Array setSection_List(Array a, List<List<Integer>> ranges, Array v) {
+        Array r = copy(a);
+        int n = r.getRank();
+        int[] count = new int[n];
+        Index index = Index.factory(count);
+        Index vIndex = v.getIndex();
+        int m = ranges.get(0).size();
+        for (int i = 0; i < m; i++){
+            for (int j = 0; j < n; j++){
+                count[j] = ranges.get(j).get(i);
+            }
+            index.set(count);
+            r.setObject(index, v.getObject(vIndex));
+            vIndex.incr();
+        }
+        
         return r;
     }
 

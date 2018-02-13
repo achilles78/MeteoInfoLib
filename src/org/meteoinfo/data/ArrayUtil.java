@@ -447,6 +447,12 @@ public class ArrayUtil {
                 a.setObject(i, data.get(i));
             }
             return a;
+        } else if (d0 instanceof Boolean) {
+            Array a = Array.factory(DataType.BOOLEAN, new int[]{data.size()});
+            for (int i = 0; i < data.size(); i++) {
+                a.setObject(i, data.get(i));
+            }
+            return a;
         } else if (d0 instanceof PyComplex) {
             Array a = Array.factory(DataType.OBJECT, new int[]{data.size()});
             PyComplex d;

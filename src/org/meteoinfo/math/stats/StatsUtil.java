@@ -30,6 +30,21 @@ import ucar.ma2.Range;
 public class StatsUtil {
 
     /**
+     * Computes covariance of two arrays.
+     *
+     * @param x X data
+     * @param y Y data
+     * @param bias If true, returned value will be bias-corrected
+     * @return The covariance
+     */
+    public static double covariance(Array x, Array y, boolean bias){
+        double[] xd = (double[]) ArrayUtil.copyToNDJavaArray(x);
+        double[] yd = (double[]) ArrayUtil.copyToNDJavaArray(y);
+        double r = new Covariance().covariance(xd, yd, bias);
+        return r;
+    }
+    
+    /**
      * Computes covariances for pairs of arrays or columns of a matrix.
      *
      * @param x X data
