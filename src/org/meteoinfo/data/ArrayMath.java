@@ -280,6 +280,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.addInt(a, b);
             case FLOAT:
                 return ArrayMath.addFloat(a, b);
@@ -307,6 +308,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.addInt(a, b.intValue());
             case FLOAT:
                 return ArrayMath.addFloat(a, b.floatValue());
@@ -672,6 +674,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.subInt(a, b);
             case FLOAT:
                 return ArrayMath.subFloat(a, b);
@@ -699,6 +702,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.subInt(a, b.intValue());
             case FLOAT:
                 return ArrayMath.subFloat(a, b.floatValue());
@@ -748,6 +752,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.subInt(b.intValue(), a);
             case FLOAT:
                 return ArrayMath.subFloat(b.floatValue(), a);
@@ -1117,6 +1122,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.mulInt(a, b);
             case FLOAT:
                 return ArrayMath.mulFloat(a, b);
@@ -1144,6 +1150,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.mulInt(a, b.intValue());
             case FLOAT:
                 return ArrayMath.mulFloat(a, b.floatValue());
@@ -1476,6 +1483,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.divInt(a, b);
             case FLOAT:
                 return ArrayMath.divFloat(a, b);
@@ -1503,6 +1511,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.divInt(a, b.intValue());
             case FLOAT:
                 return ArrayMath.divFloat(a, b.floatValue());
@@ -1552,6 +1561,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.divInt(b.intValue(), a);
             case FLOAT:
                 return ArrayMath.divFloat(b.floatValue(), a);
@@ -1930,6 +1940,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.powInt(a, b.intValue());
             case FLOAT:
             case DOUBLE:
@@ -1978,6 +1989,7 @@ public class ArrayMath {
         switch (type) {
             case SHORT:
             case INT:
+            case BOOLEAN:
                 return ArrayMath.powInt(a.intValue(), b);
             case FLOAT:
             case DOUBLE:

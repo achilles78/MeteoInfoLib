@@ -1106,6 +1106,8 @@ public class ArrayUtil {
         }
 
         int len = a.getShape()[shapeIdx];
+        Object data;
+        String dstr;
         while (ii.hasNext()) {
             if (i == 0) {
                 if (n > 0) {
@@ -1113,8 +1115,11 @@ public class ArrayUtil {
                 }
                 sbuff.append("[");
             }
-            Object data = ii.getObjectNext();
-            sbuff.append(data);
+            data = ii.getObjectNext();
+            dstr = data.toString();
+            if (a.getDataType() == DataType.BOOLEAN)
+                dstr = GlobalUtil.capitalize(dstr);
+            sbuff.append(dstr);
             i += 1;
             if (i == len) {
                 sbuff.append("]");

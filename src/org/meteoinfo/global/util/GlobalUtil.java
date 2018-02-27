@@ -663,5 +663,22 @@ public class GlobalUtil {
             return strs;
         }
     }
+    
+    /**
+     * Capitalize the first character of a string
+     * @param str The string
+     * @return Capitalized string
+     */
+    public static String capitalize(String str){        
+        if(str == null || str.length() == 0)
+            return "";
+        
+        if(str.length() == 1)
+            return str.toUpperCase();
+        
+        char[] charArray = str.toCharArray();
+        charArray[0] = Character.toUpperCase(charArray[0]);            
+        return new String(charArray);    
+    }
     // </editor-fold>
 }
