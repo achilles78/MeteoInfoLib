@@ -11,7 +11,6 @@ import org.meteoinfo.projection.proj4j.datum.Ellipsoid;
 import org.meteoinfo.projection.proj4j.proj.Projection;
 import org.meteoinfo.projection.proj4j.proj.TransverseMercatorProjection;
 import org.meteoinfo.projection.proj4j.units.Angle;
-import org.meteoinfo.projection.proj4j.units.AngleFormat;
 import org.meteoinfo.projection.proj4j.units.Unit;
 import org.meteoinfo.projection.proj4j.units.Units;
 import org.meteoinfo.projection.proj4j.util.ProjectionMath;

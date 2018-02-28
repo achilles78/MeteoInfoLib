@@ -86,7 +86,11 @@ public class ProjectionInfo {
             }
         } else {
             String nameStr = proj.toString().replace(" ", "_");
-            _projName = ProjectionNames.valueOf(nameStr);
+            try {
+                _projName = ProjectionNames.valueOf(nameStr);
+            } catch (Exception e){
+                _projName = ProjectionNames.Undefine;
+            }
         }
     }
     // </editor-fold>
