@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import org.meteoinfo.projection.proj4j.CoordinateReferenceSystem;
+import org.meteoinfo.projection.proj4j.InvalidValueException;
+import org.meteoinfo.projection.proj4j.Registry;
 
-import org.meteoinfo.projection.proj4j.*;
 import org.meteoinfo.projection.proj4j.datum.Datum;
 import org.meteoinfo.projection.proj4j.datum.Ellipsoid;
 import org.meteoinfo.projection.proj4j.proj.Projection;

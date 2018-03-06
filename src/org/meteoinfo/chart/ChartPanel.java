@@ -1245,7 +1245,6 @@ public class ChartPanel extends JPanel {
         File output = new File(fileName);
         output.delete();
 
-        BufferedImage image = this.mapBitmap;
         String formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
         if (formatName.equals("jpg")) {
             formatName = "jpeg";
@@ -1253,6 +1252,8 @@ public class ChartPanel extends JPanel {
             return;
         }
 
+        this.paintGraphics();
+        BufferedImage image = this.mapBitmap;
         for (Iterator<ImageWriter> iw = ImageIO.getImageWritersByFormatName(formatName); iw.hasNext();) {
             ImageWriter writer = iw.next();
             ImageWriteParam writeParam = writer.getDefaultWriteParam();
@@ -1293,7 +1294,6 @@ public class ChartPanel extends JPanel {
         File output = new File(fileName);
         output.delete();
 
-        BufferedImage image = this.mapBitmap;
         String formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
         if (formatName.equals("jpg")) {
             formatName = "jpeg";
@@ -1301,6 +1301,9 @@ public class ChartPanel extends JPanel {
             return;
         }
 
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        paintGraphics(g, width, height);
         for (Iterator<ImageWriter> iw = ImageIO.getImageWritersByFormatName(formatName); iw.hasNext();) {
             ImageWriter writer = iw.next();
             ImageWriteParam writeParam = writer.getDefaultWriteParam();
