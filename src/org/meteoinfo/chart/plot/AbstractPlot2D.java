@@ -889,10 +889,10 @@ public abstract class AbstractPlot2D extends Plot {
         }
 
         //Get x axis space
-        bottom += this.getXAxisHeight(g);
+        bottom += this.getXAxisHeight(g) + 5;
 
         //Get y axis space
-        left += this.getYAxisWidth(g);
+        left += this.getYAxisWidth(g) + 5;
 
         //Set right space
         int radd = this.getAxis(Location.RIGHT).getYAxisWidth(g);
