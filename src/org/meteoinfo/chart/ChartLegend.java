@@ -62,6 +62,8 @@ public class ChartLegend {
     protected boolean drawBackground;
     protected int width;
     protected int height;
+    protected int legendWidth;
+    protected int legendHeight;
     protected ChartText label;
     protected String labelLocation;
     protected Font tickLabelFont;
@@ -287,6 +289,38 @@ public class ChartLegend {
      */
     public void setHeight(int value) {
         this.height = value;
+    }
+    
+    /**
+     * Get legend width
+     * @return Legend width
+     */
+    public int getLegendWidth(){
+        return this.legendWidth;
+    }
+    
+    /**
+     * Set legend width
+     * @param value Legend width
+     */
+    public void setLegendWidth(int value){
+        this.legendWidth = value;
+    }
+    
+    /**
+     * Get legend height
+     * @return Legend height
+     */
+    public int getLegendHeight(){
+        return this.legendHeight;
+    }
+    
+    /**
+     * Set legend height
+     * @param value Legend height
+     */
+    public void setLegendHeight(int value){
+        this.legendHeight = value;
     }
 
     /**
@@ -842,7 +876,7 @@ public class ChartLegend {
                 sP.Y = y;               
                 g.setColor(this.tickLabelColor);
                 g.setFont(this.tickLabelFont);
-                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, true);
+                Draw.drawString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, true);
                 y += breakHeight + breakSpace;
 
                 i += 1;
@@ -901,7 +935,7 @@ public class ChartLegend {
                 sP.Y = y;
                 g.setColor(this.tickLabelColor);
                 g.setFont(this.tickLabelFont);
-                Draw.outString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, true);
+                Draw.drawString(g, sP.X + 5, sP.Y, caption, XAlign.LEFT, YAlign.CENTER, true);
                 Dimension dim = Draw.getStringDimension(caption, g);
                 x += this.symbolDimension.width + dim.width + 15;
                 i += 1;

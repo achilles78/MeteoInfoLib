@@ -1,7 +1,6 @@
 package org.meteoinfo.projection.proj4j.parser;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.meteoinfo.projection.proj4j.CoordinateReferenceSystem;
@@ -503,9 +502,9 @@ public class Proj4Parser {
         String[] args = new String[params.size()];
         int i = 0;
         Set<String> key = params.keySet();
-        for (Iterator it = key.iterator(); it.hasNext();) {
-            String s = (String) it.next();
+        for (String s : key) {
             args[i] = "+" + s + "=" + params.get(s);
+            i += 1;
         }
 
         return args;

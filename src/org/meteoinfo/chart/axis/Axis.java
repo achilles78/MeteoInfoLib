@@ -1427,10 +1427,10 @@ public class Axis implements Cloneable {
                         labx = (float) x;
                         for (String dstr : chartText.getTexts()) {                            
                             if (this.location == Location.BOTTOM) {
-                                Draw.outString(g, labx, laby, dstr, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
+                                Draw.drawString(g, labx, laby, dstr, XAlign.CENTER, YAlign.TOP, this.tickLabelAngle, true);
                                 laby += dim.getHeight() + chartText.getLineSpace();                                
                             } else {
-                                Draw.outString(g, labx, laby, dstr, XAlign.CENTER, YAlign.BOTTOM, this.tickLabelAngle, true);
+                                Draw.drawString(g, labx, laby, dstr, XAlign.CENTER, YAlign.BOTTOM, this.tickLabelAngle, true);
                                 laby -= dim.getHeight() - chartText.getLineSpace();
                             }
                         }                        
@@ -1528,7 +1528,7 @@ public class Axis implements Cloneable {
                         if (drawStr != null) {
                             labx = (float) minx;
                             laby = laby + this.tickSpace;
-                            Draw.outString(g, labx, laby, drawStr, XAlign.LEFT, YAlign.TOP, true);
+                            Draw.drawString(g, labx, laby, drawStr, XAlign.LEFT, YAlign.TOP, true);
                             laby += Draw.getStringDimension(drawStr, g).height;
                         }
                     }
@@ -1605,27 +1605,21 @@ public class Axis implements Cloneable {
                 if (this.drawTickLabel && n < this.tickLabels.size()) {
                     drawStr = this.tickLabels.get(n).getText();
                     g.setFont(this.tickLabelFont);
-                    //dim = Draw.getStringDimension(drawStr, g);
                     if (this.location == Location.LEFT) {
-                        //labx = (float) (sx - dim.width - space - space);
                         labx = (float) (sx - this.tickSpace);
                         if (!this.isInsideTick()) {
                             labx -= len;
                         }
-                        //laby = (float) (y + dim.height / 3);
                         laby = (float)y;
-                        Draw.outString(g, labx, laby, drawStr, XAlign.RIGHT, YAlign.CENTER, this.tickLabelAngle, true);
+                        Draw.drawString(g, labx, laby, drawStr, XAlign.RIGHT, YAlign.CENTER, this.tickLabelAngle, true);
                     } else {
                         labx = (float) (sx + this.tickSpace);
                         if (!this.isInsideTick()) {
                             labx += len;
                         }
-                        //laby = (float) (y + dim.height / 3);
                         laby = (float)y;
-                        Draw.outString(g, labx, laby, drawStr, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
-                    }
-                    //Draw.drawTickLabel_Y(labx, laby, this.tickLabelFont, drawStr, this.tickLabelColor,
-                    //        this.tickLabelAngle, g);                    
+                        Draw.drawString(g, labx, laby, drawStr, XAlign.LEFT, YAlign.CENTER, this.tickLabelAngle, true);
+                    }                  
                 }
                 n += this.getTickLabelGap();
 
@@ -1651,9 +1645,6 @@ public class Axis implements Cloneable {
                                 }
                                 xy = plot.projToScreen(plot.getDrawExtent().minX, value1, area);
                                 y = xy[1];
-//                            if (this.inverse) {
-//                                y = area.getHeight() - y;
-//                            }
                                 y += miny;
                                 yy.add(y);
                             }

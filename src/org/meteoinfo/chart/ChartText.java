@@ -655,7 +655,7 @@ public class ChartText extends Shape {
 
         for (String str : this.text) {
             dim = Draw.getStringDimension(str, g);
-            Draw.outString(g, x, y, str, xAlign, YAlign.TOP, useExternalFont);
+            Draw.drawString(g, x, y, str, xAlign, YAlign.TOP, useExternalFont);
             y += dim.height;
             y += this.lineSpace;
         }

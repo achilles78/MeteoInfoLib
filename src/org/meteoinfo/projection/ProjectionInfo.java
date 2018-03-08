@@ -212,25 +212,9 @@ public class ProjectionInfo {
             if (proj4Str1.equals(proj4Str2))
                 return true;
             else {
-                boolean eq = true;
-                String[] params = proj4Str1.split("\\s+");
-                for (String param : params){
-                    if (!proj4Str2.contains(param)) {
-                        eq = false;
-                        break;
-                    }
-                }
-                if (eq){
-                    params = proj4Str2.split("\\s+");
-                    for (String param : params){
-                        if (!proj4Str1.contains(param)) {
-                            eq = false;
-                            break;
-                        }
-                    }
-                }
-                
-                return eq;
+                if (!this._crs.getDatum().isEqual(projInfo._crs.getDatum()))
+                    return false;
+                return this._crs.getProjection().isEqual(projInfo._crs.getProjection());
             }
         }            
     }

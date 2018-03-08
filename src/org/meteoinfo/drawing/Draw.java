@@ -1190,7 +1190,7 @@ public class Draw {
      * @param y_align the alignment in y direction
      * @param useExternalFont Use external font or not
      */
-    public static void outString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align, boolean useExternalFont) {
+    public static void drawString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align, boolean useExternalFont) {
         Dimension dim = Draw.getStringDimension(s, g);
         switch (y_align) {
             case TOP:
@@ -1225,9 +1225,9 @@ public class Draw {
      * @param angle Angle
      * @param useExternalFont Use external font or not
      */
-    public static void outString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align, float angle, boolean useExternalFont) {
+    public static void drawString(Graphics2D g, float x, float y, String s, XAlign x_align, YAlign y_align, float angle, boolean useExternalFont) {
         if (angle == 0) {
-            outString(g, x, y, s, x_align, y_align, useExternalFont);
+            drawString(g, x, y, s, x_align, y_align, useExternalFont);
         } else {
             Dimension dim = getStringDimension(s, g);
             AffineTransform tempTrans = g.getTransform();

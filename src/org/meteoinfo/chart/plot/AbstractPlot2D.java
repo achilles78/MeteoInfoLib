@@ -1175,8 +1175,10 @@ public abstract class AbstractPlot2D extends Plot {
                 if (legend.isColorbar()) {
                     if (legend.getPlotOrientation() == PlotOrientation.VERTICAL) {
                         legend.setHeight((int) (graphArea.getHeight() * legend.getShrink()));
+                        legend.setLegendHeight(legend.getHeight());
                     } else {
                         legend.setWidth((int) (graphArea.getWidth() * legend.getShrink()));
+                        legend.setLegendWidth(legend.getWidth());
                     }
                 }
                 if (legend.getPosition() == LegendPosition.CUSTOM) {
@@ -1204,7 +1206,7 @@ public abstract class AbstractPlot2D extends Plot {
                 y += 5;
                 break;
             case LOWER_CENTER_OUTSIDE:
-                x = (float) (area.getX() + area.getWidth() / 2 - dim.width / 2);
+                x = (float) (area.getX() + area.getWidth() / 2 - legend.getLegendWidth() / 2);
                 y = (float) (area.getY() + area.getHeight() + this.getXAxisHeight(g) + 10);
                 break;
             case LEFT_OUTSIDE:
@@ -1218,7 +1220,7 @@ public abstract class AbstractPlot2D extends Plot {
                 } else {
                     x = (float) area.getX() + (float) area.getWidth() + 10;
                 }
-                y = (float) area.getY() + (float) area.getHeight() / 2 - dim.height / 2;
+                y = (float) area.getY() + (float) area.getHeight() / 2 - legend.getLegendHeight() / 2;
                 break;
             case UPPER_CENTER:
                 x = (float) (area.getX() + area.getWidth() / 2 - dim.width / 2);
