@@ -12,7 +12,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -51,8 +50,6 @@ public abstract class AbstractPlot2D extends Plot {
     private Extent extent;
     private Extent drawExtent;
     private final Map<Location, Axis> axis;
-    //private Axis xAxis;
-    //private Axis yAxis;
     private Location xAxisLocation;
     private Location yAxisLocation;
     private PlotOrientation orientation;
@@ -61,9 +58,9 @@ public abstract class AbstractPlot2D extends Plot {
     private boolean drawRightAxis;
     private boolean drawNeatLine;
     private ChartText title;
-    private ChartText subTitle;
+    private ChartText leftTitle;
+    private ChartText rightTitle;
     private List<ChartLegend> legends;
-    //private boolean drawLegend;
     private List<ChartText> texts;
     private ChartWindArrow windArrow;
     private boolean autoAspect = true;
@@ -149,21 +146,65 @@ public abstract class AbstractPlot2D extends Plot {
     }
 
     /**
-     * Get sub title
+     * Get left sub title
      *
-     * @return Sub title
+     * @return Left sub title
      */
-    public ChartText getSubTitle() {
-        return subTitle;
+    public ChartText getLeftTitle() {
+        return leftTitle;
     }
 
     /**
-     * Set sub title
+     * Set left sub title
      *
-     * @param value Sub title
+     * @param value Left sub title
      */
-    public void setSubTitle(ChartText value) {
-        subTitle = value;
+    public void setLeftTitle(ChartText value) {
+        leftTitle = value;
+    }
+    
+    /**
+     * Set left sub title
+     *
+     * @param text Title text
+     */
+    public void setLeftTitle(String text) {
+        if (this.leftTitle == null) {
+            this.leftTitle = new ChartText(text);
+        } else {
+            this.leftTitle.setText(text);
+        }
+    }
+    
+    /**
+     * Get right sub title
+     *
+     * @return Right sub title
+     */
+    public ChartText getRightTitle() {
+        return rightTitle;
+    }
+
+    /**
+     * Set right sub title
+     *
+     * @param value Right sub title
+     */
+    public void setRightTitle(ChartText value) {
+        rightTitle = value;
+    }
+    
+    /**
+     * Set right sub title
+     *
+     * @param text Title text
+     */
+    public void setRightTitle(String text) {
+        if (this.rightTitle == null) {
+            this.rightTitle = new ChartText(text);
+        } else {
+            this.rightTitle.setText(text);
+        }
     }
 
     /**
@@ -720,26 +761,14 @@ public abstract class AbstractPlot2D extends Plot {
             return;
         }
 
-//        AffineTransform oldMatrix = g.getTransform();
-//        Rectangle oldRegion = g.getClipBounds();
-//        g.setClip(area);
-//        g.translate(area.getX(), area.getY());
-        //Get graphic area
-        //graphArea = this.getGraphArea(g, area);
-        //graphArea = this.getPositionArea(g, area);
         Rectangle2D graphArea;
         graphArea = this.getPositionArea();
         this.setGraphArea(graphArea);
 
         //Draw title
-        float y = this.drawTitle(g, graphArea);
-
-//        //Update legend scheme
-//        this.updateLegendScheme();
-        //Draw grid lines        
+        this.drawTitle(g, graphArea);
+      
         if (graphArea.getWidth() < 10 || graphArea.getHeight() < 10) {
-//            g.setTransform(oldMatrix);
-//            g.setClip(oldRegion);
             return;
         }
 
@@ -769,7 +798,7 @@ public abstract class AbstractPlot2D extends Plot {
         this.drawText(g, graphArea);
 
         //Draw legend
-        this.drawLegend(g, area, graphArea, y);
+        this.drawLegend(g, area, graphArea);
 
         //Draw wind arrow - quiverkey
         if (this.getWindArrow() != null) {
@@ -785,7 +814,7 @@ public abstract class AbstractPlot2D extends Plot {
                 }
             }
             float x = (float) (area.getWidth() * wa.getX());
-            y = (float) (area.getHeight() * (1 - wa.getY()));
+            float y = (float) (area.getHeight() * (1 - wa.getY()));
             WindArrow aArraw = wa.getWindArrow();
             Font drawFont = wa.getFont();
             g.setFont(drawFont);
@@ -826,10 +855,17 @@ public abstract class AbstractPlot2D extends Plot {
     @Override
     public Margin getTightInset(Graphics2D g, Rectangle2D positionArea) {
         int left = 2, bottom = 2, right = 2, top = 5;
-        int space = 2;
 
+        top += this.getAxis(Location.TOP).getXAxisHeight(g);
         if (this.title != null) {
             top += this.title.getTrueDimension(g).height + 10;
+        }        
+        if (this.leftTitle != null){
+            top += this.leftTitle.getDimension(g).height + 5;
+        } else {
+            if (this.rightTitle != null){
+                top += this.rightTitle.getDimension(g).height + 5;
+            }
         }
 
         if (!this.legends.isEmpty()) {
@@ -859,11 +895,13 @@ public abstract class AbstractPlot2D extends Plot {
         left += this.getYAxisWidth(g);
 
         //Set right space
+        int radd = this.getAxis(Location.RIGHT).getYAxisWidth(g);
         if (this.getXAxis().isVisible()) {
             if (this.getXAxis().isDrawTickLabel()) {
-                right += this.getXAxis().getMaxLabelLength(g) / 2;
+                radd = Math.max(radd,this.getXAxis().getMaxLabelLength(g) / 2);
             }
         }
+        right += radd;
 
         return new Margin(left, right, top, bottom);
     }
@@ -1030,16 +1068,29 @@ public abstract class AbstractPlot2D extends Plot {
         return this.getYAxis().getYAxisWidth(g);
     }
 
-    float drawTitle(Graphics2D g, Rectangle2D graphArea) {
-        float y = (float) graphArea.getY() - (float) this.getTightInset().getTop();
-        if (title != null) {
-            g.setColor(title.getColor());
-            g.setFont(title.getFont());
-            float x = (float) (graphArea.getX() + graphArea.getWidth() / 2);
+    void drawTitle(Graphics2D g, Rectangle2D graphArea) {
+        float x;
+        float y = (float) graphArea.getY() - this.getAxis(Location.TOP).getXAxisHeight(g);
+        int sh = 0;
+        if (leftTitle != null) {
+            x = (float) graphArea.getX();
+            y -= 5;
+            leftTitle.draw(g, x, y);
             y += 5;
-            title.draw(g, x, y);
+            sh = leftTitle.getDimension(g).height;
         }
-        return y;
+        if (rightTitle != null) {
+            x = (float) (graphArea.getX() + graphArea.getWidth());
+            y -= 5;
+            rightTitle.draw(g, x, y);
+            sh = leftTitle.getDimension(g).height;
+        }
+        if (title != null) {
+            y -= sh;
+            y -= 8;
+            x = (float) (graphArea.getX() + graphArea.getWidth() / 2);
+            title.draw(g, x, y);
+        }        
     }
 
     void drawGridLine(Graphics2D g, Rectangle2D area) {
@@ -1167,7 +1218,7 @@ public abstract class AbstractPlot2D extends Plot {
         text.draw(g, x, y);
     }
 
-    void drawLegend(Graphics2D g, Rectangle2D area, Rectangle2D graphArea, float y) {
+    void drawLegend(Graphics2D g, Rectangle2D area, Rectangle2D graphArea) {
         if (!this.legends.isEmpty()) {
             Object rendering = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1184,26 +1235,26 @@ public abstract class AbstractPlot2D extends Plot {
                 if (legend.getPosition() == LegendPosition.CUSTOM) {
                     legend.getLegendDimension(g, new Dimension((int) area.getWidth(), (int) area.getHeight()));
                     float x = (float) (area.getWidth() * legend.getX());
-                    y = (float) (area.getHeight() * (1 - (this.getLegend().getHeight() / area.getHeight())
+                    float y = (float) (area.getHeight() * (1 - (this.getLegend().getHeight() / area.getHeight())
                             - this.getLegend().getY()));
                     legend.draw(g, new PointF(x, y));
                 } else {
-                    this.drawLegendScheme(legend, g, graphArea, y);
+                    this.drawLegendScheme(legend, g, graphArea);
                 }
             }
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, rendering);
         }
     }
 
-    void drawLegendScheme(ChartLegend legend, Graphics2D g, Rectangle2D area, float y) {
+    void drawLegendScheme(ChartLegend legend, Graphics2D g, Rectangle2D area) {
         g.setFont(legend.getTickLabelFont());
         Dimension dim = legend.getLegendDimension(g, new Dimension((int) area.getWidth(), (int) area.getHeight()));
-        float x = 0;
-        //Rectangle2D graphArea = this.getPositionArea();
+        float x = 0; 
+        float y = 0;
         switch (legend.getPosition()) {
             case UPPER_CENTER_OUTSIDE:
                 x = (float) (area.getX() + area.getWidth() / 2 - dim.width / 2);
-                y += 5;
+                y = (float) (area.getY() - this.getAxis(Location.TOP).getXAxisHeight(g) - legend.getLegendHeight() - 5);
                 break;
             case LOWER_CENTER_OUTSIDE:
                 x = (float) (area.getX() + area.getWidth() / 2 - legend.getLegendWidth() / 2);

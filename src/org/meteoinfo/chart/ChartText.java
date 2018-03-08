@@ -644,6 +644,7 @@ public class ChartText extends Shape {
         }
 
         g.setColor(this.color);
+        g.setFont(font);
         switch (this.yAlign) {
             case BOTTOM:
                 y = y - dim.height;

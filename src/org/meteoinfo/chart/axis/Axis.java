@@ -1746,7 +1746,7 @@ public class Axis implements Cloneable {
             height += dim.height + this.tickSpace * 2;
         }
 
-        return height + 5;
+        return height;
     }
 
     /**
@@ -1759,7 +1759,7 @@ public class Axis implements Cloneable {
             return 0;
         }
 
-        int width = this.tickSpace;
+        int width = 0;
         if (this.isDrawTickLabel()) {
             width += this.getMaxLabelLength(g) + this.tickSpace + this.tickSpace;
         }

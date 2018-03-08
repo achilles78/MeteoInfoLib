@@ -579,19 +579,11 @@ public class Plot3D extends Plot {
     }
 
     float drawTitle(Graphics2D g, Rectangle2D graphArea) {
-        float y = (float) graphArea.getY() - (float) this.getTightInset().getTop();
+        float y = (float) graphArea.getY();
         if (title != null) {
-            g.setColor(title.getColor());
-            g.setFont(title.getFont());
             float x = (float) (graphArea.getX() + graphArea.getWidth() / 2);
-            y += 5;
-            for (String text : title.getTexts()) {
-                Dimension dim = Draw.getStringDimension(text, g);
-                y += dim.height;
-                Draw.drawString(g, text, x - dim.width / 2, y);
-                g.setFont(title.getFont());
-                y += title.getLineSpace();
-            }
+            y -= 8;
+            title.draw(g, x, y);
             g.setFont(new Font("Arial", Font.PLAIN, 14));
         }
         return y;

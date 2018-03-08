@@ -386,7 +386,7 @@ public class PolarPlot extends Plot2D {
         this.setGraphArea(graphArea);
 
         //Draw title
-        float y = this.drawTitle(g, graphArea);
+        this.drawTitle(g, graphArea);
 
         if (graphArea.getWidth() < 10 || graphArea.getHeight() < 10) {
             return;
@@ -418,7 +418,7 @@ public class PolarPlot extends Plot2D {
         this.drawText(g, graphArea);
 
         //Draw legend
-        this.drawLegend(g, area, graphArea, y);
+        this.drawLegend(g, area, graphArea);
 
     }
 
