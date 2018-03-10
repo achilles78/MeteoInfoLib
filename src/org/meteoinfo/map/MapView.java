@@ -4048,8 +4048,10 @@ public class MapView extends JPanel implements IWebMapPanel {
             this._mapBitmap = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
             //this._mapBitmap = (BufferedImage)this.createImage(this.getWidth(), this.getHeight());
             Graphics2D g = this._mapBitmap.createGraphics();
-            g.setColor(this.getBackground());
-            g.fillRect(0, 0, this.getWidth(), this.getHeight());
+            if (this.getBackground() != null) {
+                g.setColor(this.getBackground());
+                g.fillRect(0, 0, this.getWidth(), this.getHeight());
+            }
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             if (_antiAlias) {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -4162,8 +4164,8 @@ public class MapView extends JPanel implements IWebMapPanel {
         refreshXYScale(rect.width, rect.height);
 
         Color background = this.getBackground();
-        if (background.getAlpha() > 0) {
-            g.setColor(this.getBackground());
+        if (background != null) {
+            g.setColor(background);
             g.fill(rect);
         }
 
@@ -6485,8 +6487,10 @@ public class MapView extends JPanel implements IWebMapPanel {
                     bi = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 }
                 Graphics2D g = bi.createGraphics();
-                g.setColor(this.getBackground());
-                g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+                if (this.getBackground() != null) {
+                    g.setColor(this.getBackground());
+                    g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+                }
                 paintGraphics(g);
                 if (extension.equalsIgnoreCase("jpg")) {
                     BufferedImage newImage = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);

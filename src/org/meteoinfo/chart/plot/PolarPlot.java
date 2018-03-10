@@ -285,7 +285,7 @@ public class PolarPlot extends Plot2D {
         int left = 2, bottom = 2, right = 2, top = 5;        
 
         if (this.getTitle() != null) {
-            top += this.getTitle().getTrueDimension(g).height + 10;
+            top += this.getTitle().getTrueDimension(g).height + 15;
         }
 
         if (!this.getLegends().isEmpty()) {
@@ -420,6 +420,13 @@ public class PolarPlot extends Plot2D {
         //Draw legend
         this.drawLegend(g, area, graphArea);
 
+    }
+    
+    @Override
+    int getTopAxisHeight(Graphics2D g) {
+        g.setFont(xTickFont);
+        int height = Draw.getStringDimension("tick", g).height + 5;
+        return height;
     }
 
     @Override

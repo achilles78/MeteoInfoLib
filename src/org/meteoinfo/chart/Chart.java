@@ -43,7 +43,7 @@ public class Chart {
     private List<ChartText> texts;
     private ChartLegend legend;
     private Color background;
-    private boolean drawBackground;
+    //private boolean drawBackground;
     private boolean drawLegend;
     private Rectangle2D plotArea;
     private boolean antiAlias;
@@ -58,7 +58,7 @@ public class Chart {
     public Chart() {
         this.drawLegend = false;
         this.background = Color.white;
-        this.drawBackground = true;
+        //this.drawBackground = true;
         this.antiAlias = false;
         this.symbolAntialias = true;
         this.rowNum = 1;
@@ -296,23 +296,23 @@ public class Chart {
         this.background = value;
     }
 
-    /**
-     * Get if draw background
-     *
-     * @return Boolean
-     */
-    public boolean isDrawBackground() {
-        return this.drawBackground;
-    }
+//    /**
+//     * Get if draw background
+//     *
+//     * @return Boolean
+//     */
+//    public boolean isDrawBackground() {
+//        return this.drawBackground;
+//    }
 
-    /**
-     * Set if draw background
-     *
-     * @param value Boolean
-     */
-    public void setDrawBackground(boolean value) {
-        this.drawBackground = value;
-    }
+//    /**
+//     * Set if draw background
+//     *
+//     * @param value Boolean
+//     */
+//    public void setDrawBackground(boolean value) {
+//        this.drawBackground = value;
+//    }
 
     /**
      * Get chart legend
@@ -418,7 +418,7 @@ public class Chart {
         g.translate(area.getX(), area.getY());
 
         //Draw background
-        if (this.drawBackground) {
+        if (this.background != null) {
             g.setColor(background);
             g.fill(new Rectangle2D.Double(0, 0, area.getWidth(), area.getHeight()));
         }

@@ -44,8 +44,8 @@ import org.meteoinfo.shape.WindArrow;
 public abstract class AbstractPlot2D extends Plot {
 
     // <editor-fold desc="Variables">
-    private Color background;
-    private boolean drawBackground;
+    protected Color background;
+    //private boolean drawBackground;
     private Color selectColor = Color.yellow;
     private Extent extent;
     private Extent drawExtent;
@@ -73,8 +73,8 @@ public abstract class AbstractPlot2D extends Plot {
      */
     public AbstractPlot2D() {
         super();
-        this.background = Color.white;
-        this.drawBackground = false;
+        this.background = null;
+        //this.drawBackground = false;
         this.drawExtent = new Extent(0, 1, 0, 1);
         //this.xAxis = new Axis("X", true);
         //this.yAxis = new Axis("Y", false);
@@ -358,23 +358,23 @@ public abstract class AbstractPlot2D extends Plot {
         this.background = value;
     }
 
-    /**
-     * Get if draw background
-     *
-     * @return Boolean
-     */
-    public boolean isDrawBackground() {
-        return this.drawBackground;
-    }
+//    /**
+//     * Get if draw background
+//     *
+//     * @return Boolean
+//     */
+//    public boolean isDrawBackground() {
+//        return this.drawBackground;
+//    }
 
-    /**
-     * Set if draw background
-     *
-     * @param value Boolean
-     */
-    public void setDrawBackground(boolean value) {
-        this.drawBackground = value;
-    }
+//    /**
+//     * Set if draw background
+//     *
+//     * @param value Boolean
+//     */
+//    public void setDrawBackground(boolean value) {
+//        this.drawBackground = value;
+//    }
 
     @Override
     public PlotType getPlotType() {
@@ -1067,10 +1067,15 @@ public abstract class AbstractPlot2D extends Plot {
     int getYAxisWidth(Graphics2D g) {
         return this.getYAxis().getYAxisWidth(g);
     }
+    
+    int getTopAxisHeight(Graphics2D g) {
+        int height = this.getAxis(Location.TOP).getXAxisHeight(g);
+        return height;
+    }
 
     void drawTitle(Graphics2D g, Rectangle2D graphArea) {
         float x;
-        float y = (float) graphArea.getY() - this.getAxis(Location.TOP).getXAxisHeight(g);
+        float y = (float) graphArea.getY() - this.getTopAxisHeight(g);
         int sh = 0;
         if (leftTitle != null) {
             x = (float) graphArea.getX();

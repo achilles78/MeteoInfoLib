@@ -395,7 +395,7 @@ public class XY1DPlot extends AbstractPlot2D {
         g.translate(area.getX(), area.getY());
 
         //Draw background
-        if (this.isDrawBackground()) {
+        if (this.background != null) {
             g.setColor(this.getBackground());
             g.fill(new Rectangle2D.Double(0, 0, area.getWidth(), area.getHeight()));
         }
