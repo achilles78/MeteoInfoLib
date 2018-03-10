@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigDecimal;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -1816,7 +1817,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 idx += nxy;
             }
         }
-        bb.clear();
+        ((Buffer)bb).clear();
         
         if (nxy > aDH.LENH)
             _bw.write(new byte[aDH.NY * aDH.NX - aDH.LENH]);

@@ -1077,13 +1077,14 @@ public abstract class AbstractPlot2D extends Plot {
             y -= 5;
             leftTitle.draw(g, x, y);
             y += 5;
-            sh = leftTitle.getDimension(g).height;
+            sh = leftTitle.getDimension(g).height + 5;
         }
         if (rightTitle != null) {
             x = (float) (graphArea.getX() + graphArea.getWidth());
             y -= 5;
             rightTitle.draw(g, x, y);
-            sh = leftTitle.getDimension(g).height;
+            y += 5;
+            sh = rightTitle.getDimension(g).height + 5;
         }
         if (title != null) {
             y -= sh;
