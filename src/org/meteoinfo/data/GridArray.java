@@ -710,7 +710,7 @@ public class GridArray {
             sw.write("CELLSIZE " + String.valueOf(this.getXDelt()));
             sw.newLine();
             sw.write("NODATA_VALUE " + String.valueOf(this.missingValue));
-            sw.newLine();
+            //sw.newLine();
             String value;
             String aLine = "";
             int xn = this.getXNum();

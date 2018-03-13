@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 import org.meteoinfo.data.GridArray;
 import org.meteoinfo.data.meteodata.MeteoDataType;
 import org.meteoinfo.global.MIMath;
+import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.global.util.DateUtil;
 import org.meteoinfo.projection.proj4j.proj.Projection;
 import org.meteoinfo.projection.KnownCoordinateSystems;
@@ -387,14 +388,20 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                 isLatLon = true;
                 X = new double[aDH.NX];
                 Y = new double[aDH.NY];
-                for (i = 0; i < aDH.NX; i++) {
-                    X[i] = aDH.SYNC_LON + i * aDH.REF_LON;
+                double xmin = BigDecimalUtil.toDouble(aDH.SYNC_LON);
+                double xdelta = BigDecimalUtil.toDouble(aDH.REF_LON);
+                X[0] = xmin;
+                for (i = 1; i < aDH.NX; i++) {
+                    X[i] = BigDecimalUtil.add(X[i-1], xdelta);
                 }
                 if (X[aDH.NX - 1] + aDH.REF_LON - X[0] == 360) {
                     isGlobal = true;
                 }
-                for (i = 0; i < aDH.NY; i++) {
-                    Y[i] = aDH.SYNC_LAT + i * aDH.REF_LAT;
+                double ymin = BigDecimalUtil.toDouble(aDH.SYNC_LAT);
+                double ydelta = BigDecimalUtil.toDouble(aDH.REF_LAT);
+                Y[0] = ymin;
+                for (i = 1; i < aDH.NY; i++) {
+                    Y[i] = BigDecimalUtil.add(Y[i-1], ydelta);
                 }
             } else {
                 //Identify projection
