@@ -656,9 +656,6 @@ public class ArrayUtil {
             ashape[i] = shape.get(i);
         }
         Array a = Array.factory(dtype, ashape);
-        for (int i = 0; i < a.getSize(); i++) {
-            a.setObject(i, 0);
-        }
 
         return a;
     }

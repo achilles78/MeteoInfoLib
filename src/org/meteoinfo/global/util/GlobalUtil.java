@@ -651,13 +651,10 @@ public class GlobalUtil {
         if (separator == null || separator.equals(" ")) {
             return line.split("\\s+");
         } else {
-            //String[] strs = line.split(separator + "|\\s+");
             String[] strs = line.split(separator);
             List<String> r = new ArrayList<>();
             for (String s : strs){
-                if (!s.isEmpty()) {
-                    r.add(s.trim());
-                }
+                r.add(s.trim());
             }
             strs = r.toArray(new String[1]);
             return strs;
