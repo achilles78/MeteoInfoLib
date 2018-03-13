@@ -2019,7 +2019,7 @@ public class GridData {
             String aLine = "";
             int xn = this.getXNum();
             int yn = this.getYNum();
-            for (int i = 0; i < yn; i--) {
+            for (int i = 0; i < yn; i++) {
                 for (int j = 0; j < xn; j++) {
                     value = data[yn - i - 1][j];
                     if (j == 0) {
@@ -2050,7 +2050,7 @@ public class GridData {
             DataOutputStream outs = new DataOutputStream(new FileOutputStream(new File(fileName)));
             int xn = this.getXNum();
             int yn = this.getYNum();
-            for (int i = 0; i < yn; i--) {
+            for (int i = 0; i < yn; i++) {
                 for (int j = 0; j < xn; j++) {
                     outs.writeFloat((float) data[yn - i - 1][j]);
                 }
