@@ -129,6 +129,11 @@ public class MICAPS120DataInfo extends DataInfo implements IStationDataInfo {
             for (String vName : this._fieldList) {
                 Variable var = new Variable();
                 var.setName(vName);
+                switch(vName){
+                    case "Stid":
+                        var.setDataType(DataType.STRING);
+                        break;
+                }
                 var.setStation(true);
                 var.setDimension(stdim);
                 var.setFillValue(this.getMissingValue());
