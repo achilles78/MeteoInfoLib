@@ -123,8 +123,11 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
 
             _stNum = Integer.parseInt(dataArray[4]);
             Dimension stdim = new Dimension(DimensionType.Other);
-            stdim.setShortName("stations");
+            stdim.setShortName("station");
             values = new double[_stNum];
+            for (int i = 0; i < _stNum; i++){
+                values[i] = i;
+            }
             stdim.setValues(values);
             this.addDimension(stdim);
             List<Variable> variables = new ArrayList<>();
@@ -314,7 +317,7 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
 
         return dataInfo;
     }
-
+    
     /**
      * Read array data of a variable
      *

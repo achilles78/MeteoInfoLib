@@ -142,8 +142,11 @@ public class MICAPS3DataInfo extends DataInfo implements IStationDataInfo {
 
             stNum = _dataList.size();
             Dimension stdim = new Dimension(DimensionType.Other);
-            stdim.setShortName("stations");
+            stdim.setShortName("station");
             double[] values = new double[stNum];
+            for (i = 0; i < stNum; i++){
+                values[i] = i;
+            }
             stdim.setValues(values);
             this.addDimension(stdim);
             Dimension tdim = new Dimension(DimensionType.T);
