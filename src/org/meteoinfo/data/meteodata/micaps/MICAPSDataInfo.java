@@ -49,6 +49,9 @@ public class MICAPSDataInfo {
             String[] dataArray;
 
             aLine = sr.readLine().trim();
+            if (aLine.startsWith("\uFEFF")){
+                aLine = aLine.substring(1);
+            }
             dataArray = aLine.split("\\s+");
             dataType = dataArray[0] + " " + dataArray[1];
             dataType = dataType.trim().toLowerCase();
@@ -73,7 +76,7 @@ public class MICAPSDataInfo {
             if (dataType.equals("diamond 13")) {
                 mdType = MeteoDataType.MICAPS_13;
             }
-            if (dataType.equals("diamond 120")) {
+            if (dataType.contains("diamond 120")) {
                 mdType = MeteoDataType.MICAPS_120;
             }
         } catch (FileNotFoundException ex) {
@@ -82,13 +85,14 @@ public class MICAPSDataInfo {
             Logger.getLogger(MICAPSDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                sr.close();
-                return mdType;
+                if (sr != null)
+                    sr.close();
             } catch (IOException ex) {
                 Logger.getLogger(MICAPSDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-                return null;
             }
         }
+        
+        return mdType;
     }
     // </editor-fold>
     // <editor-fold desc="Methods">

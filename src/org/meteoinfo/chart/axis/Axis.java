@@ -1187,13 +1187,13 @@ public class Axis implements Cloneable {
      * @return Maximum lable string length
      */
     public int getMaxLabelLength(Graphics2D g) {
-        //FontMetrics metrics = g.getFontMetrics(this.tickLabelFont);
         this.updateTickLabels();
         int max = 0;
         Dimension dim;
         int width, height;
         g.setFont(this.tickLabelFont);
-        for (ChartText lab : this.tickLabels) {
+        for (int i = 0; i < this.tickLabels.size(); i++) {
+            ChartText lab = this.tickLabels.get(i);
             dim = Draw.getStringDimension(lab.getText(), g);
             width = dim.width;
             if (this.tickLabelAngle != 0) {
