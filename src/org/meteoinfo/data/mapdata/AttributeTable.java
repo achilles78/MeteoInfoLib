@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
@@ -73,7 +74,7 @@ public final class AttributeTable implements Cloneable {
     private boolean _loaded;
     //private bool _virtualMode;
     private List<Integer> _deletedRows;
-    private final Charset charset = Charset.defaultCharset();
+    private String encoding = "GBK";
     // </editor-fold>
 
     // <editor-fold desc="Constructor">
@@ -91,8 +92,6 @@ public final class AttributeTable implements Cloneable {
      * @throws java.io.FileNotFoundException
      */
     public AttributeTable(String filename) throws FileNotFoundException, IOException, Exception {
-        //_dataRowWatch = new Stopwatch();
-        //_fileName = filename;
         _file = new File(filename);
         configure();
         File aFile = new File(filename);
@@ -146,6 +145,22 @@ public final class AttributeTable implements Cloneable {
      */
     public void setTable(DataTable table) {
         _dataTable = table;
+    }
+    
+    /**
+     * Get encoding string
+     * @return Encoding string
+     */
+    public String getEncoding(){
+        return this.encoding;
+    }
+    
+    /**
+     * Set encoding string
+     * @param value Encoding string
+     */
+    public void setEncoding(String value){
+        this.encoding = value;
     }
     // </editor-fold>
 
@@ -264,7 +279,7 @@ public final class AttributeTable implements Cloneable {
             // read the field name				            
             byte[] bytes = new byte[11];
             buffer.get(bytes);
-            String name = new String(bytes, "GBK");
+            String name = new String(bytes, this.encoding);
 
             int nullPoint = name.indexOf((char) 0);
             if (nullPoint != -1) {
@@ -311,7 +326,7 @@ public final class AttributeTable implements Cloneable {
         //FileInfo fi = new FileInfo(_fileName);
         // Encoding appears to be ASCII, not Unicode
         rafo.seek(_headerLength + 1);
-        myReader.position(_headerLength + 1);
+        ((Buffer)myReader).position(_headerLength + 1);
         if ((int) rafo.length() == _headerLength) {
             // The file is empty, so we are done here
             return;
@@ -432,9 +447,7 @@ public final class AttributeTable implements Cloneable {
                     }
                     break;
                 case 'C': // character record.
-                    tempObject = new String(cBuffer, "GBK").trim();
-                    //tempObject = new String(cBuffer, "UTF-8").trim();
-                    //tempObject = new String(cBuffer);
+                    tempObject = new String(cBuffer, this.encoding).trim();
                     break;
                 case 'T':
                     throw new Exception();
@@ -501,6 +514,25 @@ public final class AttributeTable implements Cloneable {
             Logger.getLogger(AttributeTable.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    /**
+     * Save the file
+     * @param fileName File name
+     */
+    public void save(String fileName) {
+        try {
+            //File theFile = new File(this._fileName);
+            updateSchema();
+            _writer = new EndianDataOutputStream(new BufferedOutputStream(new FileOutputStream(fileName)));
+            writeHeader(_writer);
+            writeTable();
+            _writer.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(AttributeTable.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(AttributeTable.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     /**
      * Save this table to the specified file name
@@ -525,8 +557,7 @@ public final class AttributeTable implements Cloneable {
                     }
                 }
             }
-            //_fileName = fileName;
-            save();
+            save(fileName);
         }
     }
 
@@ -623,7 +654,7 @@ public final class AttributeTable implements Cloneable {
         for (int i = 0; i < _columns.size(); i++) {
             currentField = _columns.get(i);
             // write the field name
-            byte[] bytes = currentField.getColumnName().getBytes("GBK");
+            byte[] bytes = currentField.getColumnName().getBytes(this.encoding);
             for (int j = 0; j < 11; j++) {
                 if (bytes.length > j) {
                     writer.writeByteLE(bytes[j]);
@@ -688,7 +719,7 @@ public final class AttributeTable implements Cloneable {
                         tmps = new StringBuffer(ss);
                         tmps.setLength(currentField.getLength());
                         //patch from Hisaji Ono for Double byte characters
-                        _writer.write(tmps.toString().getBytes("GBK"), 0, currentField.getLength());  // [Matthias Scholz 04.Sept.2010] Charset added
+                        _writer.write(tmps.toString().getBytes(this.encoding), 0, currentField.getLength());  // [Matthias Scholz 04.Sept.2010] Charset added
                         break;
                     case 'D':
                         //Date
