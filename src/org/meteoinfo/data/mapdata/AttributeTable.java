@@ -254,7 +254,7 @@ public final class AttributeTable implements Cloneable {
         _numFields = (_headerLength - FileDescriptorSize - 1) / FileDescriptorSize;
 
         // _numFields = (_headerLength - FileDescriptorSize) / FileDescriptorSize;
-        _columns = new ArrayList<Field>();
+        _columns = new ArrayList<>();
 
         for (int i = 0; i < _numFields; i++) {
             arr = new byte[18];
@@ -264,7 +264,7 @@ public final class AttributeTable implements Cloneable {
             // read the field name				            
             byte[] bytes = new byte[11];
             buffer.get(bytes);
-            String name = new String(bytes, "GB2312");
+            String name = new String(bytes, "GBK");
 
             int nullPoint = name.indexOf((char) 0);
             if (nullPoint != -1) {
@@ -432,8 +432,9 @@ public final class AttributeTable implements Cloneable {
                     }
                     break;
                 case 'C': // character record.
-                    tempObject = new String(cBuffer, "GB2312").trim();
+                    tempObject = new String(cBuffer, "GBK").trim();
                     //tempObject = new String(cBuffer, "UTF-8").trim();
+                    //tempObject = new String(cBuffer);
                     break;
                 case 'T':
                     throw new Exception();
@@ -622,8 +623,7 @@ public final class AttributeTable implements Cloneable {
         for (int i = 0; i < _columns.size(); i++) {
             currentField = _columns.get(i);
             // write the field name
-            //writer.write(currentField.getColumnName().toString().getBytes(charset.name()), 0, 11);
-            byte[] bytes = currentField.getColumnName().getBytes(Charset.forName("GB2312"));
+            byte[] bytes = currentField.getColumnName().getBytes("GBK");
             for (int j = 0; j < 11; j++) {
                 if (bytes.length > j) {
                     writer.writeByteLE(bytes[j]);
@@ -688,7 +688,7 @@ public final class AttributeTable implements Cloneable {
                         tmps = new StringBuffer(ss);
                         tmps.setLength(currentField.getLength());
                         //patch from Hisaji Ono for Double byte characters
-                        _writer.write(tmps.toString().getBytes(Charset.forName("GB2312")), 0, currentField.getLength());  // [Matthias Scholz 04.Sept.2010] Charset added
+                        _writer.write(tmps.toString().getBytes("GBK"), 0, currentField.getLength());  // [Matthias Scholz 04.Sept.2010] Charset added
                         break;
                     case 'D':
                         //Date
