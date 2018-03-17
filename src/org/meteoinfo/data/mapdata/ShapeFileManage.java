@@ -60,6 +60,8 @@ import org.meteoinfo.shape.PolygonZShape;
  * @author yaqiang
  */
 public class ShapeFileManage {
+    
+    public static String encoding = "UTF-8";
 
     /**
      * Load shape file
@@ -70,7 +72,7 @@ public class ShapeFileManage {
      * @throws java.io.FileNotFoundException
      */
     public static VectorLayer loadShapeFile(String shpfilepath) throws IOException, FileNotFoundException, Exception {
-        return loadShapeFile(shpfilepath, "GBK");
+        return loadShapeFile(shpfilepath, encoding);
     }
     
     /**

@@ -32,7 +32,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +73,7 @@ public final class AttributeTable implements Cloneable {
     private boolean _loaded;
     //private bool _virtualMode;
     private List<Integer> _deletedRows;
-    private String encoding = "GBK";
+    private String encoding = "UTF-8";
     // </editor-fold>
 
     // <editor-fold desc="Constructor">
@@ -146,20 +145,22 @@ public final class AttributeTable implements Cloneable {
     public void setTable(DataTable table) {
         _dataTable = table;
     }
-    
+
     /**
      * Get encoding string
+     *
      * @return Encoding string
      */
-    public String getEncoding(){
+    public String getEncoding() {
         return this.encoding;
     }
-    
+
     /**
      * Set encoding string
+     *
      * @param value Encoding string
      */
-    public void setEncoding(String value){
+    public void setEncoding(String value) {
         this.encoding = value;
     }
     // </editor-fold>
@@ -184,20 +185,30 @@ public final class AttributeTable implements Cloneable {
      * @throws java.io.FileNotFoundException
      */
     public void open(String filename) throws FileNotFoundException, IOException, Exception {
-        _attributesPopulated = false; // we had a file, but have not read the dbf content into memory yet.
         String fileName = filename.replace(filename.substring(filename.lastIndexOf(".")), ".dbf");
+        File file = new File(fileName);
+        if (!file.exists()) {
+            fileName = filename.replace(filename.substring(filename.lastIndexOf(".")), ".DBF");
+        }
+        openDBF(fileName);
+    }
+
+    /**
+     * Reads all the information from the dBase file, including the vector
+     * shapes and the database component.
+     *
+     * @param fileName The dBase file name
+     * @throws java.io.FileNotFoundException
+     */
+    public void openDBF(String fileName) throws FileNotFoundException, IOException, Exception {
+        _attributesPopulated = false; // we had a file, but have not read the dbf content into memory yet.
         _dataTable = new DataTable();
         _file = new File(fileName);
         if (!_file.exists()) {
-            fileName = filename.replace(filename.substring(filename.lastIndexOf(".")), ".DBF");
-            _file = new File(fileName);
-            if (!_file.exists()) {
-                System.out.println("The dbf file for this shapefile was not found.");
-                return;
-            }
+            System.out.println("The dbf file for this shapefile was not found.");
+            return;
         }
 
-        //_fileName = aFile.getCanonicalPath();
         DataInputStream myReader = new DataInputStream(new BufferedInputStream(new FileInputStream(_file)));
         readTableHeader(myReader); // based on the header, set up the fields information etc.
 
@@ -326,7 +337,7 @@ public final class AttributeTable implements Cloneable {
         //FileInfo fi = new FileInfo(_fileName);
         // Encoding appears to be ASCII, not Unicode
         rafo.seek(_headerLength + 1);
-        ((Buffer)myReader).position(_headerLength + 1);
+        ((Buffer) myReader).position(_headerLength + 1);
         if ((int) rafo.length() == _headerLength) {
             // The file is empty, so we are done here
             return;
@@ -514,9 +525,10 @@ public final class AttributeTable implements Cloneable {
             Logger.getLogger(AttributeTable.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     /**
      * Save the file
+     *
      * @param fileName File name
      */
     public void save(String fileName) {
