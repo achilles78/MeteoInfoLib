@@ -1616,12 +1616,35 @@ public class ArrayUtil {
 
         return javaArray;
     }
+    
+    /**
+     * Convert array to N-Dimension double Java array
+     *
+     * @param a Array a
+     * @return N-D Java array
+     */
+    public static Object copyToNDJavaArray_Long(Array a) {
+        Object javaArray;
+        try {
+            javaArray = java.lang.reflect.Array.newInstance(Long.TYPE, a.getShape());
+        } catch (IllegalArgumentException | NegativeArraySizeException e) {
+            throw new IllegalArgumentException(e);
+        }
+        IndexIterator iter = a.getIndexIterator();
+        reflectArrayCopyOut(javaArray, a, iter);
+
+        return javaArray;
+    }
 
     private static void reflectArrayCopyOut(Object jArray, Array aa, IndexIterator aaIter) {
         Class cType = jArray.getClass().getComponentType();
 
         if (!cType.isArray()) {
-            copyTo1DJavaArray(aaIter, jArray);
+            if (cType == long.class){
+                copyTo1DJavaArray_Long(aaIter, jArray);
+            } else {
+                copyTo1DJavaArray(aaIter, jArray);
+            }
         } else {
             for (int i = 0; i < java.lang.reflect.Array.getLength(jArray); i++) {
                 reflectArrayCopyOut(java.lang.reflect.Array.get(jArray, i), aa, aaIter);
@@ -1633,6 +1656,13 @@ public class ArrayUtil {
         double[] ja = (double[]) javaArray;
         for (int i = 0; i < ja.length; i++) {
             ja[i] = iter.getDoubleNext();
+        }
+    }
+    
+    protected static void copyTo1DJavaArray_Long(IndexIterator iter, Object javaArray) {
+        long[] ja = (long[]) javaArray;
+        for (int i = 0; i < ja.length; i++) {
+            ja[i] = iter.getLongNext();
         }
     }
 
