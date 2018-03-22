@@ -6,7 +6,10 @@
         <group>
             <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/math/RandomUtil.java</file>
             <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/data/ArrayUtil.java</file>
+            <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/table/DataRow.java</file>
             <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/math/stats/StatsUtil.java</file>
+            <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/table/DataTable.java</file>
+            <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/data/TableUtil.java</file>
         </group>
     </open-files>
 </project-private>
