@@ -1679,7 +1679,8 @@ public class ArrayUtil {
         double min = ArrayMath.getMinimum(a);
         double max = ArrayMath.getMaximum(a);
         double[] bins = MIMath.getIntervalValues(min, max, nbins);
-        return histogram(a, bins);
+        Array ba = Array.factory(DataType.DOUBLE, new int[]{bins.length}, bins);        
+        return histogram(a, ba);
     }
 
     /**

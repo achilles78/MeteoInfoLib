@@ -4018,6 +4018,205 @@ public class ArrayMath {
         }
         return max;
     }
+    
+    /**
+     * Compute minimum value of an array
+     *
+     * @param a Array a
+     * @return Minimum value
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static double min(Array a) throws InvalidRangeException {
+        double min = 1.7976931348623157E+308D;
+        double v;
+        IndexIterator ii = a.getIndexIterator();
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                if (v < min) {
+                    min = v;
+                }
+            }
+        }
+        if (min == 1.7976931348623157E+308D) {
+            return Double.NaN;
+        } else {
+            return min;
+        }
+    }
+    
+    /**
+     * Compute minimum value of an array along an axis (dimension)
+     *
+     * @param a Array a
+     * @param axis Axis
+     * @return Minimum value array
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static Array min(Array a, int axis) throws InvalidRangeException {
+        int[] dataShape = a.getShape();
+        int[] shape = new int[dataShape.length - 1];
+        int idx;
+        for (int i = 0; i < dataShape.length; i++) {
+            idx = i;
+            if (idx == axis) {
+                continue;
+            } else if (idx > axis) {
+                idx -= 1;
+            }
+            shape[idx] = dataShape[i];
+        }
+        Array r = Array.factory(DataType.DOUBLE, shape);
+        double s;
+        Index indexr = r.getIndex();
+        int[] current;
+        for (int i = 0; i < r.getSize(); i++) {
+            current = indexr.getCurrentCounter();
+            List<Range> ranges = new ArrayList<>();
+            for (int j = 0; j < dataShape.length; j++) {
+                if (j == axis) {
+                    ranges.add(new Range(0, dataShape[j] - 1, 1));
+                } else {
+                    idx = j;
+                    if (idx > axis) {
+                        idx -= 1;
+                    }
+                    ranges.add(new Range(current[idx], current[idx], 1));
+                }
+            }
+            s = min(a, ranges);
+            r.setDouble(i, s);
+            indexr.incr();
+        }
+
+        return r;
+    }
+    
+    /**
+     * Compute minimum value of an array
+     *
+     * @param a Array a
+     * @param ranges Range list
+     * @return Minimum value
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static double min(Array a, List<Range> ranges) throws InvalidRangeException {
+        double min = 1.7976931348623157E+308D;
+        double v;
+        IndexIterator ii = a.getRangeIterator(ranges);
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                if (v < min) {
+                    min = v;
+                }
+            }
+        }
+        if (min == 1.7976931348623157E+308D) {
+            return Double.NaN;
+        } else {
+            return min;
+        }
+    }
+    
+    /**
+     * Compute maximum value of an array
+     *
+     * @param a Array a
+     * @return Maximum value
+     */
+    public static double max(Array a) {
+        double max = -1.797693134862316E+307D;
+        double v;
+        IndexIterator ii = a.getIndexIterator();
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                if (v > max) {
+                    max = v;
+                }
+            }
+        }
+        if (max == -1.797693134862316E+307D) {
+            return Double.NaN;
+        } else {
+            return max;
+        }
+    }
+    
+    /**
+     * Compute maximum value of an array along an axis (dimension)
+     *
+     * @param a Array a
+     * @param axis Axis
+     * @return Maximum value array
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static Array max(Array a, int axis) throws InvalidRangeException {
+        int[] dataShape = a.getShape();
+        int[] shape = new int[dataShape.length - 1];
+        int idx;
+        for (int i = 0; i < dataShape.length; i++) {
+            idx = i;
+            if (idx == axis) {
+                continue;
+            } else if (idx > axis) {
+                idx -= 1;
+            }
+            shape[idx] = dataShape[i];
+        }
+        Array r = Array.factory(DataType.DOUBLE, shape);
+        double s;
+        Index indexr = r.getIndex();
+        int[] current;
+        for (int i = 0; i < r.getSize(); i++) {
+            current = indexr.getCurrentCounter();
+            List<Range> ranges = new ArrayList<>();
+            for (int j = 0; j < dataShape.length; j++) {
+                if (j == axis) {
+                    ranges.add(new Range(0, dataShape[j] - 1, 1));
+                } else {
+                    idx = j;
+                    if (idx > axis) {
+                        idx -= 1;
+                    }
+                    ranges.add(new Range(current[idx], current[idx], 1));
+                }
+            }
+            s = max(a, ranges);
+            r.setDouble(i, s);
+            indexr.incr();
+        }
+
+        return r;
+    }
+    
+    /**
+     * Compute maximum value of an array
+     *
+     * @param a Array a
+     * @param ranges Range list
+     * @return Maximum value
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static double max(Array a, List<Range> ranges) throws InvalidRangeException {
+        double max = -1.797693134862316E+307D;
+        double v;
+        IndexIterator ii = a.getRangeIterator(ranges);
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                if (v > max) {
+                    max = v;
+                }
+            }
+        }
+        if (max == -1.797693134862316E+307D) {
+            return Double.NaN;
+        } else {
+            return max;
+        }
+    }
 
     /**
      * Compute sum value of an array along an axis (dimension)
@@ -4579,6 +4778,95 @@ public class ArrayMath {
             }
         }
         sum = Math.sqrt(sum / n);
+
+        return sum;
+    }
+    
+    /**
+     * Compute variance value of an array along an axis (dimension)
+     *
+     * @param a Array a
+     * @param axis Axis
+     * @return Variance value array
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static Array var(Array a, int axis) throws InvalidRangeException {
+        int[] dataShape = a.getShape();
+        int[] shape = new int[dataShape.length - 1];
+        int idx;
+        for (int i = 0; i < dataShape.length; i++) {
+            idx = i;
+            if (idx == axis) {
+                continue;
+            } else if (idx > axis) {
+                idx -= 1;
+            }
+            shape[idx] = dataShape[i];
+        }
+        Array r = Array.factory(DataType.DOUBLE, shape);
+        double mean;
+        Index indexr = r.getIndex();
+        int[] current;
+        for (int i = 0; i < r.getSize(); i++) {
+            current = indexr.getCurrentCounter();
+            List<Range> ranges = new ArrayList<>();
+            for (int j = 0; j < dataShape.length; j++) {
+                if (j == axis) {
+                    ranges.add(new Range(0, dataShape[j] - 1, 1));
+                } else {
+                    idx = j;
+                    if (idx > axis) {
+                        idx -= 1;
+                    }
+                    ranges.add(new Range(current[idx], current[idx], 1));
+                }
+            }
+            mean = std(a, ranges);
+            r.setDouble(i, mean);
+            indexr.incr();
+        }
+
+        return r;
+    }
+
+    /**
+     * Compute variance value of an array
+     *
+     * @param a Array a
+     * @param ranges Range list
+     * @return Variance value
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static double var(Array a, List<Range> ranges) throws InvalidRangeException {
+        double mean = 0.0, v;
+        int n = 0;
+        IndexIterator ii = a.getRangeIterator(ranges);
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                mean += v;
+                n += 1;
+            }
+        }
+        if (n > 0) {
+            mean = mean / n;
+        } else {
+            mean = Double.NaN;
+        }
+
+        if (Double.isNaN(mean)) {
+            return Double.NaN;
+        }
+
+        double sum = 0;
+        ii = a.getRangeIterator(ranges);
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                sum += Math.pow((v - mean), 2);
+            }
+        }
+        sum = sum / n;
 
         return sum;
     }

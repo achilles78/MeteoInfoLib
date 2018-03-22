@@ -1431,20 +1431,50 @@ public class GraphicFactory {
 
         return graphics;
     }
+    
+    /**
+     * Create histogram bar graphics
+     *
+     * @param data The data array
+     * @param bins Bins number
+     * @param bbs Bar breaks
+     * @return Bar graphics
+     */
+    public static GraphicCollection createHistBars(Array data, int bins,
+            List<BarBreak> bbs) {
+        List<Array> r = ArrayUtil.histogram(data, bins);
+        Array xdata = r.get(1);
+        Array ydata = r.get(0);
+        return createHistBars(data, xdata, ydata, bbs);
+    }
 
     /**
      * Create histogram bar graphics
      *
      * @param data The data array
-     * @param nbin Bin number
+     * @param bins Bins array
      * @param bbs Bar breaks
      * @return Bar graphics
      */
-    public static GraphicCollection createHistBars(Array data, int nbin,
+    public static GraphicCollection createHistBars(Array data, Array bins,
             List<BarBreak> bbs) {
-        List<Array> r = ArrayUtil.histogram(data, nbin);
+        List<Array> r = ArrayUtil.histogram(data, bins);
         Array xdata = r.get(1);
         Array ydata = r.get(0);
+        return createHistBars(data, xdata, ydata, bbs);
+    }
+    
+    /**
+     * Create histogram bar graphics
+     *
+     * @param data The data array
+     * @param xdata X bins data
+     * @param ydata Y bins data
+     * @param bbs Bar breaks
+     * @return Bar graphics
+     */
+    public static GraphicCollection createHistBars(Array data, Array xdata, Array ydata,
+            List<BarBreak> bbs) {
         GraphicCollection graphics = new GraphicCollection();
         int n = (int) ydata.getSize();
         double x, y, width;
