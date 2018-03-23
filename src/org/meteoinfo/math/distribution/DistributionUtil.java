@@ -16,6 +16,18 @@ import ucar.ma2.DataType;
  */
 public class DistributionUtil {
     /**
+     * Random variates of given type.
+     * @param dis Distribution.
+     * @param n Size.
+     * @return Rsult array.
+     */
+    public static Array rvs(RealDistribution dis, int n){
+        double[] samples = dis.sample(n);
+        Array r = Array.factory(DataType.DOUBLE, new int[]{n}, samples);        
+        return r;
+    }
+    
+    /**
      * Probability density function at x
      * @param dis Distribution.
      * @param x X.
