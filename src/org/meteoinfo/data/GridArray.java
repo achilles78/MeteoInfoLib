@@ -659,21 +659,15 @@ public class GridArray {
             double[] maxmin = new double[2];
             getMaxMinValue(maxmin);
             sw.write(String.valueOf(maxmin[1]) + " " + String.valueOf(maxmin[0]));
-            double value;
+            Object value;
             String aLine = "";
             for (int i = 0; i < this.getYNum(); i++) {
                 for (int j = 0; j < this.getXNum(); j++) {
-                    value = data.getDouble(i * this.getXNum() + j);
-                    if (Double.isNaN(value)) {
-                        value = -9999.0;
-                    } else if (MIMath.doubleEquals(value, missingValue)) {
-                        value = -9999.0;
-                    }
-
+                    value = data.getObject(i * this.getXNum() + j);
                     if (j == 0) {
-                        aLine = String.valueOf(value);
+                        aLine = value.toString();
                     } else {
-                        aLine = aLine + " " + String.valueOf(value);
+                        aLine = aLine + " " + value.toString();
                     }
                 }
                 sw.newLine();
