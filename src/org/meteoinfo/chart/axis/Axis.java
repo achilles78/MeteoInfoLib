@@ -1689,32 +1689,22 @@ public class Axis implements Cloneable {
         //Draw label
         if (this.isDrawLabel()) {
             g.setFont(this.getLabelFont());
-            Dimension dim = Draw.getStringDimension(this.label.getText(), g);
-            //metrics = g.getFontMetrics(this.yAxis.getLabelFont());
             if (this.location == Location.LEFT) {
-                x = sx - this.tickSpace - this.getMaxLabelLength(g) - dim.height - 10;
+                x = sx - this.tickSpace - this.getMaxLabelLength(g);
                 if (!this.isInsideTick()) {
                     x -= len;
                 }
                 y = (maxy - miny) / 2 + miny;
-                //x = g.getTransform().getTranslateX() + x;
-                //y = g.getTransform().getTranslateY() + y;
-                //Draw.drawLabelPoint((float)x, (float)y, this.yAxis.getLabelFont(), this.yAxis.getLabel(), 
-                //        this.yAxis.getLabelColor(), -90, g, null);
-                Draw.drawLabelPoint_270((float) x, (float) y, this.getLabelFont(), this.label.getText(),
-                        this.getLabelColor(), g, null, this.label.isUseExternalFont());
+                Draw.drawString(g, (float)x, (float)y, this.label.getText(), XAlign.RIGHT, 
+                        YAlign.CENTER, 90, this.label.isUseExternalFont());
             } else {
-                x = sx + this.tickSpace + this.getMaxLabelLength(g) + 10;
+                x = sx + this.tickSpace + this.getMaxLabelLength(g) + 5;
                 if (!this.isInsideTick()) {
                     x += len;
                 }
                 y = (maxy - miny) / 2 + miny;
-                //x = g.getTransform().getTranslateX() + x;
-                //y = g.getTransform().getTranslateY() + y;
-                //Draw.drawLabelPoint((float)x, (float)y, this.yAxis.getLabelFont(), this.yAxis.getLabel(), 
-                //        this.yAxis.getLabelColor(), -90, g, null);
-                Draw.drawLabelPoint_270((float) x, (float) y, this.getLabelFont(), this.label.getText(),
-                        this.getLabelColor(), g, null, this.label.isUseExternalFont());
+                Draw.drawString(g, (float)x, (float)y, this.label.getText(), XAlign.LEFT, 
+                        YAlign.CENTER, 90, this.label.isUseExternalFont());
             }
         }
     }

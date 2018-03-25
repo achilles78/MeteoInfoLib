@@ -110,8 +110,8 @@ public class Draw {
             //icon.setInsets(new Insets(5, 5, 5, 5));
             //return new Dimension(icon.getIconWidth(), icon.getIconHeight());
             int width = (int) icon.getTrueIconWidth() + 10;
-            //int height = (int)icon.getTrueIconHeight();
-            int height = icon.getIconHeight();
+            int height = (int)icon.getTrueIconHeight();
+            //int height = icon.getIconHeight();
             return new Dimension(width, height);
         } else {
             FontMetrics metrics = g.getFontMetrics();
@@ -146,8 +146,8 @@ public class Draw {
                 //icon.setInsets(new Insets(5, 5, 5, 5));
                 //return new Dimension(icon.getIconWidth(), icon.getIconHeight());
                 width = (int) icon.getTrueIconWidth() + 10;
-                //int height = (int)icon.getTrueIconHeight();
-                height = icon.getIconHeight();
+                height = (int)icon.getTrueIconHeight();
+                //height = icon.getIconHeight();
             } else {
                 FontMetrics metrics = g.getFontMetrics();
                 width = metrics.stringWidth(str);
@@ -256,8 +256,9 @@ public class Draw {
         // insert a border 
         icon.setInsets(new Insets(5, 5, 5, 5));
         icon.setForeground(g.getColor());
-        //y = y - (icon.getIconHeight() * 2.0f / 3.f);
-        y = y - icon.getIconHeight() * 0.85f;
+        y = y - icon.getIconHeight()  + (icon.getIconHeight() - icon.getTrueIconHeight()) * 0.6f;
+        //y = y - icon.getIconHeight() + size * 0.7f;
+        //y = y - icon.getTrueIconHeight() * 1.f;
         icon.paintIcon(null, g, (int) x, (int) y);
     }
 
@@ -1264,6 +1265,24 @@ public class Draw {
                             } else {
                                 //y += (float) (dim.getHeight() * Math.cos(Math.toRadians(angle)) * 0.5);
                                 y += (float) (dim.getHeight() * Math.abs(Math.cos(Math.toRadians(angle))));
+                            }
+                            break;
+                    }
+                    break;
+                case RIGHT:
+                    switch (y_align) {
+                        case CENTER:
+                            if (angle == 90) {         
+                                x -= (float) (dim.getHeight());
+                                y += (float) (dim.getWidth() * 0.5);
+                            } else if (angle == -90) {
+                                x -= (float) (dim.getHeight());
+                                y -= (float) (dim.getWidth() * 0.5);
+                            } else if (angle > 0) {
+                                x -= (float) (dim.getWidth()* Math.abs(Math.cos(Math.toRadians(angle))));
+                                y += (float) (dim.getHeight() * Math.cos(Math.toRadians(angle)) * 0.5);
+                            } else {
+                                y += (float) (dim.getHeight() * Math.cos(Math.toRadians(angle)) * 0.5);
                             }
                             break;
                     }

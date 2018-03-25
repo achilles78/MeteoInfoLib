@@ -844,7 +844,7 @@ public class ChartLegend {
         i = 0;
         for (int col = 0; col < rowColNum; col++) {
             x = symbolWidth / 2 + leftSpace + col * colWidth;
-            y = breakHeight / 2 + breakSpace;
+            y = breakHeight / 2 + breakSpace * 2;
             for (int row = 0; row < rowNums[col]; row++) {
                 if (!aLS.getLegendBreaks().get(i).isDrawShape()) {
                     continue;
@@ -1491,7 +1491,7 @@ public class ChartLegend {
 //                        this.height = (int) (rowNums[0] * (breakHeight + _breakSpace)
 //                                + _breakSpace * 2 + breakHeight / 2 + 5);
                         this.height = (int) (rowNums[0] * (breakHeight + _breakSpace)
-                                + _breakSpace * 2);
+                                + _breakSpace * 3);
                         break;
                     case HORIZONTAL:
                         //Get row number
