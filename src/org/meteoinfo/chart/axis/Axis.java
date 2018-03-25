@@ -851,9 +851,12 @@ public class Axis implements Cloneable {
     public void setTickLocations(double[] value) {
         this.tickLocations.clear();
         this.tickLabels.clear();
+        String tick;
         for (double v : value) {
             this.tickLocations.add(v);
-            this.tickLabels.add(new ChartText(String.valueOf((int) v)));
+            tick = String.valueOf(v);
+            tick = DataConvert.removeTailingZeros(tick);
+            this.tickLabels.add(new ChartText(tick));
         }
         this.autoTick = false;
     }

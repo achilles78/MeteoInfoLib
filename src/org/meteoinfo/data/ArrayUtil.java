@@ -273,9 +273,9 @@ public class ArrayUtil {
         for (int i = 0; i < a.getSize(); i++) {
             j += 1;
             if (format == null) {
-                line = line + a.getFloat(i);
+                line = line + a.getObject(i).toString();
             } else {
-                line = line + String.format(format, a.getFloat(i));
+                line = line + String.format(format, a.getObject(i));
             }
             if (j < colNum && i < a.getSize() - 1) {
                 if (delimiter == null) {
