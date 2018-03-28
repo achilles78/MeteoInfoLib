@@ -58,7 +58,7 @@ public class ChartText extends Shape {
     public ChartText() {
         font = new Font("Arial", Font.PLAIN, 14);
         color = Color.black;
-        lineSpace = 3;
+        lineSpace = 5;
         coordinates = CoordinateType.DATA;
         this.background = Color.white;
         this.drawBackground = false;
