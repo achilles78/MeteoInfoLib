@@ -1544,10 +1544,9 @@ public class Axis implements Cloneable {
             x = (maxx - minx) / 2 + minx;
             g.setFont(this.getLabelFont());
             g.setColor(this.getLabelColor());
-            Dimension dim = Draw.getStringDimension(this.label.getText(), g);
-            labx = (float) (x - dim.width / 2);
-            laby += dim.height + this.tickSpace;
-            Draw.drawString(g, this.label.getText(), labx, laby, this.label.isUseExternalFont());
+            labx = (float)x;
+            laby += this.tickSpace;
+            this.label.draw(g, labx, laby);
         }
     }
 
@@ -1578,7 +1577,6 @@ public class Axis implements Cloneable {
             g.setColor(this.getTickColor());
             g.setStroke(this.getTickStroke());
             g.setFont(this.getTickLabelFont());
-            //FontMetrics metrics = g.getFontMetrics();
             this.updateLabelGap(g, area);
             len = this.getTickLength();
             this.updateTickLabels();
@@ -1589,9 +1587,6 @@ public class Axis implements Cloneable {
                 double value = this.getTickValues()[n];
                 xy = plot.projToScreen(plot.getDrawExtent().minX, value, area);
                 y = xy[1];
-//            if (this.isInverse()) {
-//                y = area.getHeight() - y;
-//            }
                 y += area.getY();
                 if (this.location == Location.LEFT) {
                     if (this.isInsideTick()) {
@@ -1662,9 +1657,6 @@ public class Axis implements Cloneable {
                         }
                         xy = plot.projToScreen(plot.getDrawExtent().minX, value, area);
                         y = xy[1];
-//                    if (this.inverse) {
-//                        y = area.getHeight() - y;
-//                    }
                         y += miny;
                         yy.add(y);
                     }
@@ -1687,25 +1679,26 @@ public class Axis implements Cloneable {
         }
 
         //Draw label
-        if (this.isDrawLabel()) {
-            g.setFont(this.getLabelFont());
+        XAlign x_align = XAlign.RIGHT;
+        YAlign y_align = YAlign.CENTER;
+        if (this.isDrawLabel()) {            
             if (this.location == Location.LEFT) {
                 x = sx - this.tickSpace - this.getMaxLabelLength(g);
                 if (!this.isInsideTick()) {
                     x -= len;
                 }
-                y = (maxy - miny) / 2 + miny;
-                Draw.drawString(g, (float)x, (float)y, this.label.getText(), XAlign.RIGHT, 
-                        YAlign.CENTER, 90, this.label.isUseExternalFont());
+                y = (maxy - miny) / 2 + miny; 
             } else {
                 x = sx + this.tickSpace + this.getMaxLabelLength(g) + 5;
                 if (!this.isInsideTick()) {
                     x += len;
                 }
                 y = (maxy - miny) / 2 + miny;
-                Draw.drawString(g, (float)x, (float)y, this.label.getText(), XAlign.LEFT, 
-                        YAlign.CENTER, 90, this.label.isUseExternalFont());
+                x_align = XAlign.LEFT;                
             }
+            g.setFont(this.getLabelFont());
+            Draw.drawString(g, (float)x, (float)y, this.label.getText(), x_align, 
+                y_align, 90, this.label.isUseExternalFont());
         }
     }
     
