@@ -259,7 +259,9 @@ public class Draw {
         y = y - icon.getIconHeight() + (icon.getIconHeight() - icon.getTrueIconHeight()) * 0.6f;
         //y = y - icon.getIconHeight() + size * 0.7f;
         //y = y - icon.getTrueIconHeight() * 1.f;
+        Font font = g.getFont();
         icon.paintIcon(null, g, (int) x, (int) y);
+        g.setFont(font);
     }
 
     // </editor-fold>
