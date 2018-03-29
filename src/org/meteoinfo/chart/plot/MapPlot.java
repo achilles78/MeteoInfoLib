@@ -45,6 +45,7 @@ import org.meteoinfo.map.MapView;
 import org.meteoinfo.projection.KnownCoordinateSystems;
 import org.meteoinfo.projection.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
+import org.meteoinfo.shape.CircleShape;
 import org.meteoinfo.shape.CurveLineShape;
 import org.meteoinfo.shape.Graphic;
 import org.meteoinfo.shape.PointShape;
@@ -599,6 +600,29 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
             return aGraphic;
         }
         return null;
+    }
+    
+    /**
+     * Add a circle
+     *
+     * @param x Center x
+     * @param y Center y
+     * @param radius
+     * @param pgb PolygonBreak
+     * @return Graphic
+     */
+    public Graphic addCircle(float x, float y, float radius, PolygonBreak pgb) {
+        List<PointD> points = new ArrayList<>();
+        points.add(new PointD(x - radius, y));
+        points.add(new PointD(x, y -  radius));
+        points.add(new PointD(x + radius, y));
+        points.add(new PointD(x, y + radius));
+        
+        CircleShape aPGS = new CircleShape();
+        aPGS.setPoints(points);
+        Graphic graphic = new Graphic(aPGS, pgb);
+        
+        return graphic;
     }
 
 //    /**
