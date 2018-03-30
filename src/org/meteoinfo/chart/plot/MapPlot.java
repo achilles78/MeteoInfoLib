@@ -621,6 +621,7 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         CircleShape aPGS = new CircleShape();
         aPGS.setPoints(points);
         Graphic graphic = new Graphic(aPGS, pgb);
+        this.mapView.addGraphic(graphic);
         
         return graphic;
     }
