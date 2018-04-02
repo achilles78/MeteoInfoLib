@@ -63,7 +63,7 @@ public class GlobalUtil {
      * @return Software version
      */
     public static String getVersion(){
-        return "1.4.8R7";
+        return "1.4.8R8";
     }
 
     /**
