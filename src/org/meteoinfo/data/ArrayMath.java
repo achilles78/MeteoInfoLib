@@ -5527,6 +5527,27 @@ public class ArrayMath {
         }
         return r;
     }
+    
+    /**
+     * Maskin function
+     *
+     * @param a Array a
+     * @param x X Array
+     * @param y Y Array
+     * @param polygons Polygons for maskin
+     * @return Result array with cell values of missing inside polygons
+     */
+    public static Array maskin(Array a, Array x, Array y, List<PolygonShape> polygons) {
+        Array r = Array.factory(a.getDataType(), a.getShape());
+        for (int i = 0; i < a.getSize(); i++) {
+            if (GeoComputation.pointInPolygons(polygons, new PointD(x.getDouble(i), y.getDouble(i)))) {
+                r.setObject(i, Double.NaN);
+            } else {
+                r.setObject(i, a.getObject(i));
+            }
+        }
+        return r;
+    }
 
     /**
      * Maskout function
@@ -5543,6 +5564,42 @@ public class ArrayMath {
         List<Double> rydata = new ArrayList<>();
         for (int i = 0; i < a.getSize(); i++) {
             if (GeoComputation.pointInPolygons(polygons, new PointD(x.getDouble(i), y.getDouble(i)))) {
+                rdata.add(a.getObject(i));
+                rxdata.add(x.getDouble(i));
+                rydata.add(y.getDouble(i));
+            }
+        }
+        
+        int n = rdata.size();
+        int[] shape = new int[1];
+        shape[0] = n;
+        Array r = Array.factory(a.getDataType(), shape);
+        Array rx = Array.factory(x.getDataType(), shape);
+        Array ry = Array.factory(y.getDataType(), shape);
+        for (int i = 0; i < n; i++) {
+            r.setObject(i, rdata.get(i));
+            rx.setDouble(i, rxdata.get(i));
+            ry.setDouble(i, rydata.get(i));
+        }
+        
+        return new Array[]{r, rx, ry};
+    }
+    
+    /**
+     * Maskin function
+     *
+     * @param a Array a
+     * @param x X Array
+     * @param y Y Array
+     * @param polygons Polygons for maskin
+     * @return Result arrays removing cells inside polygons
+     */
+    public static Array[] maskin_Remove(Array a, Array x, Array y, List<PolygonShape> polygons) {
+        List<Object> rdata = new ArrayList<>();
+        List<Double> rxdata = new ArrayList<>();
+        List<Double> rydata = new ArrayList<>();
+        for (int i = 0; i < a.getSize(); i++) {
+            if (!GeoComputation.pointInPolygons(polygons, new PointD(x.getDouble(i), y.getDouble(i)))) {
                 rdata.add(a.getObject(i));
                 rxdata.add(x.getDouble(i));
                 rydata.add(y.getDouble(i));
@@ -5654,6 +5711,27 @@ public class ArrayMath {
                 r.setObject(i, Double.NaN);
             } else {
                 r.setObject(i, a.getObject(i));
+            }
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Maskin function
+     *
+     * @param a Array a
+     * @param m Array mask
+     * @return Result array
+     */
+    public static Array maskin(Array a, Array m) {
+        Array r = Array.factory(a.getDataType(), a.getShape());
+        int n = (int) a.getSize();
+        for (int i = 0; i < n; i++) {
+            if (m.getDouble(i) < 0) {
+                r.setObject(i, a.getObject(i));
+            } else {
+                r.setObject(i, Double.NaN);
             }
         }
         
