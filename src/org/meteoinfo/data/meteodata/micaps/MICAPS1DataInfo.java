@@ -166,6 +166,9 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
                     break;
                 }
                 aLine = aLine.trim();
+                if (aLine.isEmpty())
+                    continue;
+                
                 dataArray = aLine.split("\\s+");
                 aList = new ArrayList<>();
                 aList.addAll(Arrays.asList(dataArray));
@@ -247,6 +250,9 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
                     break;
                 }
                 aLine = aLine.trim();
+                if (aLine.isEmpty())
+                    continue;
+                
                 dataArray = aLine.split("\\s+");
                 aList = new ArrayList<>();
                 aList.addAll(Arrays.asList(dataArray));
