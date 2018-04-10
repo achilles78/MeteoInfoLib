@@ -16,7 +16,7 @@ package org.meteoinfo.map;
 import org.meteoinfo.data.mapdata.Field;
 import org.meteoinfo.data.mapdata.MapDataManage;
 import org.meteoinfo.drawing.Draw;
-import org.meteoinfo.drawing.PointStyle;
+import org.meteoinfo.legend.PointStyle;
 import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.colors.ColorUtil;
 import org.meteoinfo.global.Direction;
@@ -9101,7 +9101,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         try {
             _gridLineColor = ColorUtil.parseToColor(GridLine.getAttributes().getNamedItem("GridLineColor").getNodeValue());
             _gridLineSize = Integer.parseInt(GridLine.getAttributes().getNamedItem("GridLineSize").getNodeValue());
-            _gridLineStyle = LineStyles.valueOf(GridLine.getAttributes().getNamedItem("GridLineStyle").getNodeValue());
+            _gridLineStyle = LineStyles.valueOf(GridLine.getAttributes().getNamedItem("GridLineStyle").getNodeValue().toUpperCase());
             _drawGridLine = Boolean.parseBoolean(GridLine.getAttributes().getNamedItem("DrawGridLine").getNodeValue());
             _drawGridTickLine = Boolean.parseBoolean(GridLine.getAttributes().getNamedItem("DrawGridTickLine").getNodeValue());
         } catch (DOMException | NumberFormatException e) {

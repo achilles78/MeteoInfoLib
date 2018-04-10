@@ -19,7 +19,7 @@ import org.meteoinfo.data.StationData;
 import org.meteoinfo.data.mapdata.Field;
 import org.meteoinfo.drawing.ContourDraw;
 import org.meteoinfo.drawing.Draw;
-import org.meteoinfo.drawing.MarkerType;
+import org.meteoinfo.legend.MarkerType;
 import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;

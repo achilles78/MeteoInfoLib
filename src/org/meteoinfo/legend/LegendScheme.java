@@ -14,8 +14,6 @@
 package org.meteoinfo.legend;
 
 import org.meteoinfo.data.meteodata.DrawType2D;
-import org.meteoinfo.drawing.MarkerType;
-import org.meteoinfo.drawing.PointStyle;
 import org.meteoinfo.global.colors.ColorUtil;
 import org.meteoinfo.shape.ShapeTypes;
 import java.awt.Color;

@@ -13,6 +13,8 @@
  */
 package org.meteoinfo.drawing;
 
+import org.meteoinfo.legend.MarkerType;
+import org.meteoinfo.legend.PointStyle;
 import org.meteoinfo.geoprocess.Spline;
 import org.meteoinfo.global.colors.ColorUtil;
 import org.meteoinfo.global.Extent;
