@@ -72,6 +72,14 @@ public class ShapeFileManage {
      * @throws java.io.FileNotFoundException
      */
     public static VectorLayer loadShapeFile(String shpfilepath) throws IOException, FileNotFoundException, Exception {
+        String cpgfilepath = shpfilepath.replaceFirst(shpfilepath.substring(shpfilepath.lastIndexOf(".")), ".cpg");
+        File cpgFile = new File(cpgfilepath);
+        if (cpgFile.exists()){
+            BufferedReader sr = new BufferedReader(new FileReader(cpgFile));
+            String ec = sr.readLine().trim();
+            sr.close();
+            encoding = ec;
+        }
         return loadShapeFile(shpfilepath, encoding);
     }
     
@@ -658,19 +666,19 @@ public class ShapeFileManage {
         bridx.close();
     }
     
-    /**
-     * Load DBF data file
-     * @param shpFileName Shape file name
-     * @return Attribute table
-     * @throws Exception 
-     */
-    public static AttributeTable loadDbfFile(String shpFileName) throws Exception{
-        AttributeTable attrTable = new AttributeTable();
-        attrTable.open(shpFileName);
-        attrTable.fill(attrTable.getNumRecords());
-        
-        return attrTable;
-    }
+//    /**
+//     * Load DBF data file
+//     * @param shpFileName Shape file name
+//     * @return Attribute table
+//     * @throws Exception 
+//     */
+//    public static AttributeTable loadDbfFile(String shpFileName) throws Exception{
+//        AttributeTable attrTable = new AttributeTable();
+//        attrTable.open(shpFileName);
+//        attrTable.fill(attrTable.getNumRecords());
+//        
+//        return attrTable;
+//    }
     
     /**
      * Load DBF data file
