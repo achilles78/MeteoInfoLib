@@ -164,6 +164,17 @@ public class GridData {
         this.missingValue = missingValue;
         this.projInfo = projInfo;
     }
+    
+    /**
+     * Constructor
+     *
+     * @param array Data array
+     * @param xdata X data
+     * @param ydata Y data
+     */
+    public GridData(Array array, Array xdata, Array ydata) {
+        this(array, xdata, ydata, -9999.0);
+    }
 
     /**
      * Constructor

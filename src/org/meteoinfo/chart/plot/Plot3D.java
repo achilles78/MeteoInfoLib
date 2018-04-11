@@ -232,8 +232,20 @@ public class Plot3D extends Plot {
         return this.yAxis;
     }
 
+    /**
+     * Get z axis
+     * @return Z axis
+     */
     public Axis getZAxis() {
         return this.zAxis;
+    }
+    
+    /**
+     * Get x minimum
+     * @return X minimum
+     */
+    public float getXMin(){
+        return this.xmin;
     }
 
     /**
@@ -245,6 +257,14 @@ public class Plot3D extends Plot {
         this.xmin = value;
         updateExtent();
         this.xAxis.setMinMaxValue(xmin, xmax);
+    }
+    
+    /**
+     * Get x maximum
+     * @return X maximum
+     */
+    public float getXMax() {
+        return this.xmax;
     }
 
     /**
@@ -270,6 +290,14 @@ public class Plot3D extends Plot {
         updateExtent();
         this.xAxis.setMinMaxValue(min, max);
     }
+    
+    /**
+     * Get y minimum
+     * @return Y minimum
+     */
+    public float getYMin(){
+        return this.ymin;
+    }
 
     /**
      * Set minimum y
@@ -280,6 +308,14 @@ public class Plot3D extends Plot {
         this.ymin = value;
         updateExtent();
         this.yAxis.setMinMaxValue(ymin, ymax);
+    }
+    
+    /**
+     * Get y maximum
+     * @return Y maximum
+     */
+    public float getYMax() {
+        return this.ymax;
     }
 
     /**
@@ -305,6 +341,14 @@ public class Plot3D extends Plot {
         updateExtent();
         this.yAxis.setMinMaxValue(min, max);
     }
+    
+    /**
+     * Get z minimum
+     * @return Z minimum
+     */
+    public float getZMin(){
+        return this.zmin;
+    }
 
     /**
      * Set minimum z
@@ -315,6 +359,14 @@ public class Plot3D extends Plot {
         this.zmin = value;
         updateExtent();
         this.zAxis.setMinMaxValue(zmin, zmax);
+    }
+    
+    /**
+     * Get z maximum
+     * @return Z maximum
+     */
+    public float getZMax() {
+        return this.zmax;
     }
 
     /**

@@ -935,6 +935,14 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
     }
     
     /**
+     * Get layer number
+     * @return Layer number
+     */
+    public int getLayerNum(){
+        return this.mapView.getLayerNum();
+    }
+    
+    /**
      * Get legend scheme
      *
      * @return Legend scheme
