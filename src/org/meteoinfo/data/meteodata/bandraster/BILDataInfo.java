@@ -34,6 +34,12 @@ import org.meteoinfo.data.meteodata.MeteoDataType;
 import org.meteoinfo.data.meteodata.Variable;
 import org.meteoinfo.global.DataConvert;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
+import ucar.ma2.Index2D;
+import ucar.ma2.IndexIterator;
+import ucar.ma2.InvalidRangeException;
+import ucar.ma2.Range;
+import ucar.ma2.Section;
 import ucar.nc2.Attribute;
 
 /**
@@ -181,16 +187,29 @@ public class BILDataInfo extends DataInfo implements IGridDataInfo {
                 Dimension xDim = new Dimension(DimensionType.X);
                 xDim.setValues(X);
                 this.setXDimension(xDim);
+                this.addDimension(xDim);
                 Dimension yDim = new Dimension(DimensionType.Y);
                 yDim.setValues(Y);
                 this.setYDimension(yDim);
+                this.addDimension(yDim);
 
                 List<Variable> variables = new ArrayList<>();
+                DataType dtype = DataType.INT;                
+                switch (this._pixeltype.toLowerCase()){
+                    case "float":
+                        dtype = DataType.FLOAT;
+                        break;                    
+                }
+                int nbytes = this._nbits / 8;
+                if (nbytes == 1){
+                    dtype = DataType.BYTE;
+                }
                 for (i = 0; i < this._nbands; i++) {
                     Variable aVar = new Variable();
                     aVar.setName("band" + String.valueOf(i));
-                    aVar.addDimension(xDim);
+                    aVar.setDataType(dtype);
                     aVar.addDimension(yDim);
+                    aVar.addDimension(xDim);                    
                     aVar.setFillValue(nodata);
                     variables.add(aVar);
                 }
@@ -226,6 +245,7 @@ public class BILDataInfo extends DataInfo implements IGridDataInfo {
         dataInfo += System.getProperty("line.separator") + "XSize = " + String.valueOf(xdim.getValues()[1] - xdim.getValues()[0])
                 + "  YSize = " + String.valueOf(ydim.getValues()[1] - ydim.getValues()[0]);
         dataInfo += System.getProperty("line.separator") + "UNDEF = " + String.valueOf(this.getMissingValue());
+        dataInfo += System.getProperty("line.separator") + super.generateInfoText();
 
         return dataInfo;
     }
@@ -238,7 +258,7 @@ public class BILDataInfo extends DataInfo implements IGridDataInfo {
      */
     @Override
     public Array read(String varName){
-        return null;
+        return readArray_bil(varName);
     }
     
     /**
@@ -252,7 +272,159 @@ public class BILDataInfo extends DataInfo implements IGridDataInfo {
      */
     @Override
     public Array read(String varName, int[] origin, int[] size, int[] stride) {
+        try {
+            Section section = new Section(origin, size, stride);
+            Variable var = this.getVariable(varName);
+            int varIdx = this.getVariables().indexOf(var);
+            Array array = Array.factory(var.getDataType(), section.getShape());
+            int rangeIdx = 0;
+            Range yRange = section.getRange(rangeIdx++);
+            Range xRange = section.getRange(rangeIdx);
+            IndexIterator ii = array.getIndexIterator();
+            this.readArray_bil_xy(varIdx, array.getDataType(), yRange, xRange, ii);
+            return array;
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(BILDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return null;
+    }
+    
+    private Array readArray_bil(String varName) {
+        Variable var = this.getVariable(varName);
+        int varIdx = this.getVariables().indexOf(var);
+        try {
+            RandomAccessFile br = new RandomAccessFile(this.getFileName(), "r");
+            Array gData = Array.factory(var.getDataType(), new int[]{_nrows, _ncols});
+            Index2D index = (Index2D)gData.getIndex();
+            
+            br.seek(this._skipbytes);
+            int i, j;
+            int nbytes = this._nbits / 8;
+            byte[] bytes;
+            int start;
+            long position;
+            for (i = 0; i < _nrows; i++) {
+                position = br.getFilePointer();
+                if (varIdx > 0) {
+                    br.seek(this._bandrowbytes * varIdx);
+                }
+                byte[] byteData = new byte[_ncols * nbytes];
+                br.read(byteData);
+                start = 0;
+                for (j = 0; j < _ncols; j++) {
+                    bytes = new byte[nbytes];
+                    System.arraycopy(byteData, start, bytes, 0, nbytes);
+                    start += nbytes;
+                    index.set(_nrows - 1 - i, j);
+                    switch (gData.getDataType()){
+                        case FLOAT:
+                            gData.setFloat(index, DataConvert.bytes2Float(bytes, _byteOrder));
+                            break;
+                        case INT:
+                            if (nbytes >= 2) {
+                                gData.setInt(index, DataConvert.bytes2Int(bytes, _byteOrder));
+                            } else {
+                                gData.setByte(index, bytes[0]);
+                            }
+                            break;
+                    }
+                }
+                br.seek(position + this._totalrowbytes);
+            }
+
+            br.close();
+            return gData;
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BILDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(BILDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
+    }
+    
+    private void readArray_bil_xy(int varIdx, DataType dtype, Range yRange, Range xRange, IndexIterator ii) {
+        try {
+            RandomAccessFile br = new RandomAccessFile(this.getFileName(), "r");            
+            br.seek(this._skipbytes);
+            int i, j;
+            int nbytes = this._nbits / 8;
+            byte[] bytes;
+            int start;
+            long position;
+            switch (dtype) {
+                case FLOAT:
+                    float vf;
+                    for (int y = yRange.first(); y <= yRange.last(); y += yRange.stride()) {
+                        position = br.getFilePointer();
+                        if (varIdx > 0) {
+                            br.seek(this._bandrowbytes * varIdx);
+                        }
+                        byte[] byteData = new byte[_ncols * nbytes];
+                        br.read(byteData);
+                        start = 0;
+                        for (int x = xRange.first(); x <= xRange.last(); x += xRange.stride()) {
+                            bytes = new byte[nbytes];
+                            System.arraycopy(byteData, start, bytes, 0, nbytes);
+                            start += nbytes * xRange.stride();
+                            vf = DataConvert.bytes2Float(bytes, _byteOrder);
+                            ii.setFloatNext(vf);
+                        }
+                        if (y < yRange.last()){
+                            br.seek(position + this._totalrowbytes * (yRange.stride()));
+                        }
+                    }
+                    break;
+                case INT:
+                    int vi;
+                    for (int y = yRange.first(); y <= yRange.last(); y += yRange.stride()) {
+                        position = br.getFilePointer();
+                        if (varIdx > 0) {
+                            br.seek(this._bandrowbytes * varIdx);
+                        }
+                        byte[] byteData = new byte[_ncols * nbytes];
+                        br.read(byteData);
+                        start = 0;
+                        for (int x = xRange.first(); x <= xRange.last(); x += xRange.stride()) {
+                            bytes = new byte[nbytes];
+                            System.arraycopy(byteData, start, bytes, 0, nbytes);
+                            start += nbytes * xRange.stride();
+                            vi = DataConvert.bytes2Int(bytes, _byteOrder);
+                            ii.setIntNext(vi);
+                        }
+                        if (y < yRange.last()){
+                            br.seek(position + this._totalrowbytes * (yRange.stride()));
+                        }
+                    }
+                    break;
+                case BYTE:
+                    for (int y = yRange.first(); y <= yRange.last(); y += yRange.stride()) {
+                        position = br.getFilePointer();
+                        if (varIdx > 0) {
+                            br.seek(this._bandrowbytes * varIdx);
+                        }
+                        byte[] byteData = new byte[_ncols * nbytes];
+                        br.read(byteData);
+                        start = 0;
+                        for (int x = xRange.first(); x <= xRange.last(); x += xRange.stride()) {
+                            bytes = new byte[nbytes];
+                            System.arraycopy(byteData, start, bytes, 0, nbytes);
+                            start += nbytes * xRange.stride();
+                            ii.setByteNext(bytes[0]);
+                        }
+                        if (y < yRange.last()){
+                            br.seek(position + this._totalrowbytes * (yRange.stride()));
+                        }
+                    }
+                    break;                    
+            }
+            
+            br.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BILDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(BILDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     /**

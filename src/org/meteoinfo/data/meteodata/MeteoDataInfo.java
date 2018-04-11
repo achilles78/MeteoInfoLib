@@ -48,6 +48,7 @@ import org.meteoinfo.global.MIMath;
 import org.meteoinfo.data.mathparser.MathParser;
 import org.meteoinfo.data.mathparser.ParseException;
 import org.meteoinfo.data.meteodata.awx.AWXDataInfo;
+import org.meteoinfo.data.meteodata.bandraster.BILDataInfo;
 import org.meteoinfo.data.meteodata.bandraster.GeoTiffDataInfo;
 import org.meteoinfo.data.meteodata.metar.METARDataInfo;
 import org.meteoinfo.data.meteodata.micaps.MICAPS2DataInfo;
@@ -595,12 +596,26 @@ public class MeteoDataInfo {
     }
 
     /**
-     * Open ASCII grid data
+     * Open Geotiff grid data
      *
      * @param aFile File path
      */
     public void openGeoTiffData(String aFile) {
         GeoTiffDataInfo aDataInfo = new GeoTiffDataInfo();
+        aDataInfo.readDataInfo(aFile);
+        _dataInfo = aDataInfo;
+
+        //Get data info text
+        _infoText = aDataInfo.generateInfoText();
+    }
+    
+    /**
+     * Open BIL grid data
+     *
+     * @param aFile File path
+     */
+    public void openBILData(String aFile) {
+        BILDataInfo aDataInfo = new BILDataInfo();
         aDataInfo.readDataInfo(aFile);
         _dataInfo = aDataInfo;
 

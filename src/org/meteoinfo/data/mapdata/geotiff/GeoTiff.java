@@ -553,17 +553,26 @@ public class GeoTiff {
         int height = heightIFD.value[0];
         double[] X = new double[width];
         double[] Y = new double[height];
-        IFDEntry modelTiePointTag = findTag(Tag.ModelTiepointTag);
-        IFDEntry modelPixelScaleTag = findTag(Tag.ModelPixelScaleTag);
-        double minLon = modelTiePointTag.valueD[3];
-        double maxLat = modelTiePointTag.valueD[4];
-        double xdelt = modelPixelScaleTag.valueD[0];
-        double ydelt = modelPixelScaleTag.valueD[1];
+        double minLon, maxLat, xdelta, ydelta;
+        IFDEntry modelTransformationTag = this.findTag(Tag.ModelTransformationTag);
+        if (modelTransformationTag != null){
+            minLon = modelTransformationTag.valueD[3];
+            maxLat = modelTransformationTag.valueD[7];
+            xdelta = modelTransformationTag.valueD[0];
+            ydelta = -modelTransformationTag.valueD[5];
+        } else {
+            IFDEntry modelTiePointTag = findTag(Tag.ModelTiepointTag);
+            IFDEntry modelPixelScaleTag = findTag(Tag.ModelPixelScaleTag);
+            minLon = modelTiePointTag.valueD[3];
+            maxLat = modelTiePointTag.valueD[4];
+            xdelta = modelPixelScaleTag.valueD[0];
+            ydelta = modelPixelScaleTag.valueD[1];
+        }
         for (int i = 0; i < width; i++) {
-            X[i] = minLon + xdelt * i;
+            X[i] = minLon + xdelta * i;
         }
         for (int i = 0; i < height; i++) {
-            Y[height - i - 1] = maxLat - ydelt * i;
+            Y[height - i - 1] = maxLat - ydelta * i;
         }
 
         List<double[]> xy = new ArrayList<>();
@@ -1045,12 +1054,23 @@ public class GeoTiff {
                     }
                     break;
                 case 32:
+                    int size = tileHeight * tileWidth * 4;
                     for (int i = 0; i < vTileNum; i++) {
                         for (int j = 0; j < hTileNum; j++) {
                             tileIdx = i * hTileNum + j;
                             tileOffset = tileOffsetTag.value[tileIdx];
                             tileSize = tileSizeTag.value[tileIdx];
                             buffer = testReadData(tileOffset, tileSize);
+                            if (cDecoder != null){
+                                buffer = ByteBuffer.wrap(cDecoder.decode(buffer.array(), byteOrder));
+                                if (buffer.limit() < size){
+                                    ByteBuffer nbuffer = ByteBuffer.allocate(size);
+                                    nbuffer.put(buffer.array());
+                                    buffer = nbuffer;
+                                    ((Buffer)buffer).position(0);
+                                }
+                                buffer.order(byteOrder);
+                            }
                             for (int h = 0; h < tileHeight; h++) {
                                 vIdx = i * tileHeight + h;
                                 if (vIdx == height) {
