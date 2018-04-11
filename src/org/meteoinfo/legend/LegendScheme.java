@@ -926,8 +926,10 @@ public class LegendScheme {
                             aPLB.setSymbolStyle(PointStyle.valueOf(brk.getAttributes().getNamedItem("SymbolStyle").getNodeValue()));
                             aPLB.setSymbolColor(ColorUtil.parseToColor(brk.getAttributes().getNamedItem("SymbolColor").getNodeValue()));
                             aPLB.setSymbolInterval(Integer.parseInt(brk.getAttributes().getNamedItem("SymbolInterval").getNodeValue()));
-                            aPLB.setFillSymbol(Boolean.parseBoolean(brk.getAttributes().getNamedItem("FillSymbol").getNodeValue()));
-                            aPLB.setSymbolFillColor(ColorUtil.parseToColor(brk.getAttributes().getNamedItem("SymbolFillColor").getNodeValue()));
+                            if (brk.getAttributes().getNamedItem("FillSymbol") != null) {
+                                aPLB.setFillSymbol(Boolean.parseBoolean(brk.getAttributes().getNamedItem("FillSymbol").getNodeValue()));
+                                aPLB.setSymbolFillColor(ColorUtil.parseToColor(brk.getAttributes().getNamedItem("SymbolFillColor").getNodeValue()));
+                            }
                             if (brk.getAttributes().getNamedItem("Tag") != null)
                                 aPLB.setTag(brk.getAttributes().getNamedItem("Tag").getNodeValue());
                         } catch (Exception e) {
