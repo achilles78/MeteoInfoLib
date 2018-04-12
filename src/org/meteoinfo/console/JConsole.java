@@ -21,10 +21,12 @@ package org.meteoinfo.console;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -50,6 +52,7 @@ import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
@@ -62,15 +65,15 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 /**
-        A JFC/Swing based console for the BeanShell desktop.
-        This is a descendant of the old AWTConsole.
-
-        Improvements by: Mark Donszelmann <Mark.Donszelmann@cern.ch>
-                including Cut & Paste
-
-        Improvements by: Daniel Leuck
-                including Color and Image support, key press bug workaround
-*/
+ * A JFC/Swing based console for the BeanShell desktop. This is a descendant of
+ * the old AWTConsole.
+ *
+ * Improvements by: Mark Donszelmann <Mark.Donszelmann@cern.ch>
+ * including Cut & Paste
+ *
+ * Improvements by: Daniel Leuck including Color and Image support, key press
+ * bug workaround
+ */
 public class JConsole extends JScrollPane
         implements GUIConsoleInterface, Runnable, KeyListener, MouseListener, ActionListener, PropertyChangeListener {
 
@@ -101,12 +104,13 @@ public class JConsole extends JScrollPane
     public PrintStream getErr() {
         return out;
     }
-    
+
     /**
      * Get TextPane
+     *
      * @return TextPane
      */
-    public JTextPane getTextPane(){
+    public JTextPane getTextPane() {
         return this.text;
     }
 
@@ -124,7 +128,7 @@ public class JConsole extends JScrollPane
 
     // hack to prevent key repeat for some reason?
     private boolean gotUp = true;
-    
+
     private Popup popup;
     private Tip tip;
     private int dotWidth;
@@ -139,7 +143,7 @@ public class JConsole extends JScrollPane
     public JConsole(InputStream cin, OutputStream cout) {
         super();
 
-                // Special TextPane which catches for cut and paste, both L&F keys and
+        // Special TextPane which catches for cut and paste, both L&F keys and
         // programmatic behaviour
         text = new JTextPane(doc = new DefaultStyledDocument()) {
             @Override
@@ -172,11 +176,11 @@ public class JConsole extends JScrollPane
         menu.add(new JMenuItem(PASTE)).addActionListener(this);
 
         text.addMouseListener(this);
-        text.getCaret().setMagicCaretPosition(new Point(0,0));
+        text.getCaret().setMagicCaretPosition(new Point(0, 0));
 
         // make sure popup menu follows Look & Feel
         UIManager.addPropertyChangeListener(this);
-        
+
         //JFrame frame = (JFrame)javax.swing.SwingUtilities.getWindowAncestor(this);
         popup = new Popup(null, this.text);
         tip = new Tip(null);
@@ -234,12 +238,13 @@ public class JConsole extends JScrollPane
     }
 
     private synchronized void type(KeyEvent e) {
-        if (this.popup.isVisible()){
-            if (e.getID() == KeyEvent.KEY_PRESSED)
+        if (this.popup.isVisible()) {
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
                 this.popup.type(e);
+            }
             return;
         }
-            
+
         switch (e.getKeyCode()) {
             case (KeyEvent.VK_ENTER):
                 if (e.getID() == KeyEvent.KEY_PRESSED) {
@@ -270,13 +275,14 @@ public class JConsole extends JScrollPane
             case (KeyEvent.VK_LEFT):
             case (KeyEvent.VK_BACK_SPACE):
             case (KeyEvent.VK_DELETE):
-                if (this.tip.isVisible())
+                if (this.tip.isVisible()) {
                     this.tip.setVisible(false);
-                
+                }
+
                 if (text.getCaretPosition() <= cmdStart) {
-                                        // This doesn't work for backspace.
+                    // This doesn't work for backspace.
                     // See default case for workaround
-                    e.consume();    
+                    e.consume();
                     this.setStyle(Color.black);
                 }
                 break;
@@ -354,22 +360,25 @@ public class JConsole extends JScrollPane
                 if (e.getID() == KeyEvent.KEY_RELEASED) {
                     String command = this.getCurrentText();
                     Matcher match = FROM_PACKAGE_IMPORT.matcher(command);
-                    if (match.matches())
+                    if (match.matches()) {
                         this.showPopup();
+                    }
                 }
                 e.consume();
                 break;
             case (KeyEvent.VK_9):
                 if (e.getID() == KeyEvent.KEY_RELEASED) {
-                    if (e.isShiftDown())
+                    if (e.isShiftDown()) {
                         this.showTip();
+                    }
                 }
                 e.consume();
                 break;
             case (KeyEvent.VK_0):
                 if (e.getID() == KeyEvent.KEY_RELEASED) {
-                    if (e.isShiftDown())
+                    if (e.isShiftDown()) {
                         this.tip.setVisible(false);
+                    }
                 }
                 e.consume();
                 break;
@@ -387,7 +396,7 @@ public class JConsole extends JScrollPane
                  */
                 if (e.paramString().contains("Backspace")) {
                     if (text.getCaretPosition() <= cmdStart) {
-                        e.consume();                        
+                        e.consume();
                         break;
                     }
                 }
@@ -412,22 +421,23 @@ public class JConsole extends JScrollPane
 //
 //        part = part.substring(i + 1);
         int idx = part.lastIndexOf(">");
-        if (idx >= 0)
+        if (idx >= 0) {
             part = part.substring(part.lastIndexOf(">") + 2);
+        }
 
         if (part.length() < 2) // reasonable completion length
         {
             return;
         }
 
-                //System.out.println("completing part: "+part);
+        //System.out.println("completing part: "+part);
         // no completion
         String[] complete = nameCompletion.completeName(part);
-        if (complete == null){
+        if (complete == null) {
             java.awt.Toolkit.getDefaultToolkit().beep();
             return;
         }
-        
+
         if (complete.length == 0) {
             java.awt.Toolkit.getDefaultToolkit().beep();
             return;
@@ -463,7 +473,7 @@ public class JConsole extends JScrollPane
         print(prompt); // print resets command start
         append(command); // append does not reset command start
     }
-    
+
     private void doCommandCompletion_bak(String part) {
         if (nameCompletion == null) {
             return;
@@ -485,7 +495,7 @@ public class JConsole extends JScrollPane
             return;
         }
 
-                //System.out.println("completing part: "+part);
+        //System.out.println("completing part: "+part);
         // no completion
         String[] complete = nameCompletion.completeName(part);
         if (complete.length == 0) {
@@ -500,7 +510,7 @@ public class JConsole extends JScrollPane
             return;
         }
 
-                // Found ambiguous, show (some of) them
+        // Found ambiguous, show (some of) them
         String line = text.getText();
         String command = line.substring(cmdStart);
         // Find prompt
@@ -520,45 +530,49 @@ public class JConsole extends JScrollPane
         print(prompt); // print resets command start
         append(command); // append does not reset command start
     }
-    
+
     /**
      * Get popup window display point
+     *
      * @return Point
      */
-    public Point getDisplayPoint(){
+    public Point getDisplayPoint() {
         //Get the point where the popup window should be displayed        
-        Point screenPoint = this.getLocationOnScreen();
         Point caretPoint = this.text.getCaret().getMagicCaretPosition();
-        if (caretPoint == null){
+        if (caretPoint == null) {
             caretPoint = new Point(0, 0);
+        } else {
+            SwingUtilities.convertPointToScreen(caretPoint, this);
+            JScrollBar sb = this.getVerticalScrollBar();
+            caretPoint.y -= sb.getValue();
         }
-        
-        int x = (int)(screenPoint.getX() + caretPoint.getX() + this.dotWidth);
-        int y = (int)(screenPoint.getY() + caretPoint.getY() + this.textHeight);
-        if (y < 0){
-            //y = this.getY() + this.getHeight();
+
+        int x = caretPoint.x + this.dotWidth;
+        int y = caretPoint.y + this.textHeight;
+        if (y < 0) {
             y = this.getLocationOnScreen().y;
         }
-        
+
         return new Point(x, y);
     }
-    
-    private String getCurrentText(){
+
+    private String getCurrentText() {
         String part = text.getText().substring(cmdStart);
-        
+
         int idx = part.lastIndexOf(">>>");
-        if (idx >= 0)
+        if (idx >= 0) {
             part = part.substring(idx + 2);
-        
+        }
+
         return part;
     }
-    
-    private void showTip(){
+
+    private void showTip() {
         if (nameCompletion == null) {
             return;
         }
-        
-        String part = this.getCurrentText();     
+
+        String part = this.getCurrentText();
         if (part.length() < 2) // reasonable completion length
         {
             return;
@@ -566,40 +580,42 @@ public class JConsole extends JScrollPane
 //        String s = part.trim().substring(part.length() - 2, part.length() - 1);
 //        if (!Character.isLetter(s.charAt(0)))
 //            return;
-       
-        if (this.popup.isVisible())
-            this.popup.setVisible(false);                
-        
+
+        if (this.popup.isVisible()) {
+            this.popup.setVisible(false);
+        }
+
         String[] callTip = nameCompletion.getTip(part);
         String tipstr = callTip[2];
-        if (!tipstr.isEmpty()){
+        if (!tipstr.isEmpty()) {
             this.tip.setText(tipstr);
             Point displayPoint = this.getDisplayPoint();
-            if (this.text.getCaret().getMagicCaretPosition() == null){
-                if (Tip.MAX_HEIGHT - this.tip.getPreferredSize().height < 100)
-                    displayPoint.y -= 120;
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            Dimension size = this.tip.getPreferredSize();
+            if (displayPoint.y + size.height > screenSize.height) {
+                displayPoint.y -= size.height + this.textHeight;
             }
             this.tip.showTip(displayPoint);
         }
     }
-    
-    private void showPopup(){        
+
+    private void showPopup() {
         if (nameCompletion == null) {
             return;
         }
-        
-        String part = this.getCurrentText();        
+
+        String part = this.getCurrentText();
         if (part.length() < 2) // reasonable completion length
         {
             return;
         }
 
         String[] complete = nameCompletion.completeName(part);
-        if (complete == null){
+        if (complete == null) {
             //java.awt.Toolkit.getDefaultToolkit().beep();
             return;
         }
-        
+
         if (complete.length == 0) {
             //java.awt.Toolkit.getDefaultToolkit().beep();
             return;
@@ -611,8 +627,16 @@ public class JConsole extends JScrollPane
             append(complete[0]);
             return;
         }
-        
-        this.popup.showMethodCompletionList(complete, this.getDisplayPoint());
+
+        Point displayPoint = this.getDisplayPoint();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension size = this.popup.getPreferredSize();
+        if (displayPoint.y + size.height > screenSize.height) {
+            displayPoint.y -= size.height + this.textHeight;
+        }
+        this.popup.setMethods(complete);
+        this.popup.showPopup(displayPoint);
+        //this.popup.showMethodCompletionList(complete, displayPoint);
     }
 
     private void resetCommandStart() {
@@ -621,7 +645,7 @@ public class JConsole extends JScrollPane
 
     private void append(String string) {
         int slen = textLength();
-        if (slen > this.maxLength){
+        if (slen > this.maxLength) {
             text.setText("");
             slen = 0;
         }
@@ -720,7 +744,7 @@ public class JConsole extends JScrollPane
     String ZEROS = "000";
 
     private void acceptLine(String line) {
-                // Patch to handle Unicode characters
+        // Patch to handle Unicode characters
         // Submitted by Daniel Leuck
         StringBuilder buf = new StringBuilder();
         int lineLength = line.length();
@@ -735,7 +759,7 @@ public class JConsole extends JScrollPane
             }
         }
         line = buf.toString();
-                // End unicode patch
+        // End unicode patch
 
         if (outPipe == null) {
             print("Console internal error: cannot output ...", Color.red);
@@ -1073,7 +1097,8 @@ public class JConsole extends JScrollPane
                 super.out = 0;
             }
             if (super.in == super.out) {
-                super.in = -1;  /* now empty */
+                super.in = -1;
+                /* now empty */
             }
             return ret;
         }

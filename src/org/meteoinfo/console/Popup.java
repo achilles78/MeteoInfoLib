@@ -8,6 +8,7 @@ package org.meteoinfo.console;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
@@ -101,14 +102,29 @@ public class Popup extends JWindow {
 //        this.setVisible(true);
 //    }
     
-    public void showMethodCompletionList(String[] list, Point displayPoint){
+    public void showMethodCompletionList(String[] list, Point displayPoint){        
+        Dimension size = this.getPreferredSize();        
         this.setLocation(displayPoint);
-        Dimension size = this.getPreferredSize();
         this.setBounds(displayPoint.x, displayPoint.y, size.width, size.height);
         this.setMethods(list);
         if (this.textCompnent != null)
             this.dotPosition = this.textCompnent.getCaretPosition();
         //this.show();
+        this.setVisible(true);
+        this.list.setSelectedIndex(0);
+        this.setAlwaysOnTop(true);
+    }
+    
+    /**
+     * Show popup window
+     * @param displayPoint Display pooint
+     */
+    public void showPopup(Point displayPoint){        
+        Dimension size = this.getPreferredSize();        
+        this.setLocation(displayPoint);
+        this.setBounds(displayPoint.x, displayPoint.y, size.width, size.height);
+        if (this.textCompnent != null)
+            this.dotPosition = this.textCompnent.getCaretPosition();
         this.setVisible(true);
         this.list.setSelectedIndex(0);
         this.setAlwaysOnTop(true);
