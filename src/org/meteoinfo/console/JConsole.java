@@ -537,8 +537,7 @@ public class JConsole extends JScrollPane
      * @return Point
      */
     public Point getDisplayPoint() {
-        //Get the point where the popup window should be displayed   
-        this.text.getCaret().setMagicCaretPosition(new Point(0,0));
+        //Get the point where the popup window should be displayed           
         Point caretPoint = this.text.getCaret().getMagicCaretPosition();
         if (caretPoint == null) {
             caretPoint = new Point(0, 0);
@@ -971,7 +970,7 @@ public class JConsole extends JScrollPane
         byte[] ba = new byte[256]; // arbitrary blocking factor
         int read;
         while ((read = inPipe.read(ba)) != -1) {
-            print(new String(ba, 0, read));
+            print(new String(ba, 0, read, "utf-8"));
             //text.repaint();
         }
 
@@ -989,7 +988,7 @@ public class JConsole extends JScrollPane
 
     @Override
     public String toString() {
-        return "BeanShell console";
+        return "Jython console";
     }
 
     // MouseListener Interface
