@@ -537,7 +537,8 @@ public class JConsole extends JScrollPane
      * @return Point
      */
     public Point getDisplayPoint() {
-        //Get the point where the popup window should be displayed        
+        //Get the point where the popup window should be displayed   
+        this.text.getCaret().setMagicCaretPosition(new Point(0,0));
         Point caretPoint = this.text.getCaret().getMagicCaretPosition();
         if (caretPoint == null) {
             caretPoint = new Point(0, 0);
