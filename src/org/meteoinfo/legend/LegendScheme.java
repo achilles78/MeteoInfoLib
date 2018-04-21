@@ -901,7 +901,8 @@ public class LegendScheme {
                             aPB.setAngle(Float.parseFloat(brk.getAttributes().getNamedItem("Angle").getNodeValue()));
                             if (brk.getAttributes().getNamedItem("Tag") != null)
                                 aPB.setTag(brk.getAttributes().getNamedItem("Tag").getNodeValue());
-                            aPB.setOutlineSize(Float.parseFloat(brk.getAttributes().getNamedItem("OutlineSize").getNodeValue()));
+                            if (brk.getAttributes().getNamedItem("OutlineSize") != null)
+                                aPB.setOutlineSize(Float.parseFloat(brk.getAttributes().getNamedItem("OutlineSize").getNodeValue()));
                         } catch (DOMException | NumberFormatException e) {
                         } finally {
                             legendBreaks.add(aPB);
