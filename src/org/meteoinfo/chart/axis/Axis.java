@@ -1434,7 +1434,7 @@ public class Axis implements Cloneable {
                                 laby += dim.getHeight() + chartText.getLineSpace();                                
                             } else {
                                 Draw.drawString(g, labx, laby, dstr, XAlign.CENTER, YAlign.BOTTOM, this.tickLabelAngle, true);
-                                laby -= dim.getHeight() - chartText.getLineSpace();
+                                laby -= dim.getHeight() + chartText.getLineSpace();
                             }
                         }                        
                     }
@@ -1545,7 +1545,11 @@ public class Axis implements Cloneable {
             g.setFont(this.getLabelFont());
             g.setColor(this.getLabelColor());
             labx = (float)x;
-            laby += this.tickSpace;
+            if (this.getLocation() == Location.BOTTOM)
+                laby += this.tickSpace;
+            else{
+                laby -= this.tickSpace;
+            }
             this.label.draw(g, labx, laby);
         }
     }
