@@ -3130,6 +3130,43 @@ public class ArrayUtil {
         //Return
         return r;
     }
+    
+    /**
+     * Interpolates from a rectilinear grid to another rectilinear grid using bilinear interpolation.
+     *
+     * @param a The sample array
+     * @param X X coordinate of the sample array
+     * @param Y Y coordinate of the sample array
+     * @param newX X coordinate of the query points
+     * @param newY Y coordinate of the query points
+     * @return Resampled array
+     */
+    public static Array linint2(Array a, Array X, Array Y, Array newX, Array newY) {
+        int xn = (int)newX.getSize();
+        int yn = (int)newY.getSize();
+        int[] shape = a.getShape();
+        int n = shape.length;
+        shape[n - 1] = xn;
+        shape[n - 2] = yn;
+        double x, y, v;
+        Array r = Array.factory(DataType.DOUBLE, shape);
+        
+        Index index = r.getIndex();
+        int[] counter;
+        int yi, xi;
+        for (int k = 0; k < r.getSize(); k++){
+            counter = index.getCurrentCounter();
+            yi = counter[n - 2];
+            xi = counter[n - 1];
+            y = newY.getDouble(yi);
+            x = newX.getDouble(xi);
+            v = bilinear(a, index, X, Y, x, y);
+            r.setDouble(index, v);
+            index.incr();
+        }
+
+        return r;
+    }
 
     /**
      * Resample grid array with bilinear method
@@ -3604,6 +3641,112 @@ public class ArrayUtil {
             double x1val = a + (c - a) * (y - yArray.get(i1).doubleValue()) / dy;
             double x2val = b + (d - b) * (y - yArray.get(i1).doubleValue()) / dy;
             iValue = x1val + (x2val - x1val) * (x - xArray.get(j1).doubleValue()) / dx;
+        }
+
+        return iValue;
+    }
+    
+    /**
+     * Get value index in a dimension array
+     * @param dim Dimension array
+     * @param v The value
+     * @return value index
+     */
+    public static int getDimIndex(Array dim, double v){
+        int n = (int)dim.getSize();
+        if (v < dim.getDouble(0) || v > dim.getDouble(n - 1)){
+            return -1;
+        }
+        
+        int idx = n - 1;
+        for (int i = 1; i < n; i++){
+            if (v < dim.getDouble(i)){
+                idx = i - 1;
+                break;
+            }
+        }
+        return idx;
+    }
+    
+    private static int[] gridIndex(Array xdim, Array ydim, double x, double y){
+        int xn = (int)xdim.getSize();
+        int yn = (int)ydim.getSize();
+        int xIdx = getDimIndex(xdim, x);
+        if (xIdx < 0)
+            return null;
+        
+        int yIdx = getDimIndex(ydim, y);
+        if (yIdx < 0)
+            return null;
+        
+        if (xIdx == xn - 1)
+            xIdx = xn - 2;
+        if (yIdx == yn - 1)
+            yIdx = yn - 2;
+        int i1 = yIdx;
+        int j1 = xIdx;
+        int i2 = i1 + 1;
+        int j2 = j1 + 1;
+        
+        return new int[]{i1,j1,i2,j2};
+    }
+    
+    private static double bilinear(Array data, Index dindex, Array xdim, Array ydim, double x, double y){
+        double iValue = Double.NaN;
+        int[] xyIdx = gridIndex(xdim, ydim, x, y);
+        if (xyIdx == null)
+            return iValue;
+        
+        int i1 = xyIdx[0];
+        int j1 = xyIdx[1];
+        int i2 = xyIdx[2];
+        int j2 = xyIdx[3];
+        Index index = Index.factory(data.getShape());
+        int n = index.getRank();
+        for (int i = 0; i < n - 2; i++){
+            index.setDim(i, dindex.getCurrentCounter()[i]);
+        }
+        index.setDim(n - 2, i1);
+        index.setDim(n - 1, j1);
+        double a = data.getDouble(index);
+        index.setDim(n - 1, j2);
+        double b = data.getDouble(index);
+        index.setDim(n - 2, i2);
+        index.setDim(n - 1, j1);
+        double c = data.getDouble(index);
+        index.setDim(n - 2, i2);
+        index.setDim(n - 1, j2);
+        double d = data.getDouble(index);
+        List<java.lang.Double> dList = new ArrayList<>();
+        if (!Double.isNaN(a)) {
+            dList.add(a);
+        }
+        if (!Double.isNaN(b)) {
+            dList.add(b);
+        }
+        if (!Double.isNaN(c)) {
+            dList.add(c);
+        }
+        if (!Double.isNaN(d)) {
+            dList.add(d);
+        }
+
+        if (dList.isEmpty()) {
+            return iValue;
+        } else if (dList.size() == 1) {
+            iValue = dList.get(0);
+        } else if (dList.size() <= 3) {
+            double aSum = 0;
+            for (double dd : dList) {
+                aSum += dd;
+            }
+            iValue = aSum / dList.size();
+        } else {            
+            double dx = xdim.getDouble(j1 + 1) - xdim.getDouble(j1);
+            double dy = ydim.getDouble(i1 + 1) - ydim.getDouble(i1);
+            double x1val = a + (c - a) * (y - ydim.getDouble(i1)) / dy;
+            double x2val = b + (d - b) * (y - ydim.getDouble(i1)) / dy;
+            iValue = x1val + (x2val - x1val) * (x - xdim.getDouble(j1)) / dx;
         }
 
         return iValue;
