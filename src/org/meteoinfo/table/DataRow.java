@@ -16,6 +16,7 @@ package org.meteoinfo.table;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.meteoinfo.data.DataTypes;
 
@@ -270,6 +271,21 @@ public class DataRow {
             this.itemMap.put(c.toString().toLowerCase(), row.getValue(c.toString()));
         }
     }
+    
+    /**
+     * Create a new data row by columns
+     * @param cols The columns
+     * @return Selected data row
+     */
+    public DataRow colSelect(DataColumnCollection cols) {
+        DataRow row = new DataRow();
+        row.setColumns(cols);
+        for (Object c : cols) {
+            row.itemMap.put(c.toString().toLowerCase(), this.getValue(c.toString()));
+        }
+        
+        return row;
+    }
 
     /**
      * Clone
@@ -282,7 +298,6 @@ public class DataRow {
         row.setColumns(columns);
         for (Object c : this.columns) {
             row.itemMap.put(c.toString().toLowerCase(), this.getValue(c.toString()));
-
         }
 
         return row;

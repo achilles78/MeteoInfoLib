@@ -604,6 +604,29 @@ public class DataTable {
 
         return result;
     }
+    
+    /**
+     * Create a new data table using selected columns
+     * @param cols The columns
+     * @return Selected data table
+     * @throws java.lang.Exception
+     */
+    public DataTable colSelect(List<DataColumn> cols) throws Exception {
+        DataTable r = new DataTable();
+        for (DataColumn dc : cols) {
+            DataColumn newDc = new DataColumn(dc.getColumnName(), dc.getDataType());
+            newDc.setCaptionName(dc.getCaptionName());
+            r.columns.add(dc);
+        }
+        
+        DataColumnCollection dcc = new DataColumnCollection(cols);
+        for (DataRow dr : this.rows) {
+            DataRow ndr = dr.colSelect(dcc);
+            r.addRow(ndr);
+        }
+        
+        return r;
+    }
 
     /**
      * Select and form a new data table
@@ -786,14 +809,14 @@ public class DataTable {
 
         return table;
     }
-
+    
     /**
-     * Convert to string
+     * Convert to string - head
      *
+     * @param n Head row number
      * @return The string
      */
-    @Override
-    public String toString() {
+    public String head(int n) {
         StringBuilder sb = new StringBuilder();
         for (DataColumn col : this.columns) {
             if (sb.length() == 0) {
@@ -806,9 +829,9 @@ public class DataTable {
         sb.append("\n");
 
         SimpleDateFormat format;
-        int n = this.getRowCount();
-        if (n > 100) {
-            n = 100;
+        int rn = this.getRowCount();
+        if (n > rn) {
+            n = rn;
         }
         Object v;
         for (int r = 0; r < n; r++) {
@@ -841,6 +864,72 @@ public class DataTable {
         }
 
         return sb.toString();
+    }
+    
+    /**
+     * Convert to string - tail
+     *
+     * @param n Tail row number
+     * @return The string
+     */
+    public String tail(int n) {
+        StringBuilder sb = new StringBuilder();
+        for (DataColumn col : this.columns) {
+            if (sb.length() == 0) {
+                sb.append(col.getColumnName());
+            } else {
+                sb.append("\t");
+                sb.append(col.getColumnName());
+            }
+        }
+        sb.append("\n");
+
+        SimpleDateFormat format;
+        int rn = this.getRowCount();
+        if (n > rn) {
+            n = rn;
+        }
+        Object v;
+        for (int r = rn - n; r < rn; r++) {
+            DataRow row = this.rows.get(r);
+            int i = 0;
+            for (DataColumn col : this.columns) {
+                if (i > 0) {
+                    sb.append("\t");
+                }
+                switch (col.getDataType()) {
+                    case Date:
+                        format = new SimpleDateFormat(col.getFormat());
+                        sb.append(format.format((Date) row.getValue(col.getColumnName())));
+                        break;
+                    case String:
+                        sb.append("'").append(row.getValue(col.getColumnName()).toString()).append("'");
+                        break;
+                    default:
+                        v = row.getValue(col.getColumnName());
+                        if (v == null) {
+                            sb.append("null");
+                        } else {
+                            sb.append(v.toString());
+                        }
+                        break;
+                }
+                i += 1;
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Convert to string
+     *
+     * @return The string
+     */
+    @Override
+    public String toString() {
+        return head(100);
     }
 
     /**

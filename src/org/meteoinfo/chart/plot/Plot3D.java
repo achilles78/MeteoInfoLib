@@ -751,7 +751,7 @@ public class Plot3D extends Plot {
         for (int i = 0; i < graphic.getNumGraphics(); i++) {
             Graphic gg = graphic.getGraphicN(i);
             if (gg.getShape().getShapeType() == ShapeTypes.Image) {
-                g.setClip(oldRegion);
+                //g.setClip(oldRegion);
                 this.drawImage(g, gg, zdir, (float) ((GraphicCollection3D) graphic).getZValue());
             } else {
                 this.drawGrahic(g, gg);

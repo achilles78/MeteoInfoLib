@@ -29,6 +29,7 @@ import org.meteoinfo.global.Extent3D;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;
 import org.meteoinfo.global.util.BigDecimalUtil;
+import org.meteoinfo.layer.ImageLayer;
 import org.meteoinfo.layer.VectorLayer;
 import org.meteoinfo.legend.BarBreak;
 import org.meteoinfo.legend.ColorBreak;
@@ -2034,6 +2035,36 @@ public class GraphicFactory {
         graphics.add(gg);
         graphics.setLegendScheme(ls);
         graphics.setSingleLegend(false);
+        return graphics;
+    }
+    
+    /**
+     * Create image
+     *
+     * @param layer Image layer
+     * @param offset Offset of z axis
+     * @param xshift X shift - to shift the grahpics in x direction, normally
+     * for map in 180 - 360 degree east
+     * @param interpolation Interpolation
+     * @return Graphics
+     */
+    public static GraphicCollection createImage(ImageLayer layer, double offset, double xshift,
+            String interpolation) {
+        GraphicCollection3D graphics = new GraphicCollection3D();
+        graphics.setFixZ(true);
+        graphics.setZDir("z");
+        graphics.setZValue(offset);
+        ImageShape ishape = new ImageShape();
+        ishape.setImage(layer.getImage());
+        Extent extent = layer.getExtent();
+        Extent3D ex3 = new Extent3D(extent.minX + xshift, extent.maxX + xshift, extent.minY, extent.maxY, offset, offset);
+        ishape.setExtent(ex3);
+        Graphic gg = new Graphic(ishape, new ColorBreak());
+        if (interpolation != null){
+            ((ImageShape)gg.getShape()).setInterpolation(interpolation);
+        }
+        graphics.add(gg);
+        
         return graphics;
     }
 

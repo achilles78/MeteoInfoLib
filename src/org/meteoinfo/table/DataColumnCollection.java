@@ -27,6 +27,24 @@ public class DataColumnCollection extends ArrayList<DataColumn>{
     Map nameMap = new HashMap<>();
     
     /**
+     * Constructor
+     */
+    public DataColumnCollection(){
+        super();
+    }
+    
+    /**
+     * Constructor
+     * @param dcs DataColumn list
+     */
+    public DataColumnCollection(List<DataColumn> dcs) {
+        super();
+        for (DataColumn dc : dcs) {
+            this.add(dc);
+        }
+    }
+    
+    /**
      * Add a data column
      * @param aCol The data column
      * @return Boolean
