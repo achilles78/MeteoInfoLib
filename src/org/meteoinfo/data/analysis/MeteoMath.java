@@ -5,6 +5,8 @@
  */
 package org.meteoinfo.data.analysis;
 
+import ucar.ma2.Array;
+
 /**
  *
  * @author yaqiang
@@ -101,6 +103,51 @@ public class MeteoMath {
         double es = cal_Es(tc);
         double e = cal_Es(tdc);
         return e / es * 100;
+    }
+    
+    /**
+     * Calculate relative humidity from dewpoint
+     *
+     * @param tdc Dewpoint temperature
+     * @param tc Temperature
+     * @return Relative humidity as percent (i.e. 80%)
+     */
+    public static Array dewpoint2rh(Array tdc, Array tc) {
+        Array r = Array.factory(tdc.getDataType(), tdc.getShape());
+        for (int i = 0; i < r.getSize(); i++) {
+            r.setDouble(i, MeteoMath.dewpoint2rh(tc.getDouble(i), tdc.getDouble(i)));
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Calculate dewpoint from relative humidity and temperature
+     *     
+     * @param rh Relative humidity
+     * @param t Temperature
+     * @return Dewpoint
+     */
+    public static double rh2dewpoint(double rh, double t) {
+        double esw = cal_Es(t);
+        double e = esw * (rh / 100);
+        return cal_Tdc(e);
+    }
+    
+    /**
+     * Calculate dewpoint from relative humidity and temperature
+     *
+     * @param rh Dewpoint temperature
+     * @param tc Temperature
+     * @return Relative humidity as percent (i.e. 80%)
+     */
+    public static Array rh2dewpoint(Array rh, Array tc) {
+        Array r = Array.factory(rh.getDataType(), rh.getShape());
+        for (int i = 0; i < r.getSize(); i++) {
+            r.setDouble(i, MeteoMath.rh2dewpoint(rh.getDouble(i), tc.getDouble(i)));
+        }
+        
+        return r;
     }
 
     /**

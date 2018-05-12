@@ -6223,23 +6223,7 @@ public class ArrayMath {
         }
         
         return r;
-    }
-
-    /**
-     * Calculate relative humidity from dewpoint
-     *
-     * @param tdc Dewpoint temperature
-     * @param tc Temperature
-     * @return Relative humidity as percent (i.e. 80%)
-     */
-    public static Array dewpoint2rh(Array tdc, Array tc) {
-        Array r = Array.factory(tdc.getDataType(), tdc.getShape());
-        for (int i = 0; i < r.getSize(); i++) {
-            r.setDouble(i, MeteoMath.dewpoint2rh(tc.getDouble(i), tdc.getDouble(i)));
-        }
-        
-        return r;
-    }
+    }    
 
     /**
      * Calculate relative humidity from specific humidity
