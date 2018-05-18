@@ -44,6 +44,7 @@ import org.meteoinfo.data.mapdata.webmap.OviHybridMapInfo;
 import org.meteoinfo.data.mapdata.webmap.OviMapInfo;
 import org.meteoinfo.data.mapdata.webmap.OviSatelliteMapInfo;
 import org.meteoinfo.data.mapdata.webmap.OviTerrainMapInfo;
+import org.meteoinfo.data.mapdata.webmap.TencentMapInfo;
 import org.meteoinfo.data.mapdata.webmap.Tile;
 import org.meteoinfo.data.mapdata.webmap.TileFactory;
 import org.meteoinfo.data.mapdata.webmap.TileFactoryInfo;
@@ -474,6 +475,9 @@ public class WebMapLayer extends MapLayer {
                 break;
             case AHybridMap:
                 info = new AHybridMapInfo();
+                break;
+            case TencentMap:
+                info = new TencentMapInfo();
                 break;
 //            case ArcGISImage:
 //                info = new ArcGISImageInfo();

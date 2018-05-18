@@ -23,6 +23,7 @@ public enum WebMapProvider {
     AMap,
     ASatelliteMap,
     AHybridMap,
+    TencentMap,
     //BaiduMap,
     //BaiduSatelliteMap,
     //OviMap,
