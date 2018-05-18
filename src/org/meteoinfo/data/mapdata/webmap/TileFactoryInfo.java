@@ -21,31 +21,31 @@ import java.util.Locale;
  */
 public class TileFactoryInfo {
 
-    private int minimumZoomLevel;
-    private int maximumZoomLevel;
-    private int totalMapZoom;
+    protected int minimumZoomLevel;
+    protected int maximumZoomLevel;
+    protected int totalMapZoom;
     // the size of each tile (assumes they are square)
     private int tileSize = 256;
     /*
      * The number of tiles wide at each zoom level
      */
-    private int[] mapWidthInTilesAtZoom;
+    protected int[] mapWidthInTilesAtZoom;
     /**
      * An array of coordinates in <em>pixels</em> that indicates the center in
      * the world map for the given zoom level.
      */
-    private Point2D[] mapCenterInPixelsAtZoom;// = new Point2D.Double[18];
+    protected Point2D[] mapCenterInPixelsAtZoom;// = new Point2D.Double[18];
     /**
      * An array of doubles that contain the number of pixels per degree of
      * longitude at a give zoom level.
      */
-    private double[] longitudeDegreeWidthInPixels;
+    protected double[] longitudeDegreeWidthInPixels;
     /**
      * An array of doubles that contain the number of radians per degree of
      * longitude at a given zoom level (where longitudeRadianWidthInPixels[0] is
      * the most zoomed out)
      */
-    private double[] longitudeRadianWidthInPixels;
+    protected double[] longitudeRadianWidthInPixels;
     /**
      * The base url for loading tiles from.
      */

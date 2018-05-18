@@ -21,6 +21,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
+import org.meteoinfo.data.mapdata.webmap.AHybridMapInfo;
+import org.meteoinfo.data.mapdata.webmap.AMapInfo;
+import org.meteoinfo.data.mapdata.webmap.ASatelliteMapInfo;
+import org.meteoinfo.data.mapdata.webmap.ArcGISImageInfo;
 import org.meteoinfo.data.mapdata.webmap.BaiduMapInfo;
 import org.meteoinfo.data.mapdata.webmap.BaiduSatelliteMapInfo;
 import org.meteoinfo.data.mapdata.webmap.BingHybridMapInfo;
@@ -420,18 +424,18 @@ public class WebMapLayer extends MapLayer {
             case BingHybridMap:
                 info = new BingHybridMapInfo();
                 break;
-            case OviMap:
-                info = new OviMapInfo();
-                break;
-            case OviSatelliteMap:
-                info = new OviSatelliteMapInfo();
-                break;
-            case OviTerrainMap:
-                info = new OviTerrainMapInfo();
-                break;
-            case OviHybridMap:
-                info = new OviHybridMapInfo();
-                break;
+//            case OviMap:
+//                info = new OviMapInfo();
+//                break;
+//            case OviSatelliteMap:
+//                info = new OviSatelliteMapInfo();
+//                break;
+//            case OviTerrainMap:
+//                info = new OviTerrainMapInfo();
+//                break;
+//            case OviHybridMap:
+//                info = new OviHybridMapInfo();
+//                break;
             case YahooMap:
                 info = new YahooMapInfo();
                 break;
@@ -456,12 +460,24 @@ public class WebMapLayer extends MapLayer {
             case GoogleHybridTerrainMap:
                 info = new GoogleHybridTerrainMapInfo();
                 break;
-            case BaiduMap:
-                info = new BaiduMapInfo();
+//            case BaiduMap:
+//                info = new BaiduMapInfo();
+//                break;
+//            case BaiduSatelliteMap:
+//                info = new BaiduSatelliteMapInfo();
+//                break;
+            case AMap:
+                info = new AMapInfo();
                 break;
-            case BaiduSatelliteMap:
-                info = new BaiduSatelliteMapInfo();
+            case ASatelliteMap:
+                info = new ASatelliteMapInfo();
                 break;
+            case AHybridMap:
+                info = new AHybridMapInfo();
+                break;
+//            case ArcGISImage:
+//                info = new ArcGISImageInfo();
+//                break;                
         }
 
         if (info != null) {

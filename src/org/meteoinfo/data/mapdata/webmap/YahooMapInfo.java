@@ -27,6 +27,8 @@ public class YahooMapInfo extends TileFactoryInfo {
                 256, true, true, // tile size is 256 and x/y orientation is normal
                 "https://%1$d.base.maps.api.here.com/maptile/%2$s/maptile/ef83a04284/normal.day/%3$d/%4$d/%5$d/256/png8?lg=ENG&token=%6$s&requestid=yahoo.prod&app_id=%7$s",
                 "x", "y", "z");
+        this.baseURL = "http://%1$d.base.maps.api.here.com/maptile/%2$s/maptile/newest/normal.day/%3$d/%4$d/%5$d/256/png8?lg=%6$s&token=%7$s&requestid=yahoo.prod&app_id=%8$s";
+        this.setLanguage("EN");
     }
 //    // </editor-fold>
 //    // <editor-fold desc="Get Set Methods">
@@ -40,7 +42,7 @@ public class YahooMapInfo extends TileFactoryInfo {
         //String url = String.format(this.baseURL, serverNum, version, this.getLanguage(), x, ((1 << zoom) >> 1) - 1 - y, zoom + 1);
         String rnd1 = "TrLJuXVK62IQk0vuXFzaig%3D%3D";
         String rnd2 = "eAdkWGYRoc4RfxVo0Z4B";
-        String url = String.format(this.baseURL, serverNum, version, zoom, x, y, rnd1, rnd2);
+        String url = String.format(this.baseURL, serverNum, version, zoom, x, y, this.getLanguage(), rnd1, rnd2);
         return url;
     }
    

@@ -4027,9 +4027,8 @@ public class ArrayMath {
      *
      * @param a Array a
      * @return Minimum value
-     * @throws ucar.ma2.InvalidRangeException
      */
-    public static double min(Array a) throws InvalidRangeException {
+    public static double min(Array a) {
         double min = 1.7976931348623157E+308D;
         double v;
         IndexIterator ii = a.getIndexIterator();
@@ -4331,14 +4330,19 @@ public class ArrayMath {
     public static double sum(Array a) {
         double sum = 0.0D;
         double v;
+        int n = 0;
         IndexIterator iterA = a.getIndexIterator();
         while (iterA.hasNext()) {
             v = iterA.getDoubleNext();
             if (!Double.isNaN(v)) {
                 sum += v;
+                n += 1;
             }
         }
-        return sum;
+        if (n == 0){
+            return Double.NaN;
+        } else
+            return sum;
     }
 
     /**

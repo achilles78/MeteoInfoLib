@@ -3555,6 +3555,10 @@ public class GraphicFactory {
 
         for (int i = 0; i < n; i++) {
             Array a = xdata.get(i);
+            if (Double.isNaN(ArrayMath.min(a))){
+                continue;
+            }
+            
             v = positions.get(i).doubleValue();
             width = widths.get(i).doubleValue();
             //Add box polygon

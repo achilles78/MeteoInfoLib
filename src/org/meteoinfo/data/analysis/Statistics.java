@@ -173,7 +173,10 @@ public class Statistics {
             if (!Double.isNaN(v))
                 dlist.add(v);
         }
-        return quantile(dlist, aNum);
+        if (dlist.size() <= 3)
+            return Double.NaN;
+        else
+            return quantile(dlist, aNum);
     }
 
     /**
