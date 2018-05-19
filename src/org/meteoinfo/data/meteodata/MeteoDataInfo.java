@@ -51,6 +51,7 @@ import org.meteoinfo.data.meteodata.awx.AWXDataInfo;
 import org.meteoinfo.data.meteodata.bandraster.BILDataInfo;
 import org.meteoinfo.data.meteodata.bandraster.GeoTiffDataInfo;
 import org.meteoinfo.data.meteodata.metar.METARDataInfo;
+import org.meteoinfo.data.meteodata.micaps.MICAPS131DataInfo;
 import org.meteoinfo.data.meteodata.micaps.MICAPS2DataInfo;
 import org.meteoinfo.data.meteodata.synop.SYNOPDataInfo;
 import ucar.ma2.Array;
@@ -312,6 +313,7 @@ public class MeteoDataInfo {
             case MICAPS_11:
             case MICAPS_13:
             case MICAPS_4:
+            case MICAPS_131:
             case Sufer_Grid:
             case MM5:
             case MM5IM:
@@ -853,6 +855,9 @@ public class MeteoDataInfo {
                 break;
             case MICAPS_120:
                 _dataInfo = new MICAPS120DataInfo();
+                break;
+            case MICAPS_131:
+                _dataInfo = new MICAPS131DataInfo();
                 break;
         }
         _dataInfo.readDataInfo(fileName);

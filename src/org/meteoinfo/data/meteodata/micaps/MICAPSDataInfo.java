@@ -79,6 +79,9 @@ public class MICAPSDataInfo {
             if (dataType.contains("iamond 120")) {
                 mdType = MeteoDataType.MICAPS_120;
             }
+            if (dataType.contains("diamond 131")){
+                mdType = MeteoDataType.MICAPS_131;
+            }
             if (mdType == null) {
                 System.out.println(String.format("Unknown MICAPS data file type: %s", dataType));
             }
