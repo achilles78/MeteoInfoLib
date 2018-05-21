@@ -61,8 +61,8 @@ public class MICAPS131DataInfo extends DataInfo implements IGridDataInfo {
     private int yNum;
     private int zNum;
     private int radarCount;
-    private float _lon_LB;
-    private float _lat_LB;
+    private float startLon;
+    private float startLat;
     private float _lon_Center;
     private float _lat_Center;
     private float lonDelta;
@@ -159,10 +159,10 @@ public class MICAPS131DataInfo extends DataInfo implements IGridDataInfo {
             radarCount = DataConvert.bytes2Int(bb, ByteOrder.LITTLE_ENDIAN);
             sidx += len;
             bb = Arrays.copyOfRange(bytes, sidx, sidx + len);
-            _lon_LB = DataConvert.bytes2Float(bb, ByteOrder.LITTLE_ENDIAN);
+            startLon = DataConvert.bytes2Float(bb, ByteOrder.LITTLE_ENDIAN);
             sidx += len;
             bb = Arrays.copyOfRange(bytes, sidx, sidx + len);
-            _lat_LB = DataConvert.bytes2Float(bb, ByteOrder.LITTLE_ENDIAN);
+            startLat = DataConvert.bytes2Float(bb, ByteOrder.LITTLE_ENDIAN);
             sidx += len;
             bb = Arrays.copyOfRange(bytes, sidx, sidx + len);
             this._lon_Center = DataConvert.bytes2Float(bb, ByteOrder.LITTLE_ENDIAN);
@@ -225,7 +225,7 @@ public class MICAPS131DataInfo extends DataInfo implements IGridDataInfo {
             Dimension ydim = new Dimension(DimensionType.Y);
             double[] yValues = new double[yNum];
             for (int i = 0; i < yNum; i++) {
-                yValues[i] = BigDecimalUtil.add(_lat_LB, BigDecimalUtil.mul(i, latDelta));
+                yValues[i] = BigDecimalUtil.sub(startLat, BigDecimalUtil.mul((yNum - i - 1), latDelta));
             }
             ydim.setValues(yValues);
             this.addDimension(ydim);
@@ -233,7 +233,7 @@ public class MICAPS131DataInfo extends DataInfo implements IGridDataInfo {
             Dimension xdim = new Dimension(DimensionType.X);
             double[] xValues = new double[xNum];
             for (int i = 0; i < xNum; i++) {
-                xValues[i] = BigDecimalUtil.add(_lon_LB, BigDecimalUtil.mul(i, lonDelta));
+                xValues[i] = BigDecimalUtil.add(startLon, BigDecimalUtil.mul(i, lonDelta));
             }
             xdim.setValues(xValues);
             this.addDimension(xdim);
