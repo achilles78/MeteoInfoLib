@@ -378,7 +378,7 @@ public class MICAPS131DataInfo extends DataInfo implements IGridDataInfo {
     public GridData getGridData_LonLat(int timeIdx, int varIdx, int levelIdx) {
         try {
             RandomAccessFile br = new RandomAccessFile(this.getFileName(), "r");
-            int n = yNum * xNum;
+            int n = yNum * xNum * dataByteNum;
             byte[] bytes = new byte[n];
             br.skipBytes(1024);
             br.skipBytes(levelIdx * n);
@@ -387,9 +387,19 @@ public class MICAPS131DataInfo extends DataInfo implements IGridDataInfo {
 
             GridData gridData = new GridData();
             double[][] gData = new double[yNum][xNum];
-            for (int i = 0; i < yNum; i++) {
-                for (int j = 0; j < xNum; j++) {
-                    gData[i][j] = DataConvert.byte2Int(bytes[(yNum - i - 1) * xNum + j]);
+            if (dataByteNum == 1) {
+                for (int i = 0; i < yNum; i++) {
+                    for (int j = 0; j < xNum; j++) {
+                        gData[i][j] = DataConvert.byte2Int(bytes[(yNum - i - 1) * xNum + j]);
+                    }
+                }
+            } else {
+                int index;
+                for (int i = 0; i < yNum; i++) {
+                    for (int j = 0; j < xNum; j++) {
+                        index = ((yNum - i - 1) * xNum + j) * 2;             
+                        gData[i][j] = DataConvert.bytes2Short(Arrays.copyOfRange(bytes, index, index + 2), ByteOrder.LITTLE_ENDIAN);
+                    }
                 }
             }
             gridData.data = gData;
