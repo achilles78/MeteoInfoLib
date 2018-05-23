@@ -168,27 +168,7 @@ public class TableData extends DataTable {
 
         return cols;
     }
-
-    /**
-     * Get data columns by names
-     *
-     * @param colNames Data column names
-     * @return Data columns
-     */
-    public List<DataColumn> findColumns(List<String> colNames) {
-        List<DataColumn> cols = new ArrayList<>();
-        for (DataColumn col : this.getColumns()) {
-            for (String colName : colNames) {
-                if (col.getColumnName().equals(colName)) {
-                    cols.add(col);
-                    break;
-                }
-            }
-        }
-
-        return cols;
-    }
-
+    
     /**
      * Get column values
      *

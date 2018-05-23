@@ -349,6 +349,7 @@ public class DataColumn {
         col.columnName = this.columnName;
         col.dataType = this.dataType;
         col.readOnly = this.readOnly;
+        col.format = this.format;
 
         return col;
     }

@@ -81,6 +81,16 @@ public class DataRow {
     public void setColumns(DataColumnCollection columns) {
         this.columns = columns;
     }
+    
+    /**
+     * Set columns
+     *
+     * @param column Column
+     */
+    public void setColumns(DataColumn column) {
+        this.columns = new DataColumnCollection();
+        this.columns.add(column);
+    }
 
     /**
      * Get columns
@@ -270,6 +280,19 @@ public class DataRow {
         for (Object c : this.columns) {
             this.itemMap.put(c.toString().toLowerCase(), row.getValue(c.toString()));
         }
+    }
+    
+    /**
+     * Create a new data row by column
+     * @param col The column
+     * @return Selected data row
+     */
+    public DataRow colSelect(DataColumn col) {
+        DataRow row = new DataRow();
+        row.setColumns(col);
+        row.itemMap.put(col.toString().toLowerCase(), this.getValue(col.toString()));
+        
+        return row;
     }
     
     /**

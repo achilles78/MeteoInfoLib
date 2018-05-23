@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.meteoinfo.data.TableUtil;
 import org.meteoinfo.data.mapdata.Field;
 import org.meteoinfo.global.MIMath;
+import ucar.ma2.Range;
 
 /**
  *
@@ -132,6 +133,34 @@ public class DataTable {
      */
     public DataRowCollection getRows() {
         return this.rows;
+    }
+    
+    /**
+     * Get data rows
+     *
+     * @param idx Index
+     * @return DataRowCollection The data rows
+     */
+    public DataRowCollection getRows(List<Integer> idx) {
+        DataRowCollection r = new DataRowCollection();
+        for (int i : idx){
+            r.add(this.rows.get(i));
+        }
+        return r;
+    }
+    
+    /**
+     * Get data rows
+     *
+     * @param range Range
+     * @return DataRowCollection The data rows
+     */
+    public DataRowCollection getRows(Range range) {
+        DataRowCollection r = new DataRowCollection();
+        for (int i = range.first(); i < range.last(); i++){
+            r.add(this.rows.get(i));
+        }
+        return r;
     }
 
     /**
@@ -273,6 +302,41 @@ public class DataTable {
         }
 
         return null;
+    }
+    
+    /**
+     * Get data columns by names
+     *
+     * @param colNames Data column names
+     * @return Data columns
+     */
+    public List<DataColumn> findColumns(List<String> colNames) {
+        List<DataColumn> cols = new ArrayList<>();
+        for (DataColumn col : this.getColumns()) {
+            for (String colName : colNames) {
+                if (col.getColumnName().equals(colName)) {
+                    cols.add(col);
+                    break;
+                }
+            }
+        }
+
+        return cols;
+    }
+    
+    /**
+     * Get data columns by index
+     *
+     * @param colIndex Data column index
+     * @return Data columns
+     */
+    public List<DataColumn> findColumns_Index(List<Integer> colIndex) {
+        List<DataColumn> cols = new ArrayList<>();
+        for (int i : colIndex) {
+            cols.add(this.columns.get(i));
+        }
+
+        return cols;
     }
 
     /**
@@ -586,9 +650,7 @@ public class DataTable {
         DataTable result = new DataTable();
         List<DataRow> dataRows = this.select(expression);
         for (DataColumn dc : dataColumns) {
-            DataColumn newDc = new DataColumn(dc.getColumnName(),
-                    dc.getDataType());
-            newDc.setCaptionName(dc.getCaptionName());
+            DataColumn newDc = (DataColumn)dc.clone();
             result.columns.add(newDc);
         }
 
@@ -606,6 +668,193 @@ public class DataTable {
     }
     
     /**
+     * Get a new table by row range
+     * @param rowRange Row range
+     * @return
+     * @throws Exception 
+     */
+    public DataTable select(Range rowRange) throws Exception{
+        return select(rowRange.first(), rowRange.last(), rowRange.stride());
+    }
+    
+    /**
+     * Get a new table by select rows
+     * @param r_start row start
+     * @param r_stop row stop
+     * @param r_step row step
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(int r_start, int r_stop, int r_step) throws Exception {
+        DataTable r = new DataTable();
+        for (DataColumn dc : this.columns) {
+            DataColumn newDc = (DataColumn)dc.clone();
+            r.columns.add(newDc);
+        }
+
+        for (int i = r_start; i < r_stop; i+=r_step) {
+            if (i >= this.getRowCount())
+                break;
+            DataRow newRow = r.newRow();
+            newRow.copyFrom(this.rows.get(i));
+            r.addRow(newRow);
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Get a new table by row index
+     * @param rowIndex Row index
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(List<Integer> rowIndex) throws Exception {
+        DataTable r = new DataTable();
+        for (DataColumn dc : this.columns) {
+            DataColumn newDc = (DataColumn)dc.clone();
+            r.columns.add(newDc);
+        }
+
+        for (int i : rowIndex) {
+            if (i >= this.getRowCount())
+                break;
+            DataRow newRow = r.newRow();
+            newRow.copyFrom(this.rows.get(i));
+            r.addRow(newRow);
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Get a new table by row range and column range
+     * @param rowRange Row range
+     * @param colRange Column range
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(Range rowRange, Range colRange) throws Exception {
+        return select(rowRange.first(), rowRange.last(), rowRange.stride(), colRange.first(), colRange.last(), colRange.stride());
+    }
+    
+    /**
+     * Get a new table by select rows
+     * @param r_start Row start
+     * @param r_stop Row stop
+     * @param r_step Row step
+     * @param c_start Column start
+     * @param c_stop Column stop
+     * @param c_step Column step
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(int r_start, int r_stop, int r_step, int c_start, int c_stop, int c_step) throws Exception {
+        List<DataColumn> cols = new ArrayList<>();
+        for (int i = c_start; i < c_stop; i+= c_step){
+            if (i >= this.getColumnCount())
+                break;
+            cols.add(this.columns.get(i));
+        }
+        
+        return this.select(r_start, r_stop, r_step, cols);
+    }
+    
+    /**
+     * Get a new table by row index and column range
+     * @param rowIndex Row index
+     * @param colRange Column range
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(List<Integer> rowIndex, Range colRange) throws Exception {
+        return select(rowIndex, colRange.first(), colRange.last(), colRange.stride());
+    }
+    
+    /**
+     * Get a new table by row index and column slice
+     * @param rowIndex Row index
+     * @param c_start Column start
+     * @param c_stop Column stop
+     * @param c_step Column step
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(List<Integer> rowIndex, int c_start, int c_stop, int c_step) throws Exception {
+        List<DataColumn> cols = new ArrayList<>();
+        for (int i = c_start; i < c_stop; i+= c_step){
+            if (i >= this.getColumnCount())
+                break;
+            cols.add(this.columns.get(i));
+        }
+        
+        return this.select(rowIndex, cols);
+    }
+    
+    /**
+     * Get a new table by row range and columns
+     * @param rowRange Row range
+     * @param cols Columns
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(Range rowRange, List<DataColumn> cols) throws Exception {
+        return select(rowRange.first(), rowRange.last(), rowRange.stride(), cols);
+    }
+    
+    /**
+     * Get a new table by select rows
+     * @param r_start Row start
+     * @param r_stop Row stop
+     * @param r_step Row step
+     * @param cols Columns
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(int r_start, int r_stop, int r_step, List<DataColumn> cols) throws Exception {
+        DataTable r = new DataTable();
+        for (DataColumn dc : cols) {
+            DataColumn newDc = (DataColumn)dc.clone();
+            r.columns.add(newDc);
+        }
+
+        DataColumnCollection dcc = new DataColumnCollection(cols);
+        for (int i = r_start; i < r_stop; i+=r_step) {
+            if (i >= this.getRowCount())
+                break;
+            DataRow newRow = this.rows.get(i).colSelect(dcc);
+            r.addRow(newRow);
+        }
+        
+        return r;
+    }    
+    
+    /**
+     * Get a new table by row index and columns
+     * @param rowIndex Row index
+     * @param cols Columns
+     * @return Result table
+     * @throws Exception 
+     */
+    public DataTable select(List<Integer> rowIndex, List<DataColumn> cols) throws Exception {
+        DataTable r = new DataTable();
+        for (DataColumn dc : cols) {
+            DataColumn newDc = (DataColumn)dc.clone();
+            r.columns.add(newDc);
+        }
+
+        DataColumnCollection dcc = new DataColumnCollection(cols);
+        for (int i : rowIndex) {
+            if (i >= this.getRowCount())
+                break;
+            DataRow newRow = this.rows.get(i).colSelect(dcc);
+            r.addRow(newRow);
+        }
+        
+        return r;
+    }
+    
+    /**
      * Create a new data table using selected columns
      * @param cols The columns
      * @return Selected data table
@@ -614,8 +863,7 @@ public class DataTable {
     public DataTable colSelect(List<DataColumn> cols) throws Exception {
         DataTable r = new DataTable();
         for (DataColumn dc : cols) {
-            DataColumn newDc = new DataColumn(dc.getColumnName(), dc.getDataType());
-            newDc.setCaptionName(dc.getCaptionName());
+            DataColumn newDc = (DataColumn)dc.clone();
             r.columns.add(dc);
         }
         
@@ -638,9 +886,7 @@ public class DataTable {
         DataTable result = new DataTable();
         List<DataRow> dataRows = this.select(expression);
         for (DataColumn dc : this.columns) {
-            DataColumn newDc = new DataColumn(dc.getColumnName(),
-                    dc.getDataType());
-            newDc.setCaptionName(dc.getCaptionName());
+            DataColumn newDc = (DataColumn)dc.clone();
             result.columns.add(newDc);
         }
 
