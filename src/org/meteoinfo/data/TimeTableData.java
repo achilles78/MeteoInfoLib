@@ -231,9 +231,15 @@ public class TimeTableData extends TableData {
      * @return Index
      */
     public int getTimeIndex(Date t){
+        if (t.before(times.get(0)))
+            return 0;
+        
+        if (t.after(times.get(times.size() - 1)))
+            return times.size() - 1;
+        
         int idx = -1;
         for (int i = 0; i < this.times.size(); i++){
-            if (t.equals(times.get(i)) || t.before(times.get(i))) {
+            if (! t.after(times.get(i))) {
                 idx = i;
                 break;
             }
