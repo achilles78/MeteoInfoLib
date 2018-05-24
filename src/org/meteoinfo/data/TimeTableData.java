@@ -33,6 +33,7 @@ public class TimeTableData extends TableData {
     // <editor-fold desc="Variables">
     //private int timeColIdx = 0;
     private String timeColName;
+    private List<Date> times;
 
     // </editor-fold>
     // <editor-fold desc="Constructor">
@@ -43,15 +44,19 @@ public class TimeTableData extends TableData {
         super();
         DataColumn col = new DataColumn("Time", DataTypes.Date);
         this.addColumn(col);
+        this.times = new ArrayList<>();
     }
 
     /**
      * Constructor
      *
      * @param dataTable Data table
+     * @param timeColName Time column name
      */
-    public TimeTableData(DataTable dataTable) {
+    public TimeTableData(DataTable dataTable, String timeColName) {
         super(dataTable);
+        this.timeColName = timeColName;
+        this.times = this.getColumnData(timeColName).getData();
     }
 
     // </editor-fold>
@@ -209,6 +214,67 @@ public class TimeTableData extends TableData {
             //dataTable = dTable;
             sr.close();
         }
+    }
+    
+    /**
+     * Get time index
+     * @param t Time
+     * @return Index
+     */
+    public int getTimeIndex_Ex(Date t){
+        return this.times.indexOf(t);
+    }
+    
+    /**
+     * Get time index
+     * @param t Time
+     * @return Index
+     */
+    public int getTimeIndex(Date t){
+        int idx = -1;
+        for (int i = 0; i < this.times.size(); i++){
+            if (t.equals(times.get(i)) || t.before(times.get(i))) {
+                idx = i;
+                break;
+            }
+        }
+        
+        return idx;
+    }
+    
+    /**
+     * Get time index list
+     * @param ts Times
+     * @return Index list
+     */
+    public List<Integer> getTimeIndex(List<Date> ts){
+        List<Integer> ii = new ArrayList<>();
+        int i;
+        for (Date t : ts){
+            i = this.times.indexOf(t);
+            if (i >= 0)
+                ii.add(i);
+        }
+        
+        return ii;
+    }
+    
+    /**
+     * Get time index
+     * @param st Start time
+     * @param et End time
+     * @param step Step
+     * @return Time index
+     */
+    public List<Integer> getTimeIndex(Date st, Date et, int step){
+        int sidx = getTimeIndex(st);
+        int eidx = getTimeIndex(et);
+        List<Integer> ii = new ArrayList<>();
+        for (int i = sidx; i < eidx; i+=step){
+            ii.add(i);
+        }
+        
+        return ii;
     }
 
     /**
@@ -1230,8 +1296,7 @@ public class TimeTableData extends TableData {
             }
         }
         
-        TimeTableData r = new TimeTableData(outData);
-        r.setTimeColName(this.timeColName);
+        TimeTableData r = new TimeTableData(outData, this.timeColName);
         return r;
     }
 

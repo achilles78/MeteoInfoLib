@@ -332,8 +332,12 @@ public class DataTable {
      */
     public List<DataColumn> findColumns_Index(List<Integer> colIndex) {
         List<DataColumn> cols = new ArrayList<>();
+        int n = this.getColumnCount();
         for (int i : colIndex) {
-            cols.add(this.columns.get(i));
+            if (i < 0)
+                i = n + i;
+            if (i < n)
+                cols.add(this.columns.get(i));
         }
 
         return cols;
@@ -420,6 +424,21 @@ public class DataTable {
         for (DataRow row : this.rows) {
             row.setColumns(columns);
             row.renameColumn(oldName, fieldName);
+        }
+    }
+    
+    /**
+     * Rename column
+     *
+     * @param oldName The old column name
+     * @param newName The new column name
+     */
+    public void renameColumn(String oldName, String newName) {
+        DataColumn column = findColumn(oldName);
+        this.columns.renameColumn(column, newName);
+        for (DataRow row : this.rows) {
+            row.setColumns(columns);
+            row.renameColumn(oldName, newName);
         }
     }
 

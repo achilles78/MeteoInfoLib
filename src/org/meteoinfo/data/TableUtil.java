@@ -183,8 +183,7 @@ public class TableUtil {
         }
 
         if (hasTimeCol) {
-            TimeTableData tTableData = new TimeTableData(tableData);
-            tTableData.setTimeColName(tcolName);
+            TimeTableData tTableData = new TimeTableData(tableData, tcolName);
             return tTableData;
         } else {
             return tableData;
