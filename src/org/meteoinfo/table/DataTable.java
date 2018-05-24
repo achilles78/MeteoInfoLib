@@ -1127,6 +1127,9 @@ public class DataTable {
             }
             sb.append("\n");
         }
+        if (n < rn) {
+            sb.append("...");
+        }
 
         return sb.toString();
     }
