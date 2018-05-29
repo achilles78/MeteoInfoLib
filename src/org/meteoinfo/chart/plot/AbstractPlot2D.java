@@ -1260,10 +1260,10 @@ public abstract class AbstractPlot2D extends Plot {
         switch (legend.getPosition()) {
             case UPPER_CENTER_OUTSIDE:
                 x = (float) (area.getX() + area.getWidth() / 2 - dim.width / 2);
-                y = (float) (area.getY() - this.getAxis(Location.TOP).getXAxisHeight(g) - legend.getLegendHeight() - 5);
+                y = (float) (area.getY() - this.getAxis(Location.TOP).getXAxisHeight(g) - dim.height - 5);
                 break;
             case LOWER_CENTER_OUTSIDE:
-                x = (float) (area.getX() + area.getWidth() / 2 - legend.getLegendWidth() / 2);
+                x = (float) (area.getX() + area.getWidth() / 2 - dim.width / 2);
                 y = (float) (area.getY() + area.getHeight() + this.getXAxisHeight(g) + 10);
                 break;
             case LEFT_OUTSIDE:
@@ -1277,7 +1277,7 @@ public abstract class AbstractPlot2D extends Plot {
                 } else {
                     x = (float) area.getX() + (float) area.getWidth() + 10;
                 }
-                y = (float) area.getY() + (float) area.getHeight() / 2 - legend.getLegendHeight() / 2;
+                y = (float) area.getY() + (float) area.getHeight() / 2 - dim.height / 2;
                 break;
             case UPPER_CENTER:
                 x = (float) (area.getX() + area.getWidth() / 2 - dim.width / 2);
