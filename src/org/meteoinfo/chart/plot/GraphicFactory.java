@@ -40,6 +40,7 @@ import org.meteoinfo.legend.LineStyles;
 import org.meteoinfo.legend.PointBreak;
 import org.meteoinfo.legend.PolygonBreak;
 import org.meteoinfo.legend.PolylineBreak;
+import org.meteoinfo.ma.ArrayBoolean;
 import org.meteoinfo.shape.ArcShape;
 import org.meteoinfo.shape.BarShape;
 import org.meteoinfo.shape.CapPolylineShape;
@@ -2847,6 +2848,21 @@ public class GraphicFactory {
         GraphicCollection gc = new GraphicCollection();
         int len = (int) xdata.getSize();
         if (where == null) {
+            if (ArrayMath.containsNaN(y1data) || ArrayMath.containsNaN(y2data)){
+                where = new ArrayBoolean(new int[]{len});
+                double v1, v2;
+                for (int i = 0; i < len; i++){
+                    v1 = y1data.getDouble(i);
+                    v2 = y2data.getDouble(i);
+                    if (Double.isNaN(v1) || Double.isNaN(v2)){
+                        where.setBoolean(i, false);
+                    } else {
+                        where.setBoolean(i, true);
+                    }
+                }
+            }
+        }
+        if (where == null) {
             PolygonShape pgs = new PolygonShape();
             List<PointD> points = new ArrayList<>();
             for (int i = 0; i < len; i++) {
@@ -2864,15 +2880,15 @@ public class GraphicFactory {
             List<Integer> idx = new ArrayList<>();
             for (int j = 0; j < len; j++) {
                 if (where.getInt(j) == 1) {
-                    if (!ob) {
-                        idx = new ArrayList<>();
-                    }
                     idx.add(j);
                 } else if (ob) {
                     idxs.add(idx);
+                    idx = new ArrayList<>();
                 }
                 ob = where.getInt(j) == 1;
             }
+            if (!idx.isEmpty())
+                idxs.add(idx);
             for (List<Integer> index : idxs) {
                 int nn = index.size();
                 if (nn >= 2) {
@@ -2912,6 +2928,21 @@ public class GraphicFactory {
         GraphicCollection gc = new GraphicCollection();
         int len = (int) ydata.getSize();
         if (where == null) {
+            if (ArrayMath.containsNaN(x1data) || ArrayMath.containsNaN(x2data)){
+                where = new ArrayBoolean(new int[]{len});
+                double v1, v2;
+                for (int i = 0; i < len; i++){
+                    v1 = x1data.getDouble(i);
+                    v2 = x2data.getDouble(i);
+                    if (Double.isNaN(v1) || Double.isNaN(v2)){
+                        where.setBoolean(i, false);
+                    } else {
+                        where.setBoolean(i, true);
+                    }
+                }
+            }
+        }
+        if (where == null) {
             PolygonShape pgs = new PolygonShape();
             List<PointD> points = new ArrayList<>();
             for (int i = 0; i < len; i++) {
@@ -2929,15 +2960,15 @@ public class GraphicFactory {
             List<Integer> idx = new ArrayList<>();
             for (int j = 0; j < len; j++) {
                 if (where.getInt(j) == 1) {
-                    if (!ob) {
-                        idx = new ArrayList<>();
-                    }
                     idx.add(j);
                 } else if (ob) {
                     idxs.add(idx);
+                    idx = new ArrayList<>();
                 }
                 ob = where.getInt(j) == 1;
             }
+            if (!idx.isEmpty())
+                idxs.add(idx);
             for (List<Integer> index : idxs) {
                 int nn = index.size();
                 if (nn >= 2) {
@@ -2982,6 +3013,21 @@ public class GraphicFactory {
         gc.setZDir(zdir);
         int len = (int) xdata.getSize();
         if (where == null) {
+            if (ArrayMath.containsNaN(y1data) || ArrayMath.containsNaN(y2data)){
+                where = new ArrayBoolean(new int[]{len});
+                double v1, v2;
+                for (int i = 0; i < len; i++){
+                    v1 = y1data.getDouble(i);
+                    v2 = y2data.getDouble(i);
+                    if (Double.isNaN(v1) || Double.isNaN(v2)){
+                        where.setBoolean(i, false);
+                    } else {
+                        where.setBoolean(i, true);
+                    }
+                }
+            }
+        }
+        if (where == null) {
             PolygonZShape pgs = new PolygonZShape();
             List<PointZ> points = new ArrayList<>();
             switch (zdir) {
@@ -3019,15 +3065,15 @@ public class GraphicFactory {
             List<Integer> idx = new ArrayList<>();
             for (int j = 0; j < len; j++) {
                 if (where.getInt(j) == 1) {
-                    if (!ob) {
-                        idx = new ArrayList<>();
-                    }
                     idx.add(j);
                 } else if (ob) {
                     idxs.add(idx);
+                    idx = new ArrayList<>();
                 }
                 ob = where.getInt(j) == 1;
             }
+            if (!idx.isEmpty())
+                idxs.add(idx);
             for (List<Integer> index : idxs) {
                 int nn = index.size();
                 if (nn >= 2) {
