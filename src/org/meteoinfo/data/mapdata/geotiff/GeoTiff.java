@@ -1,11 +1,11 @@
 /* Copyright 2012 Yaqiang Wang,
  * yaqiang.wang@gmail.com
- * 
+ *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation; either version 2.1 of the License, or (at
  * your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
@@ -31,8 +31,10 @@ import java.util.logging.Logger;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.data.GridArray;
 import org.meteoinfo.data.mapdata.geotiff.compression.CompressionDecoder;
+import org.meteoinfo.data.mapdata.geotiff.compression.DeflateCompression;
 import org.meteoinfo.data.mapdata.geotiff.compression.LZWCompression;
 import org.meteoinfo.global.DataConvert;
+import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.projection.KnownCoordinateSystems;
 import org.meteoinfo.projection.ProjectionInfo;
 import ucar.ma2.Array;
@@ -569,10 +571,10 @@ public class GeoTiff {
             ydelta = modelPixelScaleTag.valueD[1];
         }
         for (int i = 0; i < width; i++) {
-            X[i] = minLon + xdelta * i;
+            X[i] = BigDecimalUtil.add(minLon, BigDecimalUtil.mul(xdelta, i));
         }
         for (int i = 0; i < height; i++) {
-            Y[height - i - 1] = maxLat - ydelta * i;
+            Y[height - i - 1] = BigDecimalUtil.sub(maxLat, BigDecimalUtil.mul(ydelta, i));
         }
 
         List<double[]> xy = new ArrayList<>();
@@ -777,9 +779,9 @@ public class GeoTiff {
             if (gtModelTypeGeoKey.value() == 1) {
                 GeoKey projCoordTrans = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjCoordTrans);
                 GeoKey projStdParallel1 = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjStdParallel1);
-                double lat_1 = projStdParallel1.valueD(0);
+                double lat_1 = projStdParallel1 == null ? 0 : projStdParallel1.valueD(0);
                 GeoKey projStdParallel2 = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjStdParallel2);
-                double lat_2 = projStdParallel2.valueD(0);
+                double lat_2 = projStdParallel2 == null ? 0 :projStdParallel2.valueD(0);
                 GeoKey projCenterLong = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjNatOriginLong);
                 if (projCenterLong == null){
                     projCenterLong = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjCenterLong);
@@ -791,7 +793,17 @@ public class GeoTiff {
                 double x_0 = projFalseEasting == null ? 0 : projFalseEasting.valueD(0);
                 GeoKey projFalseNorthing = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.GeoKey_ProjFalseNorthing);
                 double y_0 = projFalseNorthing == null ? 0 : projFalseNorthing.valueD(0);
+                GeoKey projScaleAtNatOrigin = geoKeyDirectoryTag.findGeoKey(GeoKey.Tag.ProjScaleAtNatOriginGeoKey);
+                double k_0 = projScaleAtNatOrigin == null ? 1 : projScaleAtNatOrigin.valueD(0);
                 switch (projCoordTrans.value()) {
+                    case 1:    //Transverse Mercator
+                        projStr = "+proj=tmerc"
+                                + "+lat_0=" + String.valueOf(lat_0)
+                                + "+lon_0=" + String.valueOf(lon_0)
+                                + "+k_0=" + String.valueOf(k_0)
+                                + "+x_0=" + String.valueOf(x_0)
+                                + "+y_0=" + String.valueOf(y_0);
+                        break;
                     case 11:    //AlbersEqualArea
                         projStr = "+proj=aea"
                                 + "+lat_1=" + String.valueOf(lat_1)
@@ -970,7 +982,10 @@ public class GeoTiff {
                     case 5:
                         cDecoder = new LZWCompression();
                         break;
-                }                        
+                    case 8:
+                        cDecoder = new DeflateCompression();
+                        break;
+                }
             }
         }
         IFDEntry tileOffsetTag = findTag(Tag.TileOffsets);
@@ -1060,6 +1075,9 @@ public class GeoTiff {
                             tileIdx = i * hTileNum + j;
                             tileOffset = tileOffsetTag.value[tileIdx];
                             tileSize = tileSizeTag.value[tileIdx];
+                            if (tileSize == 0)
+                                continue;
+
                             buffer = testReadData(tileOffset, tileSize);
                             if (cDecoder != null){
                                 buffer = ByteBuffer.wrap(cDecoder.decode(buffer.array(), byteOrder));

@@ -70,10 +70,12 @@ public class GeoTiffDataInfo extends DataInfo implements IGridDataInfo {
             Dimension xDim = new Dimension(DimensionType.X);
             xDim.setValues(X);
             this.setXDimension(xDim);
+            this.addDimension(xDim);
             Dimension yDim = new Dimension(DimensionType.Y);
             yDim.setValues(Y);
             yDim.setReverse(true);
             this.setYDimension(yDim);
+            this.addDimension(yDim);
             this.bandNum = this.geoTiff.getBandNum();
             Dimension bDim = null;
             if (this.bandNum > 1){
@@ -110,19 +112,8 @@ public class GeoTiffDataInfo extends DataInfo implements IGridDataInfo {
 
     @Override
     public String generateInfoText() {
-        String dataInfo;
-        dataInfo = "File Name: " + this.getFileName();
-        dataInfo += System.getProperty("line.separator") + "Data Type: GeoTiff";
-        Dimension xdim = this.getXDimension();
-        Dimension ydim = this.getYDimension();
-        dataInfo += System.getProperty("line.separator") + "XNum = " + String.valueOf(xdim.getLength())
-                + "  YNum = " + String.valueOf(ydim.getLength());
-        dataInfo += System.getProperty("line.separator") + "XMin = " + String.valueOf(xdim.getValues()[0])
-                + "  YMin = " + String.valueOf(ydim.getValues()[0]);
-        dataInfo += System.getProperty("line.separator") + "XSize = " + String.valueOf(xdim.getValues()[1] - xdim.getValues()[0])
-                + "  YSize = " + String.valueOf(ydim.getValues()[1] - ydim.getValues()[0]);
-        dataInfo += System.getProperty("line.separator") + "UNDEF = " + String.valueOf(this.getMissingValue());
-        dataInfo += System.getProperty("line.separator") + "Variable = " + this.getVariableNames().get(0);
+        String dataInfo = "Data Type: GeoTiff";        
+        dataInfo += System.getProperty("line.separator") + super.generateInfoText();
 
         return dataInfo;
     }
