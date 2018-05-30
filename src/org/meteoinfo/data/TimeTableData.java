@@ -66,6 +66,7 @@ public class TimeTableData extends TableData {
      *
      * @return Time column name
      */
+    @Override
     public String getTimeColName() {
         return this.timeColName;
     }

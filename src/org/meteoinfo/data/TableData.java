@@ -85,6 +85,15 @@ public class TableData extends DataTable {
 //    public void setDataTable(DataTable value) {
 //        dataTable = value;
 //    }
+    
+    /**
+     * Get time column name
+     *
+     * @return Time column name
+     */
+    public String getTimeColName() {
+        return null;
+    }
 
     /**
      * Get missing value

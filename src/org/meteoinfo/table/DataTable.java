@@ -293,10 +293,11 @@ public class DataTable {
      * @return The data column
      */
     public DataColumn findColumn(String colName) {
-        String name;
+        if (colName == null)
+            return null;
+
         for (DataColumn col : this.columns) {
-            name = col.getColumnName();
-            if (name.equals(colName)) {
+            if (col.getColumnName().equals(colName)) {
                 return col;
             }
         }
@@ -341,6 +342,19 @@ public class DataTable {
         }
 
         return cols;
+    }
+    
+    /**
+     * Check if the table has time column
+     * @return Boolean
+     */
+    public boolean hasTimeColumn(){
+        for (DataColumn col : this.columns){
+            if (col.getDataType() == DataTypes.Date){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
