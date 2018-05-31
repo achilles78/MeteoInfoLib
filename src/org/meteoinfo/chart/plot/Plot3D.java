@@ -1969,13 +1969,13 @@ public class Plot3D extends Plot {
                     top += dim.height + 10;
                     break;
                 case LOWER_CENTER_OUTSIDE:
-                    bottom += dim.height + 10;
+                    bottom += dim.height + legend.getYShift() + 10;
                     break;
                 case LEFT_OUTSIDE:
                     left += dim.width + 10;
                     break;
                 case RIGHT_OUTSIDE:
-                    right += dim.width + 10;
+                    right += dim.width + legend.getXShift() + 10;
                     break;
             }
         }

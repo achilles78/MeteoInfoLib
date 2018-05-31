@@ -20,7 +20,7 @@ import java.awt.Rectangle;
  *
  * @author Yaqiang Wang
  */
-public class Extent implements Cloneable{
+public class Extent implements Cloneable {
     // <editor-fold desc="Variables">
     /// <summary>
     /// minimun x
@@ -100,9 +100,10 @@ public class Extent implements Cloneable{
             return false;
         }
     }
-    
+
     /**
      * Tests whether this extent intersects the second extent.
+     *
      * @param bET The second extent
      * @return Boolean
      */
@@ -140,29 +141,65 @@ public class Extent implements Cloneable{
     }
     
     /**
+     * Extends extent by ratio
+     * @param ratio The ratio
+     * @return Extended extent
+     */
+    public Extent extend(double ratio) {
+        double dx = this.getWidth() * ratio;
+        double dy = this.getHeight() * ratio;
+        return extend(dx, dy);
+    }
+
+    /**
      * Extends extent
+     *
      * @param dx X delta
      * @param dy Y delta
      * @return Extended extent
      */
-    public Extent extend(double dx, double dy){
+    public Extent extend(double dx, double dy) {
         return new Extent(minX - dx, maxX + dx, minY - dy, maxY + dy);
     }
-    
+
     /**
      * Get is NaN or not
+     *
      * @return Boolean
      */
-    public boolean isNaN(){
+    public boolean isNaN() {
         return Double.isNaN(minX) || Double.isNaN(maxX) || Double.isNaN(minY) || Double.isNaN(maxY);
     }
-    
+
     /**
      * Get is 3D or not
+     *
      * @return false
      */
-    public boolean is3D(){
+    public boolean is3D() {
         return false;
+    }
+
+    /**
+     * Return union extent
+     *
+     * @param ex Other extent
+     * @return Union extent
+     */
+    public Extent union(Extent ex) {
+        Extent cET = new Extent();
+        if (this.isNaN()) {
+            return (Extent) ex.clone();
+        } else if (ex.isNaN()) {
+            return (Extent) this.clone();
+        }
+
+        cET.minX = Math.min(this.minX, ex.minX);
+        cET.minY = Math.min(this.minY, ex.minY);
+        cET.maxX = Math.max(this.maxX, ex.maxX);
+        cET.maxY = Math.max(this.maxY, ex.maxY);
+
+        return cET;
     }
 
     /**
@@ -172,14 +209,7 @@ public class Extent implements Cloneable{
      */
     @Override
     public Object clone() {
-        Extent o = null;
-        try {
-            o = (Extent)super.clone();
-        } catch (CloneNotSupportedException ex) {
-            ex.printStackTrace();
-        }
-        
-        return o;
+        return new Extent(minX, maxX, minY, maxY);
     }
     // </editor-fold>
 }
