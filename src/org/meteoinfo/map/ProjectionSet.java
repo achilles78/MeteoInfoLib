@@ -288,8 +288,8 @@ public class ProjectionSet {
                 if (isJoin) {
                     List<Polyline> polyLines = new ArrayList<>();
                     Polyline aPL = new Polyline();
-                    List<PointD> pList = new ArrayList<>(aPLS.getPolylines().get(1).getPointList());
-                    List<PointD> bPList = new ArrayList<>(aPLS.getPolylines().get(0).getPointList());
+                    List<PointD> pList = (List<PointD>) new ArrayList<>(aPLS.getPolylines().get(1).getPointList());
+                    List<PointD> bPList = (List<PointD>) new ArrayList<>(aPLS.getPolylines().get(0).getPointList());
                     Collections.reverse(bPList);
                     pList.addAll(bPList);
                     aPL.setPointList(pList);

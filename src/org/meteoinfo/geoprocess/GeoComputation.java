@@ -1772,7 +1772,7 @@ public class GeoComputation {
                             timesArray[pIdx] += +1;
                             aLine = aLineList.get(bP.Id);
 
-                            newPList = new ArrayList<>(aLine.getPointList());
+                            newPList = (List<PointD>) new ArrayList<>(aLine.getPointList());
                             aPoint = newPList.get(0);
 
                             if (!(MIMath.doubleEquals(bP.Point.X, aPoint.X) && MIMath.doubleEquals(bP.Point.Y, aPoint.Y))) {
@@ -1843,7 +1843,7 @@ public class GeoComputation {
                             timesArray[pIdx] += +1;
                             aLine = aLineList.get(bP.Id);
 
-                            newPList = new ArrayList<>(aLine.getPointList());
+                            newPList = (List<PointD>) new ArrayList<>(aLine.getPointList());
                             aPoint = newPList.get(0);
 
                             if (!(MIMath.doubleEquals(bP.Point.X, aPoint.X) && MIMath.doubleEquals(bP.Point.Y, aPoint.Y))) {
