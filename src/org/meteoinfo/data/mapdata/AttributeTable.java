@@ -331,21 +331,22 @@ public final class AttributeTable implements Cloneable {
 
     private void load() throws FileNotFoundException, IOException {
         RandomAccessFile rafo = new RandomAccessFile(_file, "r");
-        FileChannel fco = rafo.getChannel();
-        MappedByteBuffer myReader = fco.map(FileChannel.MapMode.READ_ONLY, 0, fco.size());
+        //FileChannel fco = rafo.getChannel();
+        //MappedByteBuffer myReader = fco.map(FileChannel.MapMode.READ_ONLY, 0, fco.size());
 
         //FileInfo fi = new FileInfo(_fileName);
         // Encoding appears to be ASCII, not Unicode
         rafo.seek(_headerLength + 1);
-        ((Buffer) myReader).position(_headerLength + 1);
+        //((Buffer) myReader).position(_headerLength + 1);
         if ((int) rafo.length() == _headerLength) {
             // The file is empty, so we are done here
             return;
         }
         int length = (int) rafo.length() - (_headerLength) - 1;
         _byteContent = new byte[length];
-        myReader.get(_byteContent);
-        fco.close();
+        //myReader.get(_byteContent);
+        rafo.read(_byteContent);
+        //fco.close();
         rafo.close();
         //_characterContent = new char[length];            
         //Encoding.Default.GetChars(_byteContent, 0, length, _characterContent, 0);
