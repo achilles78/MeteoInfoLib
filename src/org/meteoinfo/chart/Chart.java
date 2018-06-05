@@ -467,7 +467,8 @@ public class Chart {
                     if (plot.isSubPlot || plot.isSameShrink()) {
                         plot.setPlotShrink(shrink);
                     } else {
-                        plot.setPlotShrink(this.getPlotShrink(g, area, plot));
+                        //plot.setPlotShrink(this.getPlotShrink(g, area, plot));
+                        plot.setPlotShrink(this.getPlotShrink(g, plotArea, plot));
                     }
                 }
                 if (plot instanceof MapPlot) {

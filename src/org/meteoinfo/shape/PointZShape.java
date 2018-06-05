@@ -35,7 +35,8 @@ public class PointZShape extends PointShape {
      * Constructor
      */
     public PointZShape(){
-        
+        this.point = new PointZ();
+        this.updateExtent((PointZ)this.point);
     }
     
     /**
@@ -82,8 +83,26 @@ public class PointZShape extends PointShape {
      */
     @Override
     public void setPoint(PointD aPoint) {
-        super.setPoint(aPoint);
-        PointZ p = (PointZ)aPoint;
+        PointZ p = (PointZ)this.point;
+        p.X = aPoint.X;
+        p.Y = aPoint.Y;  
+        this.updateExtent(p);
+    }
+    
+    /**
+     * Set point
+     * @param p PointZ
+     */
+    public void setPoint(PointZ p){
+        this.point = p;
+        this.updateExtent(p);
+    }
+    
+    /**
+     * Update extent
+     * @param p PointZ
+     */
+    public void updateExtent(PointZ p){
         Extent3D aExtent = new Extent3D();
         aExtent.minX = p.X;
         aExtent.maxX = p.X;

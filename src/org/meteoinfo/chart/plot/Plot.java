@@ -311,7 +311,7 @@ public abstract class Plot {
     private Rectangle2D positionArea = new Rectangle2D.Double();
     
     /**
-     * Get positioin area
+     * Get position area
      * @return position area
      */
     public Rectangle2D getPositionArea() {
