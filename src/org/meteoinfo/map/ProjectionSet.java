@@ -51,6 +51,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.meteoinfo.projection.proj4j.CRSFactory;
+import ucar.ma2.InvalidRangeException;
 
 /**
  *
@@ -59,7 +60,7 @@ import org.meteoinfo.projection.proj4j.CRSFactory;
 public class ProjectionSet {
     // <editor-fold desc="Variables">
 
-    private EventListenerList _listeners = new EventListenerList();
+    private final EventListenerList _listeners = new EventListenerList();
     CRSFactory _crsFactory = new CRSFactory();
     private ProjectionInfo _projInfo;
     //private String _projStr;
@@ -108,11 +109,7 @@ public class ProjectionSet {
      * @return Boolean
      */
     public boolean isLonLatMap() {
-        if ("longlat".equals(_projInfo.getCoordinateReferenceSystem().getProjection().toString().toLowerCase())) {
-            return true;
-        } else {
-            return false;
-        }
+        return "longlat".equals(_projInfo.getCoordinateReferenceSystem().getProjection().toString().toLowerCase());
     }
 
     /**
@@ -340,12 +337,13 @@ public class ProjectionSet {
             }
 
             oLayer.setGridData(oLayer.getGridData().project(oLayer.getProjInfo(), toProj));
-            if (oLayer.getLegendScheme().getBreakNum() < 50) {
-                oLayer.updateImage(oLayer.getLegendScheme());
-            } else {
-                oLayer.setPaletteByLegend();
-            }
-        } catch (Exception ex) {
+            oLayer.updateImage(oLayer.getLegendScheme());
+//            if (oLayer.getLegendScheme().getBreakNum() < 50) {
+//                oLayer.updateImage(oLayer.getLegendScheme());
+//            } else {
+//                oLayer.setPaletteByLegend();
+//            }
+        } catch (InvalidRangeException ex) {
             Logger.getLogger(ProjectionSet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -947,7 +945,8 @@ public class ProjectionSet {
                         break;
                     }
                 } else if (newPoints.size() > 2) {
-                    bPG.addHole(newPoints);
+                    if (bPG != null)
+                        bPG.addHole(newPoints);
                 }
             }
 
@@ -998,7 +997,8 @@ public class ProjectionSet {
                         break;
                     }
                 } else if (newPoints.size() > 2) {
-                    bPG.addHole(newPoints);
+                    if (bPG != null)
+                        bPG.addHole(newPoints);
                 }
             }
 
