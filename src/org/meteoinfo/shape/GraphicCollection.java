@@ -42,6 +42,7 @@ public class GraphicCollection extends Graphic implements Iterator {
     private LabelSet labelSet;
     private List<Graphic> labelPoints;
     private LegendScheme legendScheme;
+    private ColorBreak legendBreak;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 
@@ -158,6 +159,22 @@ public class GraphicCollection extends Graphic implements Iterator {
      */
     public void setLegendScheme(LegendScheme value){
         this.legendScheme = value;
+    }
+    
+    /**
+     * Get legend break
+     * @return Legend break
+     */
+    public ColorBreak getLegendBreak(){
+        return this.legendBreak;
+    }
+    
+    /**
+     * Set legend break
+     * @param value Legend break
+     */
+    public void setLegendBreak(ColorBreak value){
+        this.legendBreak = value;
     }
     
     /**
@@ -374,7 +391,10 @@ public class GraphicCollection extends Graphic implements Iterator {
      */
     @Override
     public ColorBreak getLegend(){
-        return this.graphics.get(0).getLegend();
+        if (this.legendBreak != null)
+            return this.legendBreak;
+        else
+            return this.graphics.get(0).getLegend();
     }
 
 
