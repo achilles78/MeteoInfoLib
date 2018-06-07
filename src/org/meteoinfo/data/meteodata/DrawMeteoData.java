@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.meteoinfo.data.ArrayMath;
+import org.meteoinfo.data.ArrayUtil;
 import org.meteoinfo.data.GridArray;
 import org.meteoinfo.data.XYListDataset;
 import org.meteoinfo.global.Extent;
@@ -1489,6 +1490,12 @@ public class DrawMeteoData {
     public static VectorLayer createSTPointLayer(Array data, Array x, Array y, LegendScheme aLS, String lName, String fieldName) {
         int i;
         PointD aPoint;
+        
+        if (data.getRank() == 2 && x.getRank() == 1) {
+            Array[] xy = ArrayUtil.meshgrid(x, y);
+            x = xy[0];
+            y = xy[1];
+        }
 
         VectorLayer aLayer = new VectorLayer(ShapeTypes.Point);
         aLayer.editAddField(fieldName, DataTypes.Double);
@@ -1582,6 +1589,12 @@ public class DrawMeteoData {
     public static VectorLayer createSTPointLayer_Unique(Array data, Array x, Array y, LegendScheme aLS, String lName, String fieldName) {
         int i;
         PointD aPoint;
+        
+        if (data.getRank() == 2 && x.getRank() == 1) {
+            Array[] xy = ArrayUtil.meshgrid(x, y);
+            x = xy[0];
+            y = xy[1];
+        }
 
         VectorLayer aLayer = new VectorLayer(ShapeTypes.Point);
         aLayer.editAddField("ID", DataTypes.Integer);
