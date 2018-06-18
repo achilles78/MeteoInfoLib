@@ -2172,6 +2172,24 @@ public class GridData {
     }
 
     /**
+     * Get if has missing value
+     *
+     * @return Boolean
+     */
+    public boolean hasMissing() {
+        boolean hasNaN = false;
+        for (int i = 0; i < getYNum(); i++) {
+            for (int j = 0; j < getXNum(); j++) {
+                if (java.lang.Double.isNaN(data[i][j]) || MIMath.doubleEquals(data[i][j], missingValue)) {
+                    hasNaN = true;
+                    break;
+                }
+            }
+        }
+        return hasNaN;
+    }
+    
+    /**
      * Get if has NaN value
      *
      * @return Boolean
@@ -2180,7 +2198,7 @@ public class GridData {
         boolean hasNaN = false;
         for (int i = 0; i < getYNum(); i++) {
             for (int j = 0; j < getXNum(); j++) {
-                if (java.lang.Double.isNaN(data[i][j]) || MIMath.doubleEquals(data[i][j], missingValue)) {
+                if (java.lang.Double.isNaN(data[i][j])) {
                     hasNaN = true;
                     break;
                 }

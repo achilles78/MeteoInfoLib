@@ -698,6 +698,21 @@ public class GraphicFactory {
         graphics.setLegendScheme(ls);
         return graphics;
     }
+    
+    /**
+     * Create graphics
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param zdata Z data array
+     * @param cb Color break
+     * @return LineString graphic
+     */
+    public static GraphicCollection createPoints3D(Array xdata, Array ydata, Array zdata, ColorBreak cb) {
+        List<ColorBreak> cbs = new ArrayList<>();
+        cbs.add(cb);
+        return createPoints3D(xdata, ydata, zdata, cbs);
+    }
 
     /**
      * Create graphics

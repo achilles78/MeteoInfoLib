@@ -524,6 +524,24 @@ public class ProjectionManage {
      *
      * @param oLayer The layer
      * @param toProj To projection info
+     * @param projectLabels If projectLabels
+     */
+    public static void projectLayer(VectorLayer oLayer, ProjectionInfo toProj, boolean projectLabels) {
+        double refLon = toProj.getCoordinateReferenceSystem().getProjection().getProjectionLongitudeDegrees();
+        refLon += 180;
+        if (refLon > 180) {
+            refLon = refLon - 360;
+        } else if (refLon < -180) {
+            refLon = refLon + 360;
+        }
+        projectLayer(oLayer, toProj, refLon, projectLabels);
+    }
+    
+    /**
+     * Project vector layer
+     *
+     * @param oLayer The layer
+     * @param toProj To projection info
      * @param refCutLon Reference clip longitude
      */
     public static void projectLayer(VectorLayer oLayer, ProjectionInfo toProj, double refCutLon) {
@@ -670,7 +688,15 @@ public class ProjectionManage {
 //                        }
 
                         if (aPLS.getExtent().minX <= refLon && aPLS.getExtent().maxX >= refLon) {
-                            plsList.add(GeoComputation.clipPolylineShape_Lon(aPLS, refLon));
+                            switch (toProj.getProjectionName()) {
+                                case North_Polar_Stereographic_Azimuthal:
+                                case South_Polar_Stereographic_Azimuthal:
+                                    plsList.add(aPLS);
+                                    break;
+                                default:
+                                    plsList.add(GeoComputation.clipPolylineShape_Lon(aPLS, refLon));
+                                    break;
+                            }                            
                         } else {
                             plsList.add(aPLS);
                         }
@@ -784,13 +810,17 @@ public class ProjectionManage {
     private static PointShape projectPointShape(PointShape aPS, ProjectionInfo fromProj, ProjectionInfo toProj) {
         PointShape newPS = (PointShape) aPS.clone();
         double[][] points = new double[1][];
-        points[0] = new double[]{newPS.getPoint().X, newPS.getPoint().Y};
-        double[] fromP = new double[]{newPS.getPoint().X, newPS.getPoint().Y};
+        PointD oP = newPS.getPoint();
+        points[0] = new double[]{oP.X, oP.Y};
+        double[] fromP = new double[]{oP.X, oP.Y};
         try {
             Reproject.reprojectPoints(points, fromProj, toProj, 0, points.length);
             if (!Double.isNaN(points[0][0]) && !Double.isNaN(points[0][1])) {
                 double[] toP = points[0];
-                newPS.setPoint(new PointD(points[0][0], points[0][1]));
+                PointD rp = (PointD)oP.clone();
+                rp.X = points[0][0];
+                rp.Y = points[0][1];
+                newPS.setPoint(rp);
                 switch (aPS.getShapeType()) {
                     case WindBarb:
                         ((WindBarb) newPS).angle = projectAngle(((WindBarb) newPS).angle, fromP, toP, fromProj, toProj);

@@ -1476,7 +1476,7 @@ public class LegendManage {
         if (isUnique) {
             List<Number> values = gdata.getUniqueValues();
             ls = LegendManage.createUniqValueLegendScheme(values, cmap, ShapeTypes.Polygon);
-        } else if (gdata.hasNaN()) {
+        } else if (gdata.hasMissing()) {
             ls = LegendManage.createLegendScheme(gdata.getMinValue(), gdata.getMaxValue(), cmap, Double.NaN);
         } else {
             ls = LegendManage.createLegendScheme(gdata.getMinValue(), gdata.getMaxValue(), cmap);
@@ -1517,7 +1517,7 @@ public class LegendManage {
      */
     public static LegendScheme createImageLegend(GridData gdata, int n, ColorMap cmap) {
         LegendScheme ls;
-        if (gdata.hasNaN()) {
+        if (gdata.hasMissing()) {
             ls = LegendManage.createLegendScheme(gdata.getMinValue(), gdata.getMaxValue(), n, cmap, 
                     LegendType.GraduatedColor, ShapeTypes.Image, true, Double.NaN);
         } else {
@@ -1562,7 +1562,7 @@ public class LegendManage {
         if (cmap.getColorCount() == levs.size()){
             ls = LegendManage.createUniqValueLegendScheme(levs, cmap, ShapeTypes.Image);
         } else {
-            if (gdata.hasNaN()) {
+            if (gdata.hasMissing()) {
                 ls = LegendManage.createLegendScheme(gdata.getMinValue(), gdata.getMaxValue(), levs, cmap, 
                         LegendType.GraduatedColor, ShapeTypes.Image, true, Double.NaN);
             } else {

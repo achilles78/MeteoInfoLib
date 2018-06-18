@@ -83,10 +83,13 @@ public class PointZShape extends PointShape {
      */
     @Override
     public void setPoint(PointD aPoint) {
-        PointZ p = (PointZ)this.point;
-        p.X = aPoint.X;
-        p.Y = aPoint.Y;  
-        this.updateExtent(p);
+        if (aPoint instanceof PointZ){
+            this.point = aPoint;
+        } else {
+            this.point.X = aPoint.X;
+            this.point.Y = aPoint.Y;  
+        }
+        this.updateExtent((PointZ)this.point);
     }
     
     /**

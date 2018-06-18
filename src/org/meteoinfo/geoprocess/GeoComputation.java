@@ -35,6 +35,7 @@ import org.meteoinfo.table.DataRow;
 import org.meteoinfo.table.DataTable;
 import org.meteoinfo.layer.VectorLayer;
 import org.meteoinfo.shape.PointShape;
+import org.meteoinfo.shape.PointZ;
 import org.meteoinfo.shape.Shape;
 
 /**
@@ -2212,6 +2213,9 @@ public class GeoComputation {
             IPoint.Y = tempRight / tempLeft;
         }
 
+        if (lineA.P1 instanceof PointZ) {
+            return new PointZ(IPoint.X, IPoint.Y, ((PointZ)lineA.P1).Z, ((PointZ)lineA.P1).M);
+        }
         return IPoint;
     }
 

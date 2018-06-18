@@ -45,6 +45,7 @@ import org.meteoinfo.shape.PointZ;
 import org.meteoinfo.shape.PointZShape;
 import org.meteoinfo.shape.PolygonZ;
 import org.meteoinfo.shape.PolygonZShape;
+import org.meteoinfo.shape.Polyline;
 import org.meteoinfo.shape.PolylineZShape;
 import org.meteoinfo.shape.Shape;
 import org.meteoinfo.shape.ShapeTypes;
@@ -1030,17 +1031,19 @@ public class Plot3D extends Plot {
         if (extent.intersects(graphic.getExtent())) {
             PolylineZShape shape = (PolylineZShape) graphic.getShape();
             PolylineBreak pb = (PolylineBreak) graphic.getLegend();
-            List<PointZ> ps = (List<PointZ>) shape.getPoints();
-            PointF[] points = new PointF[ps.size()];
-            PointZ p, pp;
-            for (int i = 0; i < ps.size(); i++) {
-                p = ps.get(i);
-                pp = new PointZ((p.X - xmin) * xfactor - 10, (p.Y - ymin) * yfactor - 10,
-                        (p.Z - this.zmin) * zfactor - 10);
-                projection = projector.project((float) pp.X, (float) pp.Y, (float) pp.Z);
-                points[i] = new PointF(projection.x, projection.y);
+            for (Polyline line : shape.getPolylines()){
+                List<PointZ> ps = (List<PointZ>)line.getPointList();
+                PointF[] points = new PointF[ps.size()];
+                PointZ p, pp;
+                for (int i = 0; i < ps.size(); i++) {
+                    p = ps.get(i);
+                    pp = new PointZ((p.X - xmin) * xfactor - 10, (p.Y - ymin) * yfactor - 10,
+                            (p.Z - this.zmin) * zfactor - 10);
+                    projection = projector.project((float) pp.X, (float) pp.Y, (float) pp.Z);
+                    points[i] = new PointF(projection.x, projection.y);
+                }
+                Draw.drawPolyline(points, pb, g);
             }
-            Draw.drawPolyline(points, pb, g);
         }
     }
 

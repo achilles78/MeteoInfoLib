@@ -178,6 +178,7 @@ import org.meteoinfo.legend.LegendType;
 import static org.meteoinfo.legend.LegendType.GraduatedColor;
 import static org.meteoinfo.legend.LegendType.SingleSymbol;
 import static org.meteoinfo.legend.LegendType.UniqueValue;
+import org.meteoinfo.projection.ProjectionManage;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.ChartGraphic;
 import org.meteoinfo.shape.PointZShape;
@@ -3468,7 +3469,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                 }
 
                 if (!aLayer.getProjInfo().equals(_projection.getProjInfo())) {
-                    _projection.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
+                    ProjectionManage.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
                 }
                 break;
             case RasterLayer:
@@ -3490,7 +3491,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             case VectorLayer:
                 VectorLayer aLayer = (VectorLayer) layer;
                 if (!aLayer.getProjInfo().equals(_projection.getProjInfo())) {
-                    _projection.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
+                    ProjectionManage.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
                 }
                 break;
             case RasterLayer:
