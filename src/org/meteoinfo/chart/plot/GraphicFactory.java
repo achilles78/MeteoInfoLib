@@ -2850,6 +2850,71 @@ public class GraphicFactory {
 
         return gc;
     }
+    
+    /**
+     * Create grid polygons
+     *
+     * @param x_s X array - 1D
+     * @param y_s Y array - 1D
+     * @param a scatter value array - 2D
+     * @param ls Legend scheme
+     * @return Grid polygons
+     */
+    public static GraphicCollection createGridPolygons(Array x_s, Array y_s, Array a, LegendScheme ls){
+        GraphicCollection gc = new GraphicCollection();
+
+        int colNum = (int)x_s.getSize();
+        int rowNum = (int)y_s.getSize();
+        double x, x1 = 0, x2, y, y1 = 0, y2, xd, yd, v;
+        PolygonBreak pb;
+        for (int i = 0; i < rowNum; i++) {
+            if (i == 0)
+                y1 = y_s.getDouble(i);
+            y = y_s.getDouble(i);
+            if (i < rowNum - 1) {                
+                y2 = y_s.getDouble(i + 1);
+                yd = y2 - y;                
+            } else {
+                y2 = y_s.getDouble(i - 1);
+                yd = y - y2;
+            }
+            if (i == 0)
+                y1 = y1 - yd * 0.5;
+            y2 = y + yd * 0.5;
+            for (int j = 0; j < colNum; j++) {
+                if (j == 0)
+                    x1 = x_s.getDouble(j);
+                x = x_s.getDouble(j);
+                if (j < colNum - 1) {
+                    x2 = x_s.getDouble(j + 1);
+                    xd = x2 - x;
+                } else {
+                    x2 = x_s.getDouble(j - 1);
+                    xd = x - x2;
+                }
+                x2 = x + xd * 0.5;
+                PolygonShape ps = new PolygonShape();
+                List<PointD> points = new ArrayList<>();
+                points.add(new PointD(x1, y1));
+                points.add(new PointD(x1, y2));
+                points.add(new PointD(x2, y2));
+                points.add(new PointD(x2, y1));
+                points.add((PointD) points.get(0).clone());
+                ps.setPoints(points);
+                v = a.getDouble(i * colNum + j);
+                pb = (PolygonBreak)ls.findLegendBreak(v);
+                Graphic graphic = new Graphic(ps, pb);
+                gc.add(graphic);    
+                x1 = x2;
+            }
+            y1 = y2;
+        }
+        
+        gc.setSingleLegend(false);
+        gc.setLegendScheme(ls);
+
+        return gc;
+    }
 
     /**
      * Create fill between polygons

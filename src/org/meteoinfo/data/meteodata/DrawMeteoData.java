@@ -52,6 +52,7 @@ import org.meteoinfo.layer.RasterLayer;
 import org.meteoinfo.layer.WorldFilePara;
 import org.meteoinfo.legend.LegendType;
 import org.meteoinfo.legend.PointBreak;
+import org.meteoinfo.legend.PolygonBreak;
 import org.meteoinfo.shape.Graphic;
 import org.meteoinfo.shape.ImageShape;
 import org.meteoinfo.shape.StationModelShape;
@@ -772,6 +773,84 @@ public class DrawMeteoData {
         aLayer.setLayerName(lName);
         aLS.setFieldName(fieldName);
         aLayer.setLegendScheme(aLS.convertTo(ShapeTypes.Polygon));
+        aLayer.setLayerDrawType(LayerDrawType.GridFill);
+
+        return aLayer;
+    }
+    
+    /**
+     * Create grid fill layer
+     *
+     * @param x_s X array
+     * @param y_s Y array
+     * @param a Data array
+     * @param ls Legend scheme
+     * @param lName Layer name
+     * @param fieldName Field name
+     * @return Vector layer
+     */
+    public static VectorLayer createGridFillLayer(Array x_s, Array y_s, Array a, LegendScheme ls, String lName, String fieldName) {
+        VectorLayer aLayer = new VectorLayer(ShapeTypes.Polygon);
+        Field aDC = new Field(fieldName, DataTypes.Double);
+        aLayer.editAddField(aDC);
+        
+        int colNum = (int)x_s.getSize();
+        int rowNum = (int)y_s.getSize();
+        double x, x1 = 0, x2, y, y1 = 0, y2, xd, yd, v;
+        PolygonBreak pb;
+        for (int i = 0; i < rowNum; i++) {
+            if (i == 0)
+                y1 = y_s.getDouble(i);
+            y = y_s.getDouble(i);
+            if (i < rowNum - 1) {                
+                y2 = y_s.getDouble(i + 1);
+                yd = y2 - y;                
+            } else {
+                y2 = y_s.getDouble(i - 1);
+                yd = y - y2;
+            }
+            if (i == 0)
+                y1 = y1 - yd * 0.5;
+            y2 = y + yd * 0.5;
+            for (int j = 0; j < colNum; j++) {
+                if (j == 0)
+                    x1 = x_s.getDouble(j);
+                x = x_s.getDouble(j);
+                if (j < colNum - 1) {
+                    x2 = x_s.getDouble(j + 1);
+                    xd = x2 - x;
+                } else {
+                    x2 = x_s.getDouble(j - 1);
+                    xd = x - x2;
+                }
+                x2 = x + xd * 0.5;
+                PolygonShape ps = new PolygonShape();
+                List<PointD> points = new ArrayList<>();
+                points.add(new PointD(x1, y1));
+                points.add(new PointD(x1, y2));
+                points.add(new PointD(x2, y2));
+                points.add(new PointD(x2, y1));
+                points.add((PointD) points.get(0).clone());
+                ps.setPoints(points);
+                v = a.getDouble(i * colNum + j);
+                ps.lowValue = v;
+                ps.highValue = v;
+                int shapeNum = aLayer.getShapeNum();
+                try {
+                    if (aLayer.editInsertShape(ps, shapeNum)) {
+                        aLayer.editCellValue(fieldName, shapeNum, v);
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(DrawMeteoData.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                x1 = x2;
+            }
+            y1 = y2;
+        }
+
+        aLayer.setLayerName(lName);
+        ls.setFieldName(fieldName);
+        aLayer.setLegendScheme(ls.convertTo(ShapeTypes.Polygon));
         aLayer.setLayerDrawType(LayerDrawType.GridFill);
 
         return aLayer;
