@@ -179,6 +179,15 @@ public class Extent implements Cloneable {
     public boolean is3D() {
         return false;
     }
+    
+    /**
+     * Convert to Extent3D
+     * @return Extent3D
+     */
+    public Extent3D to3D() {
+        Extent3D ex3d = new Extent3D(this.minX, this.maxX, this.minY, this.maxY, 0, 0);
+        return ex3d;
+    }
 
     /**
      * Return union extent

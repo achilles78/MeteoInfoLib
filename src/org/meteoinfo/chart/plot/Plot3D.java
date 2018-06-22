@@ -33,6 +33,7 @@ import org.meteoinfo.chart.plot3d.Projector;
 import org.meteoinfo.data.DataMath;
 import org.meteoinfo.data.Dataset;
 import org.meteoinfo.drawing.Draw;
+import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.Extent3D;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointF;
@@ -509,7 +510,11 @@ public class Plot3D extends Plot {
      */
     public void addGraphic(Graphic g) {
         this.graphics.add(g);
-        this.setExtent((Extent3D) this.graphics.getExtent());
+        Extent ex = this.graphics.getExtent();
+        if (!ex.is3D()){
+            ex = ex.to3D();
+        }
+        this.setExtent((Extent3D)ex);
     }
 
     /**

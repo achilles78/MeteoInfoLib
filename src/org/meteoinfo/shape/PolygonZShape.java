@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.MIMath;
-import org.meteoinfo.global.PointD;
 
 /**
  *
