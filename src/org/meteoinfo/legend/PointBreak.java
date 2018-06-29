@@ -46,7 +46,7 @@ public class PointBreak extends ColorBreak {
      */
     public PointBreak() {
         super();
-        this.setBreakType(BreakTypes.PointBreak);
+        this._breakType = BreakTypes.PointBreak;
         _markerType = MarkerType.Simple;
         _fontName = "Arial";
         _charIndex = 0;

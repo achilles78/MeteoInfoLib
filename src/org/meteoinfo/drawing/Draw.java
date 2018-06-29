@@ -59,6 +59,7 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import org.meteoinfo.chart.plot.XAlign;
 import org.meteoinfo.chart.plot.YAlign;
+import org.meteoinfo.legend.ColorBreakCollection;
 import org.meteoinfo.legend.HatchStyle;
 import org.meteoinfo.shape.EllipseShape;
 import org.meteoinfo.shape.Polygon;
@@ -1236,7 +1237,7 @@ public class Draw {
             drawString(g, x, y, s, x_align, y_align, useExternalFont);
         } else {
             AffineTransform tempTrans = g.getTransform();
-            AffineTransform myTrans = transform(g, x, y, s, x_align, y_align, angle);            
+            AffineTransform myTrans = transform(g, x, y, s, x_align, y_align, angle);
             g.setTransform(myTrans);
             Draw.drawString(g, s, 0, 0, useExternalFont);
             g.setTransform(tempTrans);
@@ -2354,6 +2355,50 @@ public class Draw {
                     Draw.drawArraw(g, bPoint, angle, 8);
                     break;
             }
+        }
+    }
+
+    /**
+     * Draw polyline
+     *
+     * @param points The points
+     * @param pbc The polyline break collection
+     * @param g Graphics2D
+     */
+    public static void drawPolyline(PointF[] points, ColorBreakCollection pbc, Graphics2D g) {
+        GeneralPath path = new GeneralPath(GeneralPath.WIND_EVEN_ODD, points.length);
+        PointF p;
+        PolylineBreak aPLB;
+        List<PointF> drawPs = new ArrayList<>();
+        for (int i = 0; i < points.length; i++) {
+            p = points[i];
+            if (i == 0) {
+                path.moveTo(p.X, p.Y);
+            } else {
+                path.lineTo(p.X, p.Y);
+
+                aPLB = (PolylineBreak) pbc.get(i);
+                Color aColor = aPLB.getColor();
+                Float size = aPLB.getSize();
+                float[] dashPattern = getDashPattern(aPLB.getStyle());
+                BasicStroke pen = new BasicStroke(size, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f);
+                g.setColor(aColor);
+                g.setStroke(pen);
+                g.draw(path);
+                path.reset();
+                path.moveTo(p.X, p.Y);
+                //Draw symbol            
+                if (aPLB.getDrawSymbol()) {
+                    Object rend = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    for (int j = 0; j < drawPs.size(); j++) {
+                        Draw.drawPoint(aPLB.getSymbolStyle(), p, aPLB.getSymbolFillColor(), aPLB.getSymbolColor(),
+                                aPLB.getSymbolSize(), true, aPLB.isFillSymbol(), g);
+                    }
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, rend);
+                }
+            }
+            drawPs.add(p);
         }
     }
 

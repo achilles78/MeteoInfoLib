@@ -379,6 +379,20 @@ public class LegendScheme {
     }
     
     /**
+     * Find breaks
+     * @param values Values
+     * @return Color breaks
+     */
+    public List<ColorBreak> findBreaks(List<Double> values){
+        List<ColorBreak> cbs = new ArrayList<>();
+        for (double v : values) {
+            cbs.add(findLegendBreak(v));
+        }
+        
+        return cbs;
+    }
+    
+    /**
      * Find legend break by value
      * @param v Value
      * @return Legend break

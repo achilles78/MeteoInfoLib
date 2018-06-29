@@ -45,6 +45,7 @@ import org.meteoinfo.global.PointF;
 import org.meteoinfo.legend.BarBreak;
 import static org.meteoinfo.legend.BreakTypes.LabelBreak;
 import org.meteoinfo.legend.ColorBreak;
+import org.meteoinfo.legend.ColorBreakCollection;
 import org.meteoinfo.legend.LabelBreak;
 import org.meteoinfo.legend.LegendScheme;
 import org.meteoinfo.legend.PointBreak;
@@ -314,10 +315,16 @@ public class Plot2D extends AbstractPlot2D {
                         if (shape instanceof CapPolylineShape){
                             this.drawCapPolyline(g, (CapPolylineShape) shape, (PolylineBreak) cb, area);
                         } else {
-                            if (cb instanceof PointBreak) {
-                                this.drawPolyline(g, (PolylineShape) shape, (PointBreak) cb, area);
-                            } else {
-                                this.drawPolyline(g, (PolylineShape) shape, (PolylineBreak) cb, area);
+                            switch (cb.getBreakType()){
+                                case PointBreak:
+                                    this.drawPolyline(g, (PolylineShape) shape, (PointBreak) cb, area);
+                                    break;
+                                case PolylineBreak:
+                                    this.drawPolyline(g, (PolylineShape) shape, (PolylineBreak) cb, area);
+                                    break;
+                                case ColorBreakCollection:
+                                    this.drawPolyline(g, (PolylineShape) shape, (ColorBreakCollection) cb, area);
+                                    break;
                             }
                         }
                         break;
@@ -467,6 +474,19 @@ public class Plot2D extends AbstractPlot2D {
                 points[i] = new PointF((float) sXY[0], (float) sXY[1]);
             }
             Draw.drawPolyline(points, aPLB, g);
+        }
+    }
+    
+    private void drawPolyline(Graphics2D g, PolylineShape aPLS, ColorBreakCollection cpc, Rectangle2D area) {
+        for (Polyline aline : aPLS.getPolylines()) {
+            double[] sXY;
+            PointF[] points = new PointF[aline.getPointList().size()];
+            for (int i = 0; i < aline.getPointList().size(); i++) {
+                PointD wPoint = aline.getPointList().get(i);
+                sXY = projToScreen(wPoint.X, wPoint.Y, area);
+                points[i] = new PointF((float) sXY[0], (float) sXY[1]);
+            }
+            Draw.drawPolyline(points, cpc, g);
         }
     }
     

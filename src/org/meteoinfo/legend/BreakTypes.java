@@ -27,5 +27,6 @@ public enum BreakTypes {
     ColorBreak,
     VectorBreak,
     LabelBreak,
-    ChartBreak;
+    ChartBreak,
+    ColorBreakCollection
 }

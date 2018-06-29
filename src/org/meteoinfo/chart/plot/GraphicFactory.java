@@ -33,6 +33,7 @@ import org.meteoinfo.layer.ImageLayer;
 import org.meteoinfo.layer.VectorLayer;
 import org.meteoinfo.legend.BarBreak;
 import org.meteoinfo.legend.ColorBreak;
+import org.meteoinfo.legend.ColorBreakCollection;
 import org.meteoinfo.legend.LegendManage;
 import org.meteoinfo.legend.LegendScheme;
 import org.meteoinfo.legend.LegendType;
@@ -164,6 +165,61 @@ public class GraphicFactory {
             }
             pls.setPoints(points);
             gc.add(new Graphic(pls, cb));
+        }
+
+        return gc;
+    }
+    
+    /**
+     * Create LineString graphic
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param cbs Color break list
+     * @param iscurve Is curve line or not
+     * @return LineString graphic
+     */
+    public static GraphicCollection createLineString(Array xdata, Array ydata, List<ColorBreak> cbs, boolean iscurve) {
+        GraphicCollection gc = new GraphicCollection();
+        PolylineShape pls;
+        List<PointD> points = new ArrayList<>();
+        ColorBreakCollection cbc = new ColorBreakCollection();
+        double x, y;
+        ColorBreak cb = cbs.get(0);
+        for (int i = 0; i < xdata.getSize(); i++) {
+            x = xdata.getDouble(i);
+            y = ydata.getDouble(i);
+            if (cbs.size() > i)
+                cb = cbs.get(i);
+            if (Double.isNaN(y) || Double.isNaN(x)) {
+                if (points.isEmpty()) {
+                    continue;
+                }
+                if (points.size() == 1) {
+                    points.add((PointD) points.get(0).clone());
+                }
+                if (iscurve) {
+                    pls = new CurveLineShape();
+                } else {
+                    pls = new PolylineShape();
+                }
+                pls.setPoints(points);
+                gc.add(new Graphic(pls, cbc));
+                points = new ArrayList<>();
+                cbc = new ColorBreakCollection();
+            } else {
+                points.add(new PointD(x, y));
+                cbc.add(cb);
+            }
+        }
+        if (points.size() > 1) {
+            if (iscurve) {
+                pls = new CurveLineShape();
+            } else {
+                pls = new PolylineShape();
+            }
+            pls.setPoints(points);
+            gc.add(new Graphic(pls, cbc));
         }
 
         return gc;
