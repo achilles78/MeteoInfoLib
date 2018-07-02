@@ -225,7 +225,7 @@ public class GraphicFactory {
 
         return gc;
     }
-    
+
     /**
      * Create LineString graphic
      *
@@ -360,7 +360,7 @@ public class GraphicFactory {
 
         return gc;
     }
-    
+
     /**
      * Create 3D LineString graphic
      *
@@ -371,7 +371,7 @@ public class GraphicFactory {
      * @param ls Legend scheme
      * @return LineString graphic
      */
-    public static GraphicCollection createLineString3D(Array xdata, Array ydata, Array zdata, Array mdata, 
+    public static GraphicCollection createLineString3D(Array xdata, Array ydata, Array zdata, Array mdata,
             LegendScheme ls) {
         GraphicCollection3D gc = new GraphicCollection3D();
         PolylineZShape pls;
@@ -996,31 +996,40 @@ public class GraphicFactory {
         GraphicCollection3D stemlines = new GraphicCollection3D();
         PointShape ps;
         boolean fixZ = false;
-        double z = 0;
+        double x, y, z, z0 = 0;
         if (zdata.getSize() == 1 && xdata.getSize() > 1) {
             fixZ = true;
-            z = zdata.getDouble(0);
+            z0 = zdata.getDouble(0);
         }
         List<PointZ> pzs;
         PolylineZShape pls;
         if (cbs.size() == xdata.getSize()) {
             for (int i = 0; i < xdata.getSize(); i++) {
+                x = xdata.getDouble(i);
+                y = ydata.getDouble(i);
+                if (Double.isNaN(x) || Double.isNaN(y)) {
+                    continue;
+                }
                 ps = new PointZShape();
                 pzs = new ArrayList<>();
                 if (fixZ) {
-                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
-                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
-                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                    ps.setPoint(new PointZ(x, y, z0));
+                    pzs.add(new PointZ(x, y, bottom));
+                    pzs.add(new PointZ(x, y, z0));
                 } else {
-                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
-                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
-                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+                    z = zdata.getDouble(i);
+                    if (Double.isNaN(z)) {
+                        continue;
+                    }
+                    ps.setPoint(new PointZ(x, y, z));
+                    pzs.add(new PointZ(x, y, bottom));
+                    pzs.add(new PointZ(x, y, z));
                 }
                 graphics.add(new Graphic(ps, cbs.get(i)));
                 pls = new PolylineZShape();
                 pls.setPoints(pzs);
-                if (sameStemColor){
-                    PolylineBreak nplb = (PolylineBreak)plb.clone();
+                if (sameStemColor) {
+                    PolylineBreak nplb = (PolylineBreak) plb.clone();
                     nplb.setColor(cbs.get(i).getColor());
                     stemlines.add(new Graphic(pls, nplb));
                 } else {
@@ -1038,9 +1047,9 @@ public class GraphicFactory {
                 ps = new PointZShape();
                 pzs = new ArrayList<>();
                 if (fixZ) {
-                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z0));
                     pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
-                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z0));
                 } else {
                     ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
                     pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
@@ -1049,8 +1058,8 @@ public class GraphicFactory {
                 graphics.add(new Graphic(ps, cbs.get(0)));
                 pls = new PolylineZShape();
                 pls.setPoints(pzs);
-                if (sameStemColor){
-                    PolylineBreak nplb = (PolylineBreak)plb.clone();
+                if (sameStemColor) {
+                    PolylineBreak nplb = (PolylineBreak) plb.clone();
                     nplb.setColor(cbs.get(0).getColor());
                     stemlines.add(new Graphic(pls, nplb));
                 } else {
@@ -1063,9 +1072,9 @@ public class GraphicFactory {
             ls.setShapeType(ShapeTypes.Point);
             graphics.setLegendScheme(ls);
         }
-        return new GraphicCollection[]{graphics, stemlines};
+        return new GraphicCollection[]{stemlines, graphics};
     }
-    
+
     /**
      * Create 3D stem graphics
      *
@@ -1087,32 +1096,41 @@ public class GraphicFactory {
         double c;
         ColorBreak cb;
         boolean fixZ = false;
-        double z = 0;
+        double x, y, z, z0 = 0;
         if (zdata.getSize() == 1 && xdata.getSize() > 1) {
             fixZ = true;
-            z = zdata.getDouble(0);
+            z0 = zdata.getDouble(0);
         }
         List<PointZ> pzs;
         PolylineZShape pls;
         for (int i = 0; i < xdata.getSize(); i++) {
+            x = xdata.getDouble(i);
+            y = ydata.getDouble(i);
+            if (Double.isNaN(x) || Double.isNaN(y)) {
+                continue;
+            }
             ps = new PointZShape();
             pzs = new ArrayList<>();
             if (fixZ) {
-                ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
-                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
-                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                ps.setPoint(new PointZ(x, y, z0));
+                pzs.add(new PointZ(x, y, bottom));
+                pzs.add(new PointZ(x, y, z0));
             } else {
-                ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
-                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
-                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+                z = zdata.getDouble(i);
+                if (Double.isNaN(z)) {
+                    continue;
+                }
+                ps.setPoint(new PointZ(x, y, z));
+                pzs.add(new PointZ(x, y, bottom));
+                pzs.add(new PointZ(x, y, z));
             }
             c = cdata.getDouble(i);
             cb = ls.findLegendBreak(c);
             graphics.add(new Graphic(ps, cb));
             pls = new PolylineZShape();
             pls.setPoints(pzs);
-            if (sameStemColor){
-                PolylineBreak nplb = (PolylineBreak)plb.clone();
+            if (sameStemColor) {
+                PolylineBreak nplb = (PolylineBreak) plb.clone();
                 nplb.setColor(cb.getColor());
                 stemlines.add(new Graphic(pls, nplb));
             } else {
@@ -1121,7 +1139,7 @@ public class GraphicFactory {
         }
         graphics.setSingleLegend(false);
         graphics.setLegendScheme(ls);
-        return new GraphicCollection[]{graphics, stemlines};
+        return new GraphicCollection[]{stemlines, graphics};
     }
 
     /**
@@ -1863,6 +1881,8 @@ public class GraphicFactory {
         for (int i = 0; i < n; i++) {
             x = xdata.getDouble(i);
             y = ydata.getDouble(i);
+            if (Double.isNaN(x) || Double.isNaN(y))
+                continue;
             // Add stem
             if (y < miny) {
                 baseLine = true;
