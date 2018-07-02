@@ -1834,7 +1834,10 @@ public class Draw {
                 }
                 break;
             case Polyline:
-                drawPolyline(points, (PolylineBreak) aGraphic.getLegend(), g);
+                if (aGraphic.getLegend().getBreakType() == BreakTypes.ColorBreakCollection){
+                    drawPolyline(points, (ColorBreakCollection)aGraphic.getLegend(), g);
+                } else
+                    drawPolyline(points, (PolylineBreak) aGraphic.getLegend(), g);
                 break;
             case Polygon:
                 PolygonShape pgs = (PolygonShape) aGraphic.getShape().clone();

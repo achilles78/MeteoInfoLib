@@ -44,6 +44,7 @@ import org.meteoinfo.map.GridLabel;
 import org.meteoinfo.map.MapView;
 import org.meteoinfo.projection.KnownCoordinateSystems;
 import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.CircleShape;
 import org.meteoinfo.shape.CurveLineShape;
@@ -326,6 +327,23 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
      */
     public void addGraphic(Graphic graphic) {
         this.getMapView().addGraphic(graphic);
+    }
+    /**
+     * Add a graphic
+     * @param graphic The graphic
+     * @param proj The graphic projection
+     * @return Added graphic
+     */
+    public Graphic addGrahic(Graphic graphic, ProjectionInfo proj) {
+        ProjectionInfo toProj = this.getMapView().getProjection().getProjInfo();
+        if (proj.equals(toProj)) {
+            this.getMapView().addGraphic(graphic);
+            return graphic;
+        } else {
+            Graphic nGraphic = ProjectionUtil.projectGraphic(graphic, proj, toProj);
+            this.getMapView().addGraphic(nGraphic);
+            return nGraphic;
+        }
     }
 
     /**

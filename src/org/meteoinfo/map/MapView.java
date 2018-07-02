@@ -178,7 +178,7 @@ import org.meteoinfo.legend.LegendType;
 import static org.meteoinfo.legend.LegendType.GraduatedColor;
 import static org.meteoinfo.legend.LegendType.SingleSymbol;
 import static org.meteoinfo.legend.LegendType.UniqueValue;
-import org.meteoinfo.projection.ProjectionManage;
+import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.ChartGraphic;
 import org.meteoinfo.shape.PointZShape;
@@ -3469,7 +3469,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                 }
 
                 if (!aLayer.getProjInfo().equals(_projection.getProjInfo())) {
-                    ProjectionManage.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
+                    ProjectionUtil.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
                 }
                 break;
             case RasterLayer:
@@ -3491,7 +3491,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             case VectorLayer:
                 VectorLayer aLayer = (VectorLayer) layer;
                 if (!aLayer.getProjInfo().equals(_projection.getProjInfo())) {
-                    ProjectionManage.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
+                    ProjectionUtil.projectLayer(aLayer, _projection.getProjInfo(), projectLabels);
                 }
                 break;
             case RasterLayer:
@@ -5873,9 +5873,16 @@ public class MapView extends JPanel implements IWebMapPanel {
 
             Object aSM = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            for (Graphic aGraphic : _graphicCollection.getGraphics()) {
-                drawGraphic(g, aGraphic, lonShift);
+            for (int i = 0; i < this._graphicCollection.getNumGraphics(); i++){
+                Graphic graphic = this._graphicCollection.get(i);
+                for (int j = 0; j < graphic.getNumGraphics(); j++) {
+                    Graphic gg = graphic.getGraphicN(j);
+                    drawGraphic(g, gg, lonShift);
+                }
             }
+//            for (Graphic aGraphic : _graphicCollection.getGraphics()) {
+//                drawGraphic(g, aGraphic, lonShift);
+//            }
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aSM);
         }
     }

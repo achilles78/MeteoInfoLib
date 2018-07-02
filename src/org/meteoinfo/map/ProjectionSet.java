@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
-import org.meteoinfo.projection.ProjectionManage;
+import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.proj4j.CRSFactory;
 import ucar.ma2.InvalidRangeException;
 
@@ -250,7 +250,7 @@ public class ProjectionSet {
                 case VectorLayer:
                     VectorLayer oLayer = (VectorLayer) aMapView.getLayers().get(i);
                     //projectLayer(oLayer, toProj);
-                    ProjectionManage.projectLayer(oLayer, toProj);
+                    ProjectionUtil.projectLayer(oLayer, toProj);
                     break;
                 case RasterLayer:
                     RasterLayer oRLayer = (RasterLayer) aMapView.getLayers().get(i);

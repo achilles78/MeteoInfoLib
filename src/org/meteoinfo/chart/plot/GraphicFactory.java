@@ -169,7 +169,7 @@ public class GraphicFactory {
 
         return gc;
     }
-    
+
     /**
      * Create LineString graphic
      *
@@ -189,8 +189,9 @@ public class GraphicFactory {
         for (int i = 0; i < xdata.getSize(); i++) {
             x = xdata.getDouble(i);
             y = ydata.getDouble(i);
-            if (cbs.size() > i)
+            if (cbs.size() > i) {
                 cb = cbs.get(i);
+            }
             if (Double.isNaN(y) || Double.isNaN(x)) {
                 if (points.isEmpty()) {
                     continue;
@@ -221,6 +222,63 @@ public class GraphicFactory {
             pls.setPoints(points);
             gc.add(new Graphic(pls, cbc));
         }
+
+        return gc;
+    }
+    
+    /**
+     * Create LineString graphic
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param zdata Z data array
+     * @param ls Legend scheme
+     * @param iscurve Is curve line or not
+     * @return LineString graphic
+     */
+    public static GraphicCollection createLineString(Array xdata, Array ydata, Array zdata, LegendScheme ls, boolean iscurve) {
+        GraphicCollection gc = new GraphicCollection();
+        PolylineShape pls;
+        List<PointD> points = new ArrayList<>();
+        ColorBreakCollection cbc = new ColorBreakCollection();
+        double x, y, z;
+        ColorBreak cb;
+        for (int i = 0; i < xdata.getSize(); i++) {
+            x = xdata.getDouble(i);
+            y = ydata.getDouble(i);
+            z = zdata.getDouble(i);
+            cb = ls.findLegendBreak(z);
+            if (Double.isNaN(y) || Double.isNaN(x)) {
+                if (points.isEmpty()) {
+                    continue;
+                }
+                if (points.size() == 1) {
+                    points.add((PointD) points.get(0).clone());
+                }
+                if (iscurve) {
+                    pls = new CurveLineShape();
+                } else {
+                    pls = new PolylineShape();
+                }
+                pls.setPoints(points);
+                gc.add(new Graphic(pls, cbc));
+                points = new ArrayList<>();
+                cbc = new ColorBreakCollection();
+            } else {
+                points.add(new PointD(x, y));
+                cbc.add(cb);
+            }
+        }
+        if (points.size() > 1) {
+            if (iscurve) {
+                pls = new CurveLineShape();
+            } else {
+                pls = new PolylineShape();
+            }
+            pls.setPoints(points);
+            gc.add(new Graphic(pls, cbc));
+        }
+        gc.setLegendScheme(ls);
 
         return gc;
     }
@@ -262,7 +320,7 @@ public class GraphicFactory {
      * @param cb Color break
      * @return LineString graphic
      */
-    public static GraphicCollection createLineString(Array xdata, Array ydata, Array zdata, ColorBreak cb) {
+    public static GraphicCollection createLineString3D(Array xdata, Array ydata, Array zdata, ColorBreak cb) {
         GraphicCollection3D gc = new GraphicCollection3D();
         PolylineShape pls;
         List<PointZ> points = new ArrayList<>();
@@ -304,6 +362,65 @@ public class GraphicFactory {
     }
     
     /**
+     * Create 3D LineString graphic
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param zdata Z data array
+     * @param mdata M data array
+     * @param ls Legend scheme
+     * @return LineString graphic
+     */
+    public static GraphicCollection createLineString3D(Array xdata, Array ydata, Array zdata, Array mdata, 
+            LegendScheme ls) {
+        GraphicCollection3D gc = new GraphicCollection3D();
+        PolylineZShape pls;
+        List<PointZ> points = new ArrayList<>();
+        double x, y, z = 0, m;
+        boolean fixZ = false;
+        if (zdata.getSize() == 1 && xdata.getSize() > 1) {
+            fixZ = true;
+            z = zdata.getDouble(0);
+        }
+        ColorBreak cb;
+        ColorBreakCollection cbs = new ColorBreakCollection();
+        for (int i = 0; i < xdata.getSize(); i++) {
+            x = xdata.getDouble(i);
+            y = ydata.getDouble(i);
+            if (!fixZ) {
+                z = zdata.getDouble(i);
+            }
+            m = mdata.getDouble(i);
+            cb = ls.findLegendBreak(m);
+            if (Double.isNaN(y) || Double.isNaN(x)) {
+                if (points.isEmpty()) {
+                    continue;
+                }
+                if (points.size() == 1) {
+                    points.add((PointZ) points.get(0).clone());
+                }
+                pls = new PolylineZShape();
+                pls.setPoints(points);
+                gc.add(new Graphic(pls, cbs));
+                points = new ArrayList<>();
+                cbs = new ColorBreakCollection();
+            } else {
+                points.add(new PointZ(x, y, z));
+                cbs.add(cb);
+            }
+        }
+        if (points.size() == 1) {
+            points.add((PointZ) points.get(0).clone());
+        }
+        pls = new PolylineZShape();
+        pls.setPoints(points);
+        gc.add(new Graphic(pls, cbs));
+        gc.setLegendScheme(ls);
+
+        return gc;
+    }
+
+    /**
      * Create error LineString graphic
      *
      * @param xdata X data array
@@ -317,7 +434,7 @@ public class GraphicFactory {
      * @param capSize The length of the error bar caps.
      * @return LineString graphics
      */
-    public static GraphicCollection createErrorLineString(Array xdata, Array ydata, Array xErrorLeft, 
+    public static GraphicCollection createErrorLineString(Array xdata, Array ydata, Array xErrorLeft,
             Array xErrorRight, Array yErrorBottom, Array yErrorUp, PolylineBreak cb, PolylineBreak ecb, float capSize) {
         GraphicCollection gc = new GraphicCollection();
         PolylineShape pls;
@@ -342,7 +459,7 @@ public class GraphicFactory {
                 points = new ArrayList<>();
             } else {
                 points.add(new PointD(x, y));
-                if (yErrorBottom != null){
+                if (yErrorBottom != null) {
                     yerrB = yErrorBottom.getDouble(i);
                     yerrU = yErrorUp.getDouble(i);
                     eps = new ArrayList<>();
@@ -351,9 +468,9 @@ public class GraphicFactory {
                     epls = new CapPolylineShape();
                     epls.setCapLen(capSize);
                     epls.setPoints(eps);
-                    gc.add(new Graphic(epls, ecb));                                        
+                    gc.add(new Graphic(epls, ecb));
                 }
-                if (xErrorLeft != null){
+                if (xErrorLeft != null) {
                     xerrL = xErrorLeft.getDouble(i);
                     xerrR = xErrorRight.getDouble(i);
                     eps = new ArrayList<>();
@@ -363,7 +480,7 @@ public class GraphicFactory {
                     epls.setCapLen(capSize);
                     epls.setCapAngle(90);
                     epls.setPoints(eps);
-                    gc.add(new Graphic(epls, ecb));                    
+                    gc.add(new Graphic(epls, ecb));
                 }
             }
         }
@@ -376,10 +493,10 @@ public class GraphicFactory {
             gc.add(new Graphic(pls, cb));
         }
         gc.setSingleLegend(false);
-        PolylineBreak lb = (PolylineBreak)ecb.clone();
+        PolylineBreak lb = (PolylineBreak) ecb.clone();
         lb.setDrawSymbol(cb.getDrawSymbol());
         gc.setLegendBreak(lb);
-        
+
         return gc;
     }
 
@@ -397,7 +514,7 @@ public class GraphicFactory {
      * @param capSize The length of the error bar caps.
      * @return LineString graphics
      */
-    public static GraphicCollection createErrorLineString_bak1(Array xdata, Array ydata, Array xErrorLeft, 
+    public static GraphicCollection createErrorLineString_bak1(Array xdata, Array ydata, Array xErrorLeft,
             Array xErrorRight, Array yErrorBottom, Array yErrorUp, ColorBreak cb, ColorBreak ecb, Double capSize) {
         GraphicCollection gc = new GraphicCollection();
         PolylineShape pls, epls;
@@ -405,10 +522,11 @@ public class GraphicFactory {
         List<PointD> eps;
         double x, y, xerrL, xerrR, yerrB, yerrU;
         double width;
-        if (capSize == null)
+        if (capSize == null) {
             width = (ArrayMath.getMaximum(xdata) - ArrayMath.getMinimum(xdata)) / xdata.getSize() * 0.1;
-        else
+        } else {
             width = capSize * 0.5;
+        }
         //Loop
         for (int i = 0; i < xdata.getSize(); i++) {
             x = xdata.getDouble(i);
@@ -426,7 +544,7 @@ public class GraphicFactory {
                 points = new ArrayList<>();
             } else {
                 points.add(new PointD(x, y));
-                if (yErrorBottom != null){
+                if (yErrorBottom != null) {
                     yerrB = yErrorBottom.getDouble(i);
                     yerrU = yErrorUp.getDouble(i);
                     eps = new ArrayList<>();
@@ -434,7 +552,7 @@ public class GraphicFactory {
                     eps.add(new PointD(x, y - yerrB));
                     epls = new PolylineShape();
                     epls.setPoints(eps);
-                    gc.add(new Graphic(epls, ecb));                    
+                    gc.add(new Graphic(epls, ecb));
                     eps = new ArrayList<>();
                     eps.add(new PointD(x - width, y + yerrU));
                     eps.add(new PointD(x + width, y + yerrU));
@@ -448,7 +566,7 @@ public class GraphicFactory {
                     epls.setPoints(eps);
                     gc.add(new Graphic(epls, ecb));
                 }
-                if (xErrorLeft != null){
+                if (xErrorLeft != null) {
                     xerrL = xErrorLeft.getDouble(i);
                     xerrR = xErrorRight.getDouble(i);
                     eps = new ArrayList<>();
@@ -481,10 +599,10 @@ public class GraphicFactory {
             gc.add(new Graphic(pls, cb));
         }
         gc.setSingleLegend(false);
-        
+
         return gc;
     }
-    
+
     /**
      * Create error LineString graphic
      *
@@ -754,7 +872,7 @@ public class GraphicFactory {
         graphics.setLegendScheme(ls);
         return graphics;
     }
-    
+
     /**
      * Create graphics
      *
@@ -858,6 +976,152 @@ public class GraphicFactory {
         graphics.setSingleLegend(false);
         graphics.setLegendScheme(ls);
         return graphics;
+    }
+
+    /**
+     * Create 3D stem graphics
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param zdata Z data array
+     * @param cbs Color breaks
+     * @param plb Stem line break
+     * @param bottom Stem bottom
+     * @param sameStemColor Same stem line and point color or not
+     * @return Graphics
+     */
+    public static GraphicCollection[] createStems3D(Array xdata, Array ydata, Array zdata, List<ColorBreak> cbs,
+            PolylineBreak plb, double bottom, boolean sameStemColor) {
+        GraphicCollection3D graphics = new GraphicCollection3D();
+        GraphicCollection3D stemlines = new GraphicCollection3D();
+        PointShape ps;
+        boolean fixZ = false;
+        double z = 0;
+        if (zdata.getSize() == 1 && xdata.getSize() > 1) {
+            fixZ = true;
+            z = zdata.getDouble(0);
+        }
+        List<PointZ> pzs;
+        PolylineZShape pls;
+        if (cbs.size() == xdata.getSize()) {
+            for (int i = 0; i < xdata.getSize(); i++) {
+                ps = new PointZShape();
+                pzs = new ArrayList<>();
+                if (fixZ) {
+                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                } else {
+                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+                }
+                graphics.add(new Graphic(ps, cbs.get(i)));
+                pls = new PolylineZShape();
+                pls.setPoints(pzs);
+                if (sameStemColor){
+                    PolylineBreak nplb = (PolylineBreak)plb.clone();
+                    nplb.setColor(cbs.get(i).getColor());
+                    stemlines.add(new Graphic(pls, nplb));
+                } else {
+                    stemlines.add(new Graphic(pls, plb));
+                }
+            }
+            graphics.setSingleLegend(false);
+            LegendScheme ls = new LegendScheme();
+            ls.setLegendBreaks(cbs);
+            ls.setLegendType(LegendType.UniqueValue);
+            ls.setShapeType(ShapeTypes.Point);
+            graphics.setLegendScheme(ls);
+        } else {
+            for (int i = 0; i < xdata.getSize(); i++) {
+                ps = new PointZShape();
+                pzs = new ArrayList<>();
+                if (fixZ) {
+                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                } else {
+                    ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
+                    pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+                }
+                graphics.add(new Graphic(ps, cbs.get(0)));
+                pls = new PolylineZShape();
+                pls.setPoints(pzs);
+                if (sameStemColor){
+                    PolylineBreak nplb = (PolylineBreak)plb.clone();
+                    nplb.setColor(cbs.get(0).getColor());
+                    stemlines.add(new Graphic(pls, nplb));
+                } else {
+                    stemlines.add(new Graphic(pls, plb));
+                }
+            }
+            LegendScheme ls = new LegendScheme();
+            ls.setLegendBreaks(cbs);
+            ls.setLegendType(LegendType.SingleSymbol);
+            ls.setShapeType(ShapeTypes.Point);
+            graphics.setLegendScheme(ls);
+        }
+        return new GraphicCollection[]{graphics, stemlines};
+    }
+    
+    /**
+     * Create 3D stem graphics
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param zdata Z data array
+     * @param cdata C data array
+     * @param ls Legend scheme
+     * @param plb Stem line break
+     * @param bottom Stem bottom
+     * @param sameStemColor Same stem line and point color or not
+     * @return 3D point graphics
+     */
+    public static GraphicCollection[] createStems3D(Array xdata, Array ydata, Array zdata, Array cdata, LegendScheme ls,
+            PolylineBreak plb, double bottom, boolean sameStemColor) {
+        GraphicCollection3D graphics = new GraphicCollection3D();
+        GraphicCollection3D stemlines = new GraphicCollection3D();
+        PointShape ps;
+        double c;
+        ColorBreak cb;
+        boolean fixZ = false;
+        double z = 0;
+        if (zdata.getSize() == 1 && xdata.getSize() > 1) {
+            fixZ = true;
+            z = zdata.getDouble(0);
+        }
+        List<PointZ> pzs;
+        PolylineZShape pls;
+        for (int i = 0; i < xdata.getSize(); i++) {
+            ps = new PointZShape();
+            pzs = new ArrayList<>();
+            if (fixZ) {
+                ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
+                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), z));
+            } else {
+                ps.setPoint(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), bottom));
+                pzs.add(new PointZ(xdata.getDouble(i), ydata.getDouble(i), zdata.getDouble(i)));
+            }
+            c = cdata.getDouble(i);
+            cb = ls.findLegendBreak(c);
+            graphics.add(new Graphic(ps, cb));
+            pls = new PolylineZShape();
+            pls.setPoints(pzs);
+            if (sameStemColor){
+                PolylineBreak nplb = (PolylineBreak)plb.clone();
+                nplb.setColor(cb.getColor());
+                stemlines.add(new Graphic(pls, nplb));
+            } else {
+                stemlines.add(new Graphic(pls, plb));
+            }
+        }
+        graphics.setSingleLegend(false);
+        graphics.setLegendScheme(ls);
+        return new GraphicCollection[]{graphics, stemlines};
     }
 
     /**
@@ -1237,7 +1501,7 @@ public class GraphicFactory {
 
         return graphics;
     }
-    
+
     /**
      * Create horizontal bar graphics
      *
@@ -1306,14 +1570,14 @@ public class GraphicFactory {
                 //Add error line
                 double e = error.getDouble(i);
                 pList = new ArrayList<>();
-                pList.add(new PointD(x -e, y + height * 0.5));
+                pList.add(new PointD(x - e, y + height * 0.5));
                 pList.add(new PointD(x + e, y + height * 0.5));
                 PolylineShape pls = new PolylineShape();
                 pls.setPoints(pList);
                 graphics.add(new Graphic(pls, ebreak));
                 //Add cap
                 pList = new ArrayList<>();
-                pList.add(new PointD(x -e, y + height * 0.25));
+                pList.add(new PointD(x - e, y + height * 0.25));
                 pList.add(new PointD(x - e, y + height * 0.75));
                 pls = new PolylineShape();
                 pls.setPoints(pList);
@@ -1507,7 +1771,7 @@ public class GraphicFactory {
 
         return graphics;
     }
-    
+
     /**
      * Create histogram bar graphics
      *
@@ -1539,7 +1803,7 @@ public class GraphicFactory {
         Array ydata = r.get(0);
         return createHistBars(data, xdata, ydata, bbs);
     }
-    
+
     /**
      * Create histogram bar graphics
      *
@@ -1577,13 +1841,65 @@ public class GraphicFactory {
 
         return graphics;
     }
-    
+
+    /**
+     * Create stem graphics
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param plb Polyline break
+     * @param pb Point break
+     * @param bplb Baseline break
+     * @param bottom Bottom
+     * @return Bar graphics
+     */
+    public static GraphicCollection createStems(Array xdata, Array ydata, PolylineBreak plb, PointBreak pb,
+            PolylineBreak bplb, double bottom) {
+        GraphicCollection graphics = new GraphicCollection();
+        int n = (int) xdata.getSize();
+        double x, y;
+        double miny = bottom;
+        boolean baseLine = false;
+        for (int i = 0; i < n; i++) {
+            x = xdata.getDouble(i);
+            y = ydata.getDouble(i);
+            // Add stem
+            if (y < miny) {
+                baseLine = true;
+            }
+            List<PointD> pList = new ArrayList<>();
+            pList.add(new PointD(x, miny));
+            pList.add(new PointD(x, y));
+            PolylineShape pls = new PolylineShape();
+            pls.setPoints(pList);
+            graphics.add(new Graphic(pls, plb));
+            PointShape ps = new PointShape();
+            ps.setPoint(new PointD(x, y));
+            graphics.add(new Graphic(ps, pb));
+        }
+
+        if (baseLine) {
+            List<PointD> pList = new ArrayList<>();
+            double x1 = xdata.getDouble(0);
+            double x2 = xdata.getDouble((int) xdata.getSize() - 1);
+            pList.add(new PointD(x1, miny));
+            pList.add(new PointD(x2, miny));
+            PolylineShape pls = new PolylineShape();
+            pls.setPoints(pList);
+            graphics.add(new Graphic(pls, bplb));
+        }
+        graphics.setSingleLegend(false);
+
+        return graphics;
+    }
+
     /**
      * Create an image graphic
+     *
      * @param image The image
      * @return Image graphic
      */
-    public static Graphic createImage(BufferedImage image){
+    public static Graphic createImage(BufferedImage image) {
         ImageShape ishape = new ImageShape();
         ishape.setPoint(new PointD(0, 0));
         ishape.setImage(image);
@@ -1677,7 +1993,7 @@ public class GraphicFactory {
 
         ImageShape ishape = new ImageShape();
         double minx, maxx, miny, maxy;
-        if (extent == null){
+        if (extent == null) {
             minx = 0;
             maxx = width;
             miny = 0;
@@ -1789,7 +2105,7 @@ public class GraphicFactory {
 
         ImageShape ishape = new ImageShape();
         double minx, maxx, miny, maxy;
-        if (extent == null){
+        if (extent == null) {
             minx = 0;
             maxx = width;
             miny = 0;
@@ -1820,8 +2136,8 @@ public class GraphicFactory {
     public static GraphicCollection createImage(Array x, Array y, List<Array> data, double offset,
             String zdir, String interpolation) {
         Graphic gg = createImage(data, null);
-        if (interpolation != null){
-            ((ImageShape)gg.getShape()).setInterpolation(interpolation);
+        if (interpolation != null) {
+            ((ImageShape) gg.getShape()).setInterpolation(interpolation);
         }
         Shape shape = gg.getShape();
         Extent extent = shape.getExtent();
@@ -1904,7 +2220,7 @@ public class GraphicFactory {
 
         ImageShape ishape = new ImageShape();
         double minx, maxx, miny, maxy;
-        if (extent == null){
+        if (extent == null) {
             minx = 0;
             maxx = width;
             miny = 0;
@@ -1988,7 +2304,7 @@ public class GraphicFactory {
         ishape.setExtent(new Extent(xmin, xmax, ymin, ymax));
         return new Graphic(ishape, new ColorBreak());
     }
-    
+
     /**
      * Create image
      *
@@ -2047,7 +2363,7 @@ public class GraphicFactory {
 
         ImageShape ishape = new ImageShape();
         double xmin, xmax, ymin, ymax;
-        if (extent == null){
+        if (extent == null) {
             double xdelta = BigDecimalUtil.mul(gdata.getXDelt(), 0.5);
             xmin = BigDecimalUtil.sub(gdata.xArray[0], xdelta);
             xmax = BigDecimalUtil.add(gdata.getXMax(), xdelta);
@@ -2080,8 +2396,8 @@ public class GraphicFactory {
     public static GraphicCollection createImage(GridArray gdata, LegendScheme ls, double offset,
             String zdir, List<Number> sePoint, String interpolation) {
         Graphic gg = createImage(gdata, ls);
-        if (interpolation != null){
-            ((ImageShape)gg.getShape()).setInterpolation(interpolation);
+        if (interpolation != null) {
+            ((ImageShape) gg.getShape()).setInterpolation(interpolation);
         }
         Shape shape = gg.getShape();
         Extent extent = shape.getExtent();
@@ -2094,8 +2410,8 @@ public class GraphicFactory {
                 ex3 = new Extent3D(extent.minX, extent.maxX, offset, offset, extent.minY, extent.maxY);
                 break;
             case "xy":
-                ex3 = new Extent3D(sePoint.get(0).doubleValue(), sePoint.get(2).doubleValue(), 
-                     sePoint.get(1).doubleValue(), sePoint.get(3).doubleValue(), extent.minY, extent.maxY);
+                ex3 = new Extent3D(sePoint.get(0).doubleValue(), sePoint.get(2).doubleValue(),
+                        sePoint.get(1).doubleValue(), sePoint.get(3).doubleValue(), extent.minY, extent.maxY);
                 break;
             case "z":
                 ex3 = new Extent3D(extent.minX, extent.maxX, extent.minY, extent.maxY, offset, offset);
@@ -2112,7 +2428,7 @@ public class GraphicFactory {
         graphics.setSingleLegend(false);
         return graphics;
     }
-    
+
     /**
      * Create image
      *
@@ -2135,11 +2451,11 @@ public class GraphicFactory {
         Extent3D ex3 = new Extent3D(extent.minX + xshift, extent.maxX + xshift, extent.minY, extent.maxY, offset, offset);
         ishape.setExtent(ex3);
         Graphic gg = new Graphic(ishape, new ColorBreak());
-        if (interpolation != null){
-            ((ImageShape)gg.getShape()).setInterpolation(interpolation);
+        if (interpolation != null) {
+            ((ImageShape) gg.getShape()).setInterpolation(interpolation);
         }
         graphics.add(gg);
-        
+
         return graphics;
     }
 
@@ -2307,7 +2623,7 @@ public class GraphicFactory {
 
         return graphics;
     }
-    
+
     /**
      * Create contour lines
      *
@@ -2380,7 +2696,7 @@ public class GraphicFactory {
                     break;
                 case "xy":
                     for (int j = 0; j < aLine.PointList.size(); j++) {
-                        x = aLine.PointList.get(j).X;                        
+                        x = aLine.PointList.get(j).X;
                         y = aLine.PointList.get(j).Y;
                         aPoint = new PointZ();
                         aPoint.X = x;
@@ -2476,8 +2792,9 @@ public class GraphicFactory {
                 }
             }
             int valueIdx = Arrays.binarySearch(cValues, v);
-            if (valueIdx < 0)
+            if (valueIdx < 0) {
                 valueIdx = -valueIdx;
+            }
             //int valueIdx = findIndex(cValues, v);            
             if (valueIdx == cValues.length - 1) {
                 aPolygonShape.highValue = maxData;
@@ -2664,8 +2981,9 @@ public class GraphicFactory {
                 }
             }
             int valueIdx = Arrays.binarySearch(cValues, v);
-            if (valueIdx < 0)
+            if (valueIdx < 0) {
                 valueIdx = -valueIdx;
+            }
             //int valueIdx = findIndex(cValues, v);           
             if (valueIdx == cValues.length - 1) {
                 aPolygonShape.highValue = maxData;
@@ -2690,7 +3008,7 @@ public class GraphicFactory {
 
         return graphics;
     }
-    
+
     /**
      * Create 3D contour polygons
      *
@@ -2770,7 +3088,7 @@ public class GraphicFactory {
                         aPoint = new PointZ();
                         aPoint.X = x;
                         aPoint.Y = ys + (ye - ys) * (x - xs) / (xe - xs);
-                        aPoint.Z = y;                        
+                        aPoint.Z = y;
                         pList.add(aPoint);
                     }
                     break;
@@ -2836,8 +3154,9 @@ public class GraphicFactory {
                 }
             }
             int valueIdx = Arrays.binarySearch(cValues, v);
-            if (valueIdx < 0)
+            if (valueIdx < 0) {
                 valueIdx = -valueIdx;
+            }
             //int valueIdx = findIndex(cValues, v);           
             if (valueIdx == cValues.length - 1) {
                 aPolygonShape.highValue = maxData;
@@ -2862,7 +3181,7 @@ public class GraphicFactory {
 
         return graphics;
     }
-    
+
     /**
      * Create pseudocolor polygons
      *
@@ -2872,7 +3191,7 @@ public class GraphicFactory {
      * @param ls Legend scheme
      * @return Mesh polygon layer
      */
-    public static GraphicCollection createPColorPolygons(Array x_s, Array y_s, Array a, LegendScheme ls){
+    public static GraphicCollection createPColorPolygons(Array x_s, Array y_s, Array a, LegendScheme ls) {
         GraphicCollection gc = new GraphicCollection();
 
         int[] shape = x_s.getShape();
@@ -2895,18 +3214,18 @@ public class GraphicFactory {
                 points.add((PointD) points.get(0).clone());
                 ps.setPoints(points);
                 v = a.getDouble(i * colNum + j);
-                pb = (PolygonBreak)ls.findLegendBreak(v);
+                pb = (PolygonBreak) ls.findLegendBreak(v);
                 Graphic graphic = new Graphic(ps, pb);
-                gc.add(graphic);                
+                gc.add(graphic);
             }
         }
-        
+
         gc.setSingleLegend(false);
         gc.setLegendScheme(ls);
 
         return gc;
     }
-    
+
     /**
      * Create grid polygons
      *
@@ -2916,30 +3235,33 @@ public class GraphicFactory {
      * @param ls Legend scheme
      * @return Grid polygons
      */
-    public static GraphicCollection createGridPolygons(Array x_s, Array y_s, Array a, LegendScheme ls){
+    public static GraphicCollection createGridPolygons(Array x_s, Array y_s, Array a, LegendScheme ls) {
         GraphicCollection gc = new GraphicCollection();
 
-        int colNum = (int)x_s.getSize();
-        int rowNum = (int)y_s.getSize();
+        int colNum = (int) x_s.getSize();
+        int rowNum = (int) y_s.getSize();
         double x, x1 = 0, x2, y, y1 = 0, y2, xd, yd, v;
         PolygonBreak pb;
         for (int i = 0; i < rowNum; i++) {
-            if (i == 0)
+            if (i == 0) {
                 y1 = y_s.getDouble(i);
+            }
             y = y_s.getDouble(i);
-            if (i < rowNum - 1) {                
+            if (i < rowNum - 1) {
                 y2 = y_s.getDouble(i + 1);
-                yd = y2 - y;                
+                yd = y2 - y;
             } else {
                 y2 = y_s.getDouble(i - 1);
                 yd = y - y2;
             }
-            if (i == 0)
+            if (i == 0) {
                 y1 = y1 - yd * 0.5;
+            }
             y2 = y + yd * 0.5;
             for (int j = 0; j < colNum; j++) {
-                if (j == 0)
+                if (j == 0) {
                     x1 = x_s.getDouble(j);
+                }
                 x = x_s.getDouble(j);
                 if (j < colNum - 1) {
                     x2 = x_s.getDouble(j + 1);
@@ -2958,14 +3280,14 @@ public class GraphicFactory {
                 points.add((PointD) points.get(0).clone());
                 ps.setPoints(points);
                 v = a.getDouble(i * colNum + j);
-                pb = (PolygonBreak)ls.findLegendBreak(v);
+                pb = (PolygonBreak) ls.findLegendBreak(v);
                 Graphic graphic = new Graphic(ps, pb);
-                gc.add(graphic);    
+                gc.add(graphic);
                 x1 = x2;
             }
             y1 = y2;
         }
-        
+
         gc.setSingleLegend(false);
         gc.setLegendScheme(ls);
 
@@ -2987,13 +3309,13 @@ public class GraphicFactory {
         GraphicCollection gc = new GraphicCollection();
         int len = (int) xdata.getSize();
         if (where == null) {
-            if (ArrayMath.containsNaN(y1data) || ArrayMath.containsNaN(y2data)){
+            if (ArrayMath.containsNaN(y1data) || ArrayMath.containsNaN(y2data)) {
                 where = new ArrayBoolean(new int[]{len});
                 double v1, v2;
-                for (int i = 0; i < len; i++){
+                for (int i = 0; i < len; i++) {
                     v1 = y1data.getDouble(i);
                     v2 = y2data.getDouble(i);
-                    if (Double.isNaN(v1) || Double.isNaN(v2)){
+                    if (Double.isNaN(v1) || Double.isNaN(v2)) {
                         where.setBoolean(i, false);
                     } else {
                         where.setBoolean(i, true);
@@ -3026,8 +3348,9 @@ public class GraphicFactory {
                 }
                 ob = where.getInt(j) == 1;
             }
-            if (!idx.isEmpty())
+            if (!idx.isEmpty()) {
                 idxs.add(idx);
+            }
             for (List<Integer> index : idxs) {
                 int nn = index.size();
                 if (nn >= 2) {
@@ -3051,7 +3374,7 @@ public class GraphicFactory {
 
         return gc;
     }
-    
+
     /**
      * Create fill between polygons - X direction
      *
@@ -3067,13 +3390,13 @@ public class GraphicFactory {
         GraphicCollection gc = new GraphicCollection();
         int len = (int) ydata.getSize();
         if (where == null) {
-            if (ArrayMath.containsNaN(x1data) || ArrayMath.containsNaN(x2data)){
+            if (ArrayMath.containsNaN(x1data) || ArrayMath.containsNaN(x2data)) {
                 where = new ArrayBoolean(new int[]{len});
                 double v1, v2;
-                for (int i = 0; i < len; i++){
+                for (int i = 0; i < len; i++) {
                     v1 = x1data.getDouble(i);
                     v2 = x2data.getDouble(i);
-                    if (Double.isNaN(v1) || Double.isNaN(v2)){
+                    if (Double.isNaN(v1) || Double.isNaN(v2)) {
                         where.setBoolean(i, false);
                     } else {
                         where.setBoolean(i, true);
@@ -3106,8 +3429,9 @@ public class GraphicFactory {
                 }
                 ob = where.getInt(j) == 1;
             }
-            if (!idx.isEmpty())
+            if (!idx.isEmpty()) {
                 idxs.add(idx);
+            }
             for (List<Integer> index : idxs) {
                 int nn = index.size();
                 if (nn >= 2) {
@@ -3152,13 +3476,13 @@ public class GraphicFactory {
         gc.setZDir(zdir);
         int len = (int) xdata.getSize();
         if (where == null) {
-            if (ArrayMath.containsNaN(y1data) || ArrayMath.containsNaN(y2data)){
+            if (ArrayMath.containsNaN(y1data) || ArrayMath.containsNaN(y2data)) {
                 where = new ArrayBoolean(new int[]{len});
                 double v1, v2;
-                for (int i = 0; i < len; i++){
+                for (int i = 0; i < len; i++) {
                     v1 = y1data.getDouble(i);
                     v2 = y2data.getDouble(i);
-                    if (Double.isNaN(v1) || Double.isNaN(v2)){
+                    if (Double.isNaN(v1) || Double.isNaN(v2)) {
                         where.setBoolean(i, false);
                     } else {
                         where.setBoolean(i, true);
@@ -3211,8 +3535,9 @@ public class GraphicFactory {
                 }
                 ob = where.getInt(j) == 1;
             }
-            if (!idx.isEmpty())
+            if (!idx.isEmpty()) {
                 idxs.add(idx);
+            }
             for (List<Integer> index : idxs) {
                 int nn = index.size();
                 if (nn >= 2) {
@@ -3260,7 +3585,7 @@ public class GraphicFactory {
 
         return gc;
     }
-    
+
     /**
      * Create fill between polygons
      *
@@ -3572,10 +3897,10 @@ public class GraphicFactory {
         LegendScheme ls = new LegendScheme(ShapeTypes.Polygon);
         for (int i = 0; i < n; i++) {
             v = xdata.getDouble(i);
-            if (Double.isNaN(v)){
+            if (Double.isNaN(v)) {
                 continue;
             }
-            
+
             if (sum > 1) {
                 v = v / sum;
             }
@@ -3740,10 +4065,10 @@ public class GraphicFactory {
 
         for (int i = 0; i < n; i++) {
             Array a = xdata.get(i);
-            if (Double.isNaN(ArrayMath.min(a))){
+            if (Double.isNaN(ArrayMath.min(a))) {
                 continue;
             }
-            
+
             v = positions.get(i).doubleValue();
             width = widths.get(i).doubleValue();
             //Add box polygon
@@ -3866,23 +4191,23 @@ public class GraphicFactory {
         }
         graphics.updateExtent();
     }
-    
-    private static int findIndex(double[] values, double v){
+
+    private static int findIndex(double[] values, double v) {
         int idx = -1;
-        for (int i = 0; i < values.length; i++){
+        for (int i = 0; i < values.length; i++) {
             if (i == values.length - 1) {
                 if (v == values[i]) {
                     idx = i;
                     break;
                 }
             } else {
-                if (v == values[i] || v < values[i + 1]){
+                if (v == values[i] || v < values[i + 1]) {
                     idx = i;
                     break;
                 }
             }
         }
-        
+
         return idx;
     }
 

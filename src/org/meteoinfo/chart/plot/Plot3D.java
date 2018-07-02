@@ -37,6 +37,9 @@ import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.Extent3D;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointF;
+import org.meteoinfo.legend.BreakTypes;
+import org.meteoinfo.legend.ColorBreak;
+import org.meteoinfo.legend.ColorBreakCollection;
 import org.meteoinfo.legend.PointBreak;
 import org.meteoinfo.legend.PolygonBreak;
 import org.meteoinfo.legend.PolylineBreak;
@@ -1035,7 +1038,7 @@ public class Plot3D extends Plot {
     private void drawLineString(Graphics2D g, Graphic graphic) {
         if (extent.intersects(graphic.getExtent())) {
             PolylineZShape shape = (PolylineZShape) graphic.getShape();
-            PolylineBreak pb = (PolylineBreak) graphic.getLegend();
+            ColorBreak pb = graphic.getLegend();
             for (Polyline line : shape.getPolylines()){
                 List<PointZ> ps = (List<PointZ>)line.getPointList();
                 PointF[] points = new PointF[ps.size()];
@@ -1047,7 +1050,10 @@ public class Plot3D extends Plot {
                     projection = projector.project((float) pp.X, (float) pp.Y, (float) pp.Z);
                     points[i] = new PointF(projection.x, projection.y);
                 }
-                Draw.drawPolyline(points, pb, g);
+                if (pb.getBreakType() == BreakTypes.ColorBreakCollection)
+                    Draw.drawPolyline(points, (ColorBreakCollection)pb, g);
+                else
+                    Draw.drawPolyline(points, (PolylineBreak)pb, g);
             }
         }
     }

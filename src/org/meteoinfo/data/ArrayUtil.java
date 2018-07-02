@@ -47,7 +47,7 @@ import org.meteoinfo.math.Complex;
 import org.meteoinfo.math.ListIndexComparator;
 import org.meteoinfo.projection.KnownCoordinateSystems;
 import org.meteoinfo.projection.ProjectionInfo;
-import org.meteoinfo.projection.ProjectionManage;
+import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.PolygonShape;
 import org.meteoinfo.shape.ShapeTypes;
@@ -4072,7 +4072,7 @@ public class ArrayUtil {
         int ynum = yy.size();
         double xdelta = xx.get(1).doubleValue() - xx.get(0).doubleValue();
         double ydelta = yy.get(1).doubleValue() - yy.get(0).doubleValue();
-        aExtent = ProjectionManage.getProjectionExtent(fromProj, toProj, xx, yy);
+        aExtent = ProjectionUtil.getProjectionExtent(fromProj, toProj, xx, yy);
 
         double xDelt = (aExtent.maxX - aExtent.minX) / (xnum - 1);
         double yDelt = (aExtent.maxY - aExtent.minY) / (ynum - 1);
@@ -4143,7 +4143,7 @@ public class ArrayUtil {
         Extent aExtent;
         int xnum = xx.size();
         int ynum = yy.size();
-        aExtent = ProjectionManage.getProjectionExtent(fromProj, toProj, xx, yy);
+        aExtent = ProjectionUtil.getProjectionExtent(fromProj, toProj, xx, yy);
 
         double xDelt = (aExtent.maxX - aExtent.minX) / (xnum - 1);
         double yDelt = (aExtent.maxY - aExtent.minY) / (ynum - 1);

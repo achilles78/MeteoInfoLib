@@ -9,6 +9,8 @@ import org.meteoinfo.shape.ShapeTypes;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -26,7 +28,7 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
 
     private final java.awt.Dialog _parent;
     private LegendScheme _legendScheme = null;
-    private double _minContourValue, _maxContourValue, _interval;
+    private double startValue, endValue, _interval;
     private boolean _isUniqueValue = false;
 
     /**
@@ -44,6 +46,49 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
         _isUniqueValue = isUniqueValue;
     }
 
+    private void setInterval() {
+        int bnum = _legendScheme.getBreakNum();
+        if (bnum > 2) {
+            ColorBreak aCB = _legendScheme.getLegendBreaks().get(0);
+            startValue = Double.parseDouble(aCB.getEndValue().toString());
+            if (_legendScheme.getHasNoData()) {
+                aCB = _legendScheme.getLegendBreaks().get(bnum - 2);
+                endValue = Double.parseDouble(aCB.getStartValue().toString());
+                _interval = BigDecimalUtil.div((BigDecimalUtil.sub(endValue, startValue)), (bnum - 3));
+            } else {
+                aCB = _legendScheme.getLegendBreaks().get(bnum - 1);
+                endValue = Double.parseDouble(aCB.getStartValue().toString());
+                switch (_legendScheme.getShapeType()) {
+                    case Polyline:
+                    case PolylineZ:
+                        _interval = BigDecimalUtil.div((BigDecimalUtil.sub(endValue, startValue)), (bnum - 1));
+                        break;
+                    default:
+                        _interval = BigDecimalUtil.div((BigDecimalUtil.sub(endValue, startValue)), (bnum - 2));
+                        break;
+                }
+            }
+
+            this.jTextField_StartValue.setText(String.valueOf(startValue));
+            this.jTextField_EndValue.setText(String.valueOf(endValue));
+            this.jTextField_Interval.setText(String.valueOf(_interval));
+        }
+    }
+    
+    private void setInterval_log(){
+        double min = this._legendScheme.getMinValue();
+        double max = this._legendScheme.getMaxValue();
+        int minE = (int)Math.floor(Math.log10(min));
+        int maxE = (int)Math.floor(Math.log10(max));
+        if (min == 0)
+            minE = maxE - 3;
+        if (max == 0)
+            maxE = minE + 3;
+        this.jTextField_StartValue.setText(String.valueOf(minE));
+        this.jTextField_EndValue.setText(String.valueOf(maxE));
+        this.jTextField_Interval.setText(String.valueOf(1));
+    }
+
     private void initialize() {
         if (!this._isUniqueValue) {
             this.jLabel_Min.setEnabled(true);
@@ -55,35 +100,10 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
             this.jLabel_Interval.setEnabled(true);
             this.jTextField_Interval.setEnabled(true);
             this.jButton_NewLegend.setEnabled(true);
-            
+
             this.jLabel_Min.setText("Min: " + String.format("%1$E", _legendScheme.getMinValue()));
             this.jLabel_Max.setText("Max: " + String.format("%1$E", _legendScheme.getMaxValue()));
-            int bnum = _legendScheme.getBreakNum();
-            if (bnum > 2) {
-                ColorBreak aCB = _legendScheme.getLegendBreaks().get(0);
-                _minContourValue = Double.parseDouble(aCB.getEndValue().toString());
-                if (_legendScheme.getHasNoData()) {
-                    aCB = _legendScheme.getLegendBreaks().get(bnum - 2);
-                    _maxContourValue = Double.parseDouble(aCB.getStartValue().toString());
-                    _interval = BigDecimalUtil.div((BigDecimalUtil.sub(_maxContourValue, _minContourValue)), (bnum - 3));
-                } else {
-                    aCB = _legendScheme.getLegendBreaks().get(bnum - 1);
-                    _maxContourValue = Double.parseDouble(aCB.getStartValue().toString());
-                    switch (_legendScheme.getShapeType()) {
-                        case Polyline:
-                        case PolylineZ:
-                            _interval = BigDecimalUtil.div((BigDecimalUtil.sub(_maxContourValue, _minContourValue)), (bnum - 1));
-                            break;
-                        default:
-                            _interval = BigDecimalUtil.div((BigDecimalUtil.sub(_maxContourValue, _minContourValue)), (bnum - 2));
-                            break;
-                    }
-                }
-
-                this.jTextField_StartValue.setText(String.valueOf(_minContourValue));
-                this.jTextField_EndValue.setText(String.valueOf(_maxContourValue));
-                this.jTextField_Interval.setText(String.valueOf(_interval));
-            }
+            this.setInterval();
         } else {
             this.jLabel_Min.setEnabled(false);
             this.jLabel_Max.setEnabled(false);
@@ -104,10 +124,11 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
             this.jComboBox_ColorTable.setModel(new ColorComboBoxModel(colorTables));
             this.jComboBox_ColorTable.setRenderer(render);
             ColorMap ct = ColorUtil.findColorTable(colorTables, "grads_rainbow");
-            if (ct != null)
+            if (ct != null) {
                 this.jComboBox_ColorTable.setSelectedItem(ct);
-            else
+            } else {
                 this.jComboBox_ColorTable.setSelectedIndex(0);
+            }
         } catch (IOException ex) {
             Logger.getLogger(FrmLegendBreaks.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -125,16 +146,23 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
         buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel_Min = new javax.swing.JLabel();
         jLabel_Max = new javax.swing.JLabel();
+        jButton_NewLegend = new javax.swing.JButton();
+        jButton_NewColors = new javax.swing.JButton();
+        jComboBox_ColorTable = new javax.swing.JComboBox();
+        jLabel_ColorTable = new javax.swing.JLabel();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel_Interval = new javax.swing.JPanel();
         jLabel_From = new javax.swing.JLabel();
         jTextField_StartValue = new javax.swing.JTextField();
         jLabel_To = new javax.swing.JLabel();
         jTextField_EndValue = new javax.swing.JTextField();
         jLabel_Interval = new javax.swing.JLabel();
         jTextField_Interval = new javax.swing.JTextField();
-        jButton_NewLegend = new javax.swing.JButton();
-        jButton_NewColors = new javax.swing.JButton();
-        jComboBox_ColorTable = new javax.swing.JComboBox();
-        jLabel_ColorTable = new javax.swing.JLabel();
+        jCheckBox_Log = new javax.swing.JCheckBox();
+        jTextField_logFactor = new javax.swing.JTextField();
+        jPanel_Values = new javax.swing.JPanel();
+        jTextField_Values = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -147,18 +175,6 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
         jLabel_Min.setText("Min:");
 
         jLabel_Max.setText("Max:");
-
-        jLabel_From.setText("from:");
-
-        jTextField_StartValue.setPreferredSize(new java.awt.Dimension(89, 24));
-
-        jLabel_To.setText("to:");
-
-        jTextField_EndValue.setPreferredSize(new java.awt.Dimension(89, 24));
-
-        jLabel_Interval.setText("Interval:");
-
-        jTextField_Interval.setPreferredSize(new java.awt.Dimension(89, 24));
 
         jButton_NewLegend.setText("New Legend");
         jButton_NewLegend.addActionListener(new java.awt.event.ActionListener() {
@@ -178,44 +194,126 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
 
         jLabel_ColorTable.setText("Color table:");
 
+        jLabel_From.setText("from:");
+
+        jTextField_StartValue.setPreferredSize(new java.awt.Dimension(89, 24));
+
+        jLabel_To.setText("to:");
+
+        jTextField_EndValue.setPreferredSize(new java.awt.Dimension(89, 24));
+
+        jLabel_Interval.setText("Interval:");
+
+        jTextField_Interval.setPreferredSize(new java.awt.Dimension(89, 24));
+
+        jCheckBox_Log.setText("Log");
+        jCheckBox_Log.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox_LogActionPerformed(evt);
+            }
+        });
+
+        jTextField_logFactor.setText("1");
+        jTextField_logFactor.setEnabled(false);
+
+        javax.swing.GroupLayout jPanel_IntervalLayout = new javax.swing.GroupLayout(jPanel_Interval);
+        jPanel_Interval.setLayout(jPanel_IntervalLayout);
+        jPanel_IntervalLayout.setHorizontalGroup(
+            jPanel_IntervalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel_IntervalLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel_IntervalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel_Interval)
+                    .addComponent(jLabel_From))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel_IntervalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jTextField_StartValue, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField_Interval, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel_IntervalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel_IntervalLayout.createSequentialGroup()
+                        .addComponent(jLabel_To)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField_EndValue, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE))
+                    .addGroup(jPanel_IntervalLayout.createSequentialGroup()
+                        .addComponent(jCheckBox_Log)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField_logFactor)))
+                .addContainerGap())
+        );
+        jPanel_IntervalLayout.setVerticalGroup(
+            jPanel_IntervalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel_IntervalLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel_IntervalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel_From)
+                    .addComponent(jTextField_StartValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel_To)
+                    .addComponent(jTextField_EndValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel_IntervalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField_Interval, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel_Interval)
+                    .addComponent(jCheckBox_Log)
+                    .addComponent(jTextField_logFactor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Interval", jPanel_Interval);
+
+        jLabel1.setText("Delimiter is \";\"");
+
+        javax.swing.GroupLayout jPanel_ValuesLayout = new javax.swing.GroupLayout(jPanel_Values);
+        jPanel_Values.setLayout(jPanel_ValuesLayout);
+        jPanel_ValuesLayout.setHorizontalGroup(
+            jPanel_ValuesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel_ValuesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel_ValuesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel_ValuesLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(jLabel1)
+                        .addContainerGap(263, Short.MAX_VALUE))
+                    .addGroup(jPanel_ValuesLayout.createSequentialGroup()
+                        .addComponent(jTextField_Values)
+                        .addContainerGap())))
+        );
+        jPanel_ValuesLayout.setVerticalGroup(
+            jPanel_ValuesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel_ValuesLayout.createSequentialGroup()
+                .addGap(32, 32, 32)
+                .addComponent(jTextField_Values, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Values", jPanel_Values);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(jLabel_ColorTable)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox_ColorTable, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addComponent(jLabel_Interval)
-                                            .addComponent(jLabel_From))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(jTextField_StartValue, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jTextField_Interval, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addComponent(jLabel_Min))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLabel_To)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jTextField_EndValue, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(jLabel_Max))))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton_NewLegend)
-                        .addGap(56, 56, 56)
-                        .addComponent(jButton_NewColors)
-                        .addGap(45, 45, 45))))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addComponent(jLabel_Min)
+                        .addGap(101, 101, 101)
+                        .addComponent(jLabel_Max))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addComponent(jLabel_ColorTable)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jComboBox_ColorTable, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(82, 82, 82)
+                .addComponent(jButton_NewLegend)
+                .addGap(56, 56, 56)
+                .addComponent(jButton_NewColors)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -224,21 +322,13 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel_Max)
                     .addComponent(jLabel_Min))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel_From)
-                    .addComponent(jTextField_StartValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel_To)
-                    .addComponent(jTextField_EndValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField_Interval, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel_Interval))
-                .addGap(35, 35, 35)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel_ColorTable)
                     .addComponent(jComboBox_ColorTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton_NewLegend)
                     .addComponent(jButton_NewColors))
@@ -255,18 +345,43 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
 
     private void jButton_NewLegendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_NewLegendActionPerformed
         // TODO add your handling code here:
-        _interval = Double.parseDouble(this.jTextField_Interval.getText());
-        _minContourValue = Double.parseDouble(this.jTextField_StartValue.getText());
-        _maxContourValue = Double.parseDouble(this.jTextField_EndValue.getText());
-
-        if ((int) ((_maxContourValue - _minContourValue) / _interval) < 2) {
-            JOptionPane.showMessageDialog(null, "Please reset the data!", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         double[] cValues;
-        cValues = LegendManage.createContourValuesInterval(_minContourValue, _maxContourValue,
-                _interval);
+        if (this.jTabbedPane1.getSelectedIndex() == 0) {
+            _interval = Double.parseDouble(this.jTextField_Interval.getText());
+            startValue = Double.parseDouble(this.jTextField_StartValue.getText());
+            endValue = Double.parseDouble(this.jTextField_EndValue.getText());
+
+            if ((int) ((endValue - startValue) / _interval) < 2) {
+                JOptionPane.showMessageDialog(null, "Please reset the data!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (this.jCheckBox_Log.isSelected()) {
+                int sv = Integer.parseInt(this.jTextField_StartValue.getText());
+                int ev = Integer.parseInt(this.jTextField_EndValue.getText());
+                int step = Integer.parseInt(this.jTextField_Interval.getText());
+                double factor = Double.parseDouble(this.jTextField_logFactor.getText());
+                List<Integer> vs = new ArrayList<>();
+                while (sv < ev) {
+                    vs.add(sv);
+                    sv += step;
+                }
+                cValues = new double[vs.size()];
+                for (int i = 0; i < vs.size(); i++) {
+                    cValues[i] = Math.pow(10, vs.get(i)) * factor;
+                }
+            } else {
+                cValues = LegendManage.createContourValuesInterval(startValue, endValue,
+                        _interval);
+            }
+        } else {
+            String vstr = this.jTextField_Values.getText();
+            String[] vstrs = vstr.split(";");
+            cValues = new double[vstrs.length];
+            for (int i = 0; i < vstrs.length; i++) {
+                cValues[i] = Double.parseDouble(vstrs[i].trim());
+            }
+        }
 
         Color[] colors = createColors(cValues.length + 1);
 
@@ -312,6 +427,16 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_jButton_NewColorsActionPerformed
 
+    private void jCheckBox_LogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox_LogActionPerformed
+        // TODO add your handling code here:
+        this.jTextField_logFactor.setEnabled(this.jCheckBox_Log.isSelected());
+        if (this.jCheckBox_Log.isSelected()){
+            this.setInterval_log();
+        } else {
+            this.setInterval();
+        }
+    }//GEN-LAST:event_jCheckBox_LogActionPerformed
+
     /**
      * Set legend scheme
      *
@@ -322,11 +447,11 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
         this.initialize();
     }
 
-    private Color[] createColors(int colorNum) {        
-        ColorComboBoxModel model = (ColorComboBoxModel)this.jComboBox_ColorTable.getModel();
-        ColorMap ct = (ColorMap)model.getSelectedItem();
+    private Color[] createColors(int colorNum) {
+        ColorComboBoxModel model = (ColorComboBoxModel) this.jComboBox_ColorTable.getModel();
+        ColorMap ct = (ColorMap) model.getSelectedItem();
         return ct.getColors(colorNum);
-    }    
+    }
 
     /**
      * @param args the command line arguments
@@ -357,6 +482,7 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 FrmLegendBreaks dialog = new FrmLegendBreaks(new javax.swing.JDialog(), true, false);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -373,15 +499,22 @@ public class FrmLegendBreaks extends javax.swing.JDialog {
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton_NewColors;
     private javax.swing.JButton jButton_NewLegend;
+    private javax.swing.JCheckBox jCheckBox_Log;
     private javax.swing.JComboBox jComboBox_ColorTable;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel_ColorTable;
     private javax.swing.JLabel jLabel_From;
     private javax.swing.JLabel jLabel_Interval;
     private javax.swing.JLabel jLabel_Max;
     private javax.swing.JLabel jLabel_Min;
     private javax.swing.JLabel jLabel_To;
+    private javax.swing.JPanel jPanel_Interval;
+    private javax.swing.JPanel jPanel_Values;
+    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextField jTextField_EndValue;
     private javax.swing.JTextField jTextField_Interval;
     private javax.swing.JTextField jTextField_StartValue;
+    private javax.swing.JTextField jTextField_Values;
+    private javax.swing.JTextField jTextField_logFactor;
     // End of variables declaration//GEN-END:variables
 }

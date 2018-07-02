@@ -47,7 +47,7 @@ import org.meteoinfo.table.DataTable;
  *
  * @author Yaqiang Wang
  */
-public class ProjectionManage {
+public class ProjectionUtil {
 
     /**
      * Get global extent of a projection
@@ -1035,6 +1035,18 @@ public class ProjectionManage {
         } else {
             return null;
         }
+    }
+    
+    /**
+     * Project graphic
+     * @param graphic The graphic
+     * @param fromProj From projection
+     * @param toProj To projection
+     * @return Projected graphic
+     */
+    public static Graphic projectGraphic(Graphic graphic, ProjectionInfo fromProj, ProjectionInfo toProj) {
+        Shape shape = projectShape(graphic.getShape(), fromProj, toProj);
+        return new Graphic(shape, graphic.getLegend());
     }
     
     private static GraphicCollection projectGraphics(GraphicCollection aGCollection, ProjectionInfo fromProj, ProjectionInfo toProj) {

@@ -41,7 +41,7 @@ import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.layer.VectorLayer;
 import org.meteoinfo.projection.KnownCoordinateSystems;
 import org.meteoinfo.projection.ProjectionInfo;
-import org.meteoinfo.projection.ProjectionManage;
+import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.PolygonShape;
 import org.meteoinfo.shape.ShapeTypes;
@@ -2749,9 +2749,9 @@ public class GridData {
         int xnum = this.getXNum();
         int ynum = this.getYNum();
         if (this.isGlobal() || this.xArray[xnum - 1] - this.xArray[0] == 360) {
-            aExtent = ProjectionManage.getProjectionGlobalExtent(toProj);
+            aExtent = ProjectionUtil.getProjectionGlobalExtent(toProj);
         } else {
-            aExtent = ProjectionManage.getProjectionExtent(fromProj, toProj, this.xArray, this.yArray);
+            aExtent = ProjectionUtil.getProjectionExtent(fromProj, toProj, this.xArray, this.yArray);
         }
 
         double xDelt = (aExtent.maxX - aExtent.minX) / (xnum - 1);
