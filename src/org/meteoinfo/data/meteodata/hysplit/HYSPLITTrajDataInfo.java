@@ -25,6 +25,7 @@ import org.meteoinfo.data.DataTypes;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -51,7 +52,15 @@ import org.meteoinfo.shape.PointZ;
 import org.meteoinfo.shape.PointZShape;
 import org.meteoinfo.shape.PolylineZShape;
 import org.meteoinfo.shape.ShapeTypes;
+import org.meteoinfo.table.ColumnData;
+import org.meteoinfo.table.DataColumn;
+import org.meteoinfo.table.DataTable;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
+import ucar.ma2.Range;
+import ucar.ma2.Section;
 import ucar.nc2.Attribute;
 
 /**
@@ -59,44 +68,39 @@ import ucar.nc2.Attribute;
  * @author yaqiang
  */
 public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
-    // <editor-fold desc="Variables">
-/// <summary>
-    /// File name
-    /// </summary>
 
-    public List<String> fileNames;
+    // <editor-fold desc="Variables">
     /// <summary>
     /// Number of meteorological files
     /// </summary>
-    public List<Integer> meteoFileNums;
+    public Integer meteoFileNum;
     /// <summary>
     /// Number of trajectories
     /// </summary>
-    public int trajeoryNumber;
-    /// <summary>
-    /// Number of trajectories
-    /// </summary>
-    public List<Integer> trajeoryNums;
+    public int trajNum;
+    private int endPointNum;
     /// <summary>
     /// Trajectory direction - foreward or backward
     /// </summary>
-    public List<String> trajDirections;
+    public String trajDirection;
     /// <summary>
     /// Vertical motion
     /// </summary>
-    public List<String> verticalMotions;
+    public String verticalMotion;
     /// <summary>
     /// Information list of trajectories
     /// </summary>
-    public List<List<TrajectoryInfo>> trajInfos;
+    public List<TrajectoryInfo> trajInfos;
     /// <summary>
     /// Number of variables
     /// </summary>
-    public List<Integer> varNums;
+    public int varNum;
     /// <summary>
     /// Variable name list
     /// </summary>
-    public List<List<String>> varNames;
+    public List<String> varNames;
+    private String[] inVarNames;
+    private List<DataTable> dataTables;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 
@@ -104,80 +108,56 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
      * Constructor
      */
     public HYSPLITTrajDataInfo() {
-        this.setDataType(MeteoDataType.HYSPLIT_Traj);
+        this.dataType = MeteoDataType.HYSPLIT_Traj;
         initVariables();
     }
 
     private void initVariables() {
-        fileNames = new ArrayList<>();
-        meteoFileNums = new ArrayList<>();
-        trajeoryNums = new ArrayList<>();
-        trajDirections = new ArrayList<>();
-        verticalMotions = new ArrayList<>();
         trajInfos = new ArrayList<>();
-        varNums = new ArrayList<>();
         varNames = new ArrayList<>();
-        trajeoryNumber = 0;
+        trajNum = 0;
+        inVarNames = new String[]{"time", "run_hour", "lat", "lon", "height"};
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
+    /**
+     * Get data table list
+     * @return Data table list
+     */
+    public List<DataTable> getDataTables(){
+        return this.dataTables;
+    }
     // </editor-fold>
     // <editor-fold desc="Methods">
 
     @Override
     public void readDataInfo(String fileName) {
-        String[] trajFiles = new String[1];
-        trajFiles[0] = fileName;
+        BufferedReader sr = null;
         try {
-            readDataInfo(trajFiles);
-        } catch (IOException ex) {
-            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    /**
-     * Read data info for multi trajectory files
-     *
-     * @param trajFiles Trajectory files
-     * @throws IOException
-     */
-    public void readDataInfo(String[] trajFiles) throws IOException {
-        this.setFileName(trajFiles[0]);
-        String aLine;
-        String[] dataArray;
-        int i, t;
-
-        initVariables();
-        List<Double> times = new ArrayList<>();
-
-        for (t = 0; t < trajFiles.length; t++) {
-            String aFile = trajFiles[t];
-            fileNames.add(aFile);
-
-            BufferedReader sr = new BufferedReader(new FileReader(new File(aFile)));
-
+            this.setFileName(fileName);
+            String aLine;
+            String[] dataArray;
+            int i;
+            initVariables();
+            List<Double> times = new ArrayList<>();
+            sr = new BufferedReader(new FileReader(new File(fileName)));
             //Record #1
             aLine = sr.readLine().trim();
             dataArray = aLine.split("\\s+");
-            meteoFileNums.add(Integer.parseInt(dataArray[0]));
-
+            meteoFileNum = Integer.parseInt(dataArray[0]);
             //Record #2
-            for (i = 0; i < meteoFileNums.get(t); i++) {
+            for (i = 0; i < meteoFileNum; i++) {
                 sr.readLine();
             }
-
             //Record #3
             aLine = sr.readLine().trim();
             dataArray = aLine.split("\\s+");
-            trajeoryNums.add(Integer.parseInt(dataArray[0]));
-            trajeoryNumber += trajeoryNums.get(t);
-            trajDirections.add(dataArray[1]);
-            verticalMotions.add(dataArray[2]);
-
+            trajNum = Integer.parseInt(dataArray[0]);
+            trajDirection = dataArray[1];
+            verticalMotion = dataArray[2];
             //Record #4  
             TrajectoryInfo aTrajInfo;
-            List<TrajectoryInfo> trajInfoList = new ArrayList<>();
-            for (i = 0; i < trajeoryNums.get(t); i++) {
+            for (i = 0; i < trajNum; i++) {
                 aLine = sr.readLine().trim();
                 dataArray = aLine.split("\\s+");
                 int y = Integer.parseInt(dataArray[0]);
@@ -199,90 +179,143 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
                 aTrajInfo.startLat = Float.parseFloat(dataArray[4]);
                 aTrajInfo.startLon = Float.parseFloat(dataArray[5]);
                 aTrajInfo.startHeight = Float.parseFloat(dataArray[6]);
-                trajInfoList.add(aTrajInfo);
+                trajInfos.add(aTrajInfo);
             }
-            trajInfos.add(trajInfoList);
             Dimension tdim = new Dimension(DimensionType.T);
             tdim.setValues(times);
-
             //Record #5
             aLine = sr.readLine().trim();
             dataArray = aLine.split("\\s+");
-            int nvar = Integer.parseInt(dataArray[0]);
-            if (nvar > dataArray.length - 1){
-                nvar = dataArray.length - 1;
+            this.varNum = Integer.parseInt(dataArray[0]);
+            if (varNum > dataArray.length - 1) {
+                varNum = dataArray.length - 1;
             }
-            varNums.add(nvar);
-            List<String> varNameList = new ArrayList<>();
-            for (i = 0; i < varNums.get(t); i++) {
-                varNameList.add(dataArray[i + 1]);
+            for (i = 0; i < varNum; i++) {
+                varNames.add(dataArray[i + 1]);
             }
-            varNames.add(varNameList);
-
-            Variable var = new Variable();
-            var.setName("Traj");
-            var.setStation(true);
-            var.setDimension(tdim);
-            List<Variable> variables = new ArrayList<>();
-            variables.add(var);
-            this.setVariables(variables);
-
+            //Trajectory end point number
+//            endPointNum = 0;
+//            while (true) {
+//                aLine = sr.readLine();
+//                if (aLine == null) {
+//                    break;
+//                }
+//                if (aLine.isEmpty()) {
+//                    continue;
+//                }
+//                endPointNum += 1;
+//            }
             sr.close();
+            //endPointNum = endPointNum / this.trajNum;
+            
+            //Read data table list
+            this.dataTables = this.readTable();
+            this.endPointNum = 0;
+            for (DataTable table : this.dataTables){
+                if (this.endPointNum < table.getRowCount()){
+                    this.endPointNum = table.getRowCount();
+                }
+            }
+
+            //Dimensions
+            Dimension trajDim = new Dimension(DimensionType.Other);
+            trajDim.setName("trajectory");
+            trajDim.setDimLength(this.trajNum);
+            this.addDimension(trajDim);
+            Dimension obsDim = new Dimension(DimensionType.Other);
+            obsDim.setName("obs");
+            obsDim.setDimLength(this.endPointNum);
+            this.addDimension(obsDim);
+
+            //Variables
+            for (String vName : this.inVarNames) {
+                Variable var = new Variable();
+                var.setName(vName);
+                var.addDimension(trajDim);
+                var.addDimension(obsDim);
+                var.addAttribute("long_name", vName);
+                this.addVariable(var);
+            }
+            for (String vName : this.varNames) {
+                Variable var = new Variable();
+                var.setName(vName);
+                var.addDimension(trajDim);
+                var.addDimension(obsDim);
+                var.addAttribute("long_name", vName);
+                var.setStation(true);
+                this.addVariable(var);
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (sr != null) {
+                    sr.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
-    
+
     /**
      * Get global attributes
+     *
      * @return Global attributes
      */
     @Override
-    public List<Attribute> getGlobalAttributes(){
+    public List<Attribute> getGlobalAttributes() {
         return new ArrayList<>();
     }
 
     @Override
     public String generateInfoText() {
         String dataInfo = "";
-        for (int t = 0; t < fileNames.size(); t++) {
-            int i;
-            dataInfo += "File Name: " + fileNames.get(t);
-            dataInfo += System.getProperty("line.separator") + "Trajectory number = " + String.valueOf(trajeoryNums.get(t));
-            dataInfo += System.getProperty("line.separator") + "Trajectory direction = " + trajDirections.get(t);
-            dataInfo += System.getProperty("line.separator") + "Vertical motion =" + verticalMotions.get(t);
-            dataInfo += System.getProperty("line.separator") + "Number of diagnostic output variables = "
-                    + String.valueOf(varNums.get(t));
-            dataInfo += System.getProperty("line.separator") + "Variables:";
-            for (i = 0; i < varNums.get(t); i++) {
-                dataInfo += " " + varNames.get(t).get(i);
-            }
-            dataInfo += System.getProperty("line.separator") + System.getProperty("line.separator") + "Trajectories:";
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:00");
-            for (TrajectoryInfo aTrajInfo : trajInfos.get(t)) {
-                dataInfo += System.getProperty("line.separator") + "  " + format.format(aTrajInfo.startTime)
-                        + "  " + String.valueOf(aTrajInfo.startLat) + "  " + String.valueOf(aTrajInfo.startLon)
-                        + "  " + String.valueOf(aTrajInfo.startHeight);
-            }
-
-            if (t < fileNames.size() - 1) {
-                dataInfo += System.getProperty("line.separator") + System.getProperty("line.separator")
-                        + "******************************" + System.getProperty("line.separator");
-            }
+        int i;
+        dataInfo += "File Name: " + this.getFileName();
+        dataInfo += System.getProperty("line.separator") + "Trajectory number = " + String.valueOf(this.trajNum);
+        dataInfo += System.getProperty("line.separator") + "Trajectory direction = " + trajDirection;
+        dataInfo += System.getProperty("line.separator") + "Vertical motion =" + verticalMotion;
+        dataInfo += System.getProperty("line.separator") + "Number of diagnostic output variables = "
+                + String.valueOf(varNum);
+        dataInfo += System.getProperty("line.separator") + "Variables:";
+        for (i = 0; i < varNum; i++) {
+            dataInfo += " " + varNames.get(i);
         }
+        dataInfo += System.getProperty("line.separator") + System.getProperty("line.separator") + "Trajectories:";
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:00");
+        for (TrajectoryInfo aTrajInfo : trajInfos) {
+            dataInfo += System.getProperty("line.separator") + "  " + format.format(aTrajInfo.startTime)
+                    + "  " + String.valueOf(aTrajInfo.startLat) + "  " + String.valueOf(aTrajInfo.startLon)
+                    + "  " + String.valueOf(aTrajInfo.startHeight);
+        }
+
+        dataInfo += System.getProperty("line.separator") + super.generateInfoText();
 
         return dataInfo;
     }
-    
+
     /**
      * Read array data of a variable
-     * 
+     *
      * @param varName Variable name
      * @return Array data
      */
     @Override
-    public Array read(String varName){
-        return null;
+    public Array read(String varName) {
+        int[] origin = new int[]{0, 0};
+        int[] size = new int[]{this.trajNum, this.endPointNum};
+        int[] stride = new int[]{1, 1};
+
+        Array r = read(varName, origin, size, stride);
+        
+        return r;
     }
-    
+
     /**
      * Read array data of the variable
      *
@@ -294,14 +327,46 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
      */
     @Override
     public Array read(String varName, int[] origin, int[] size, int[] stride) {
-        return null;
+        try {
+            DataColumn col = this.dataTables.get(0).findColumn(varName);
+            DataType dtype = DataType.FLOAT;
+            switch (col.getDataType()){
+                case Date:
+                    dtype = DataType.OBJECT;
+                    break;
+                case Integer:
+                    dtype = DataType.INT;
+                    break;
+            }
+            Section section = new Section(origin, size, stride);
+            Array array = Array.factory(dtype, section.getShape());
+            Range trajRange = section.getRange(0);
+            Range obsRange = section.getRange(1);
+            Index index = array.getIndex();
+            for (int trajIdx = trajRange.first(); trajIdx <= trajRange.last(); trajIdx += trajRange.stride()){
+                DataTable dTable = this.dataTables.get(trajIdx);
+                ColumnData colData = dTable.getColumnData(varName);
+                for (int obsIdx = obsRange.first(); obsIdx <= obsRange.last(); obsIdx += obsRange.stride()){
+                    if (colData.size() > obsIdx)
+                        array.setObject(index, colData.getValue(obsIdx));
+                    else
+                        array.setObject(index, Double.NaN);
+                    index.incr();
+                }
+            }
+            
+            return array;
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     @Override
     public VectorLayer createTrajLineLayer() {
         return createTrajLineLayer(false);
     }
-    
+
     public VectorLayer createTrajLineLayer(boolean zPres) {
         VectorLayer aLayer = new VectorLayer(ShapeTypes.PolylineZ);
         aLayer.editAddField("ID", DataTypes.Integer);
@@ -314,124 +379,121 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
 
         Calendar cal = Calendar.getInstance();
         int TrajNum = 0;
-        for (int t = 0; t < fileNames.size(); t++) {
-            try {
-                String aFile = fileNames.get(t);
-                BufferedReader sr = new BufferedReader(new FileReader(new File(aFile)));
-                String aLine;
-                String[] dataArray;
-                int i;
+        try {
+            BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
+            String aLine;
+            String[] dataArray;
+            int i;
 
-                //Record #1
+            //Record #1
+            sr.readLine();
+
+            //Record #2
+            for (i = 0; i < meteoFileNum; i++) {
                 sr.readLine();
+            }
 
-                //Record #2
-                for (i = 0; i < meteoFileNums.get(t); i++) {
+            //Record #3
+            sr.readLine();
+
+            //Record #4             
+            for (i = 0; i < this.trajNum; i++) {
+                sr.readLine();
+            }
+
+            //Record #5
+            sr.readLine();
+
+            //Record #6
+            int TrajIdx;
+            List<PointZ> pList;
+            List<List<PointZ>> PointList = new ArrayList<>();
+            for (i = 0; i < this.trajNum; i++) {
+                pList = new ArrayList<>();
+                PointList.add(pList);
+            }
+            PointZ aPoint;
+            //ArrayList polylines = new ArrayList();
+            int dn = 12 + this.varNum;
+            while (true) {
+                aLine = sr.readLine();
+                if (aLine == null) {
+                    break;
+                }
+                if (aLine.isEmpty()) {
+                    continue;
+                }
+                aLine = aLine.trim();
+                dataArray = aLine.split("\\s+");
+                if (dataArray.length < dn) {
                     sr.readLine();
+                    //aLine = sr.readLine().trim();
+                    //tempArray = aLine.split("\\s+");
                 }
-
-                //Record #3
-                sr.readLine();
-
-                //Record #4             
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    sr.readLine();
-                }
-
-                //Record #5
-                sr.readLine();
-
-                //Record #6
-                int TrajIdx;
-                List<PointZ> pList;
-                List<List<PointZ>> PointList = new ArrayList<>();
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    pList = new ArrayList<>();
-                    PointList.add(pList);
-                }
-                PointZ aPoint;
-                //ArrayList polylines = new ArrayList();
-                int dn = 12 + this.varNums.get(t);
-                while (true) {
-                    aLine = sr.readLine();
-                    if (aLine == null) {
-                        break;
-                    }
-                    if (aLine.isEmpty()) {
-                        continue;
-                    }
-                    aLine = aLine.trim();
-                    dataArray = aLine.split("\\s+");
-                    if (dataArray.length < dn){
-                        sr.readLine();
-                        //aLine = sr.readLine().trim();
-                        //tempArray = aLine.split("\\s+");
-                    }
-                    TrajIdx = Integer.parseInt(dataArray[0]) - 1;
-                    aPoint = new PointZ();
-                    aPoint.X = Double.parseDouble(dataArray[10]);
-                    aPoint.Y = Double.parseDouble(dataArray[9]);
-                    if (dataArray.length >= 13){
-                        if (zPres){
-                            aPoint.M = Double.parseDouble(dataArray[11]);
-                            aPoint.Z = Double.parseDouble(dataArray[12]);
-                        } else {
-                            aPoint.M = Double.parseDouble(dataArray[12]);
-                            aPoint.Z = Double.parseDouble(dataArray[11]);
-                        }
+                TrajIdx = Integer.parseInt(dataArray[0]) - 1;
+                aPoint = new PointZ();
+                aPoint.X = Double.parseDouble(dataArray[10]);
+                aPoint.Y = Double.parseDouble(dataArray[9]);
+                if (dataArray.length >= 13) {
+                    if (zPres) {
+                        aPoint.M = Double.parseDouble(dataArray[11]);
+                        aPoint.Z = Double.parseDouble(dataArray[12]);
                     } else {
+                        aPoint.M = Double.parseDouble(dataArray[12]);
                         aPoint.Z = Double.parseDouble(dataArray[11]);
                     }
+                } else {
+                    aPoint.Z = Double.parseDouble(dataArray[11]);
+                }
 
-                    if (PointList.get(TrajIdx).size() > 1) {
-                        PointZ oldPoint = PointList.get(TrajIdx).get(PointList.get(TrajIdx).size() - 1);
-                        if (Math.abs(aPoint.X - oldPoint.X) > 100) {
-                            if (aPoint.X > oldPoint.X) {
-                                aPoint.X -= 360;
-                            } else {
-                                aPoint.X += 360;
-                            }
+                if (PointList.get(TrajIdx).size() > 1) {
+                    PointZ oldPoint = PointList.get(TrajIdx).get(PointList.get(TrajIdx).size() - 1);
+                    if (Math.abs(aPoint.X - oldPoint.X) > 100) {
+                        if (aPoint.X > oldPoint.X) {
+                            aPoint.X -= 360;
+                        } else {
+                            aPoint.X += 360;
                         }
                     }
-                    PointList.get(TrajIdx).add(aPoint);
                 }
-
-                //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    PolylineZShape aPolyline = new PolylineZShape();
-                    TrajNum += 1;
-                    aPolyline.setValue(TrajNum);
-                    aPolyline.setPoints(PointList.get(i));
-                    aPolyline.setExtent(MIMath.getPointsExtent(aPolyline.getPoints()));
-
-                    int shapeNum = aLayer.getShapeNum();
-                    if (aLayer.editInsertShape(aPolyline, shapeNum)) {
-                        cal.setTime(trajInfos.get(t).get(i).startTime);
-                        aLayer.editCellValue("ID", shapeNum, TrajNum);
-                        aLayer.editCellValue("Date", shapeNum, cal.getTime());
-                        aLayer.editCellValue("Year", shapeNum, cal.get(Calendar.YEAR));
-                        aLayer.editCellValue("Month", shapeNum, cal.get(Calendar.MONTH) + 1);
-                        aLayer.editCellValue("Day", shapeNum, cal.get(Calendar.DAY_OF_MONTH));
-                        aLayer.editCellValue("Hour", shapeNum, cal.get(Calendar.HOUR_OF_DAY));
-                        aLayer.editCellValue("Height", shapeNum, trajInfos.get(t).get(i).startHeight);
-                        //aLayer.editCellValue("StartLat", shapeNum, trajInfos.get(t).get(i).startLat);
-                        //aLayer.editCellValue("StartLon", shapeNum, trajInfos.get(t).get(i).startLon);
-                    }
-                }
-
-                sr.close();
-            } catch (IOException ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+                PointList.get(TrajIdx).add(aPoint);
             }
+
+            //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
+            for (i = 0; i < this.trajNum; i++) {
+                PolylineZShape aPolyline = new PolylineZShape();
+                TrajNum += 1;
+                aPolyline.setValue(TrajNum);
+                aPolyline.setPoints(PointList.get(i));
+                aPolyline.setExtent(MIMath.getPointsExtent(aPolyline.getPoints()));
+
+                int shapeNum = aLayer.getShapeNum();
+                if (aLayer.editInsertShape(aPolyline, shapeNum)) {
+                    cal.setTime(trajInfos.get(i).startTime);
+                    aLayer.editCellValue("ID", shapeNum, TrajNum);
+                    aLayer.editCellValue("Date", shapeNum, cal.getTime());
+                    aLayer.editCellValue("Year", shapeNum, cal.get(Calendar.YEAR));
+                    aLayer.editCellValue("Month", shapeNum, cal.get(Calendar.MONTH) + 1);
+                    aLayer.editCellValue("Day", shapeNum, cal.get(Calendar.DAY_OF_MONTH));
+                    aLayer.editCellValue("Hour", shapeNum, cal.get(Calendar.HOUR_OF_DAY));
+                    aLayer.editCellValue("Height", shapeNum, trajInfos.get(i).startHeight);
+                    //aLayer.editCellValue("StartLat", shapeNum, trajInfos.get(i).startLat);
+                    //aLayer.editCellValue("StartLon", shapeNum, trajInfos.get(i).startLon);
+                }
+            }
+
+            sr.close();
+        } catch (IOException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         aLayer.setLayerName("Trajectory_Lines");
         aLayer.setLayerDrawType(LayerDrawType.TrajLine);
         //aLayer.LegendScheme = m_Legend.CreateSingleSymbolLegendScheme(Shape.ShapeType.Polyline, Color.Blue, 1.0F, 1, aDataInfo.TrajeoryNum);            
         aLayer.setVisible(true);
-        //LegendScheme aLS = LegendManage.createUniqValueLegendScheme(aLayer, 1, trajeoryNumber);
+        //LegendScheme aLS = LegendManage.createUniqValueLegendScheme(aLayer, 1, trajNum);
         aLayer.updateLegendScheme(LegendType.UniqueValue, "ID");
         LegendScheme ls = aLayer.getLegendScheme();
         int i = 0;
@@ -453,6 +515,107 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
         return aLayer;
     }
 
+    /**
+     * Read trajectories as data table list.
+     *
+     * @return Data table list
+     * @throws Exception
+     */
+    public List<DataTable> readTable() throws Exception {
+        List<DataTable> tables = new ArrayList<>();
+        for (int i = 0; i < this.trajNum; i++) {
+            DataTable table = new DataTable();
+            table.addColumn("time", DataTypes.Date);
+            table.addColumn("run_hour", DataTypes.Float);
+            table.addColumn("lat", DataTypes.Float);
+            table.addColumn("lon", DataTypes.Float);
+            table.addColumn("height", DataTypes.Float);
+            for (String vName : this.varNames) {
+                table.addColumn(vName, DataTypes.Float);
+            }
+            tables.add(table);
+        }
+
+        try {
+            BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
+            String aLine;
+            String[] dataArray, tempArray;
+            int i;
+
+            //Record #1
+            sr.readLine();
+
+            //Record #2
+            for (i = 0; i < meteoFileNum; i++) {
+                sr.readLine();
+            }
+
+            //Record #3
+            sr.readLine();
+
+            //Record #4             
+            for (i = 0; i < trajNum; i++) {
+                sr.readLine();
+            }
+
+            //Record #5
+            sr.readLine();
+
+            //Record #6
+            int trajIdx;
+            int dn = 12 + this.varNum;
+            Calendar cal;
+            while (true) {
+                aLine = sr.readLine();
+                if (aLine == null) {
+                    break;
+                }
+                if (aLine.isEmpty()) {
+                    continue;
+                }
+                aLine = aLine.trim();
+                dataArray = aLine.split("\\s+");
+                if (dataArray.length < dn) {
+                    aLine = sr.readLine().trim();
+                    tempArray = aLine.split("\\s+");
+                    dataArray = (String[]) DataConvert.resizeArray(dataArray, dn);
+                    for (i = 0; i < tempArray.length; i++) {
+                        dataArray[dn - tempArray.length + i] = tempArray[i];
+                    }
+                }
+                trajIdx = Integer.parseInt(dataArray[0]) - 1;
+                DataTable table = tables.get(trajIdx);
+                table.addRow();
+                int rowIdx = table.getRowCount() - 1;
+                int y = Integer.parseInt(dataArray[2]);
+                if (y < 100) {
+                    if (y > 50) {
+                        y = 1900 + y;
+                    } else {
+                        y = 2000 + y;
+                    }
+                }
+                cal = new GregorianCalendar(y, Integer.parseInt(dataArray[3]) - 1,
+                        Integer.parseInt(dataArray[4]), Integer.parseInt(dataArray[5]), 0, 0);
+                table.setValue(rowIdx, "time", cal.getTime());
+                table.setValue(rowIdx, "run_hour", Float.parseFloat(dataArray[8]));
+                table.setValue(rowIdx, "lat", Float.parseFloat(dataArray[9]));
+                table.setValue(rowIdx, "lon", Float.parseFloat(dataArray[10]));
+                table.setValue(rowIdx, "height", Float.parseFloat(dataArray[11]));
+                for (i = 12; i < dataArray.length; i++) {
+                    table.setValue(rowIdx, i - 7, Float.parseFloat(dataArray[i]));
+                }
+            }
+            sr.close();
+        } catch (IOException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return tables;
+    }
+
     @Override
     public VectorLayer createTrajPointLayer() {
         VectorLayer aLayer = new VectorLayer(ShapeTypes.Point);
@@ -463,131 +626,128 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
         aLayer.editAddField(new Field("Altitude", DataTypes.Double));
         aLayer.editAddField(new Field("Pressure", DataTypes.Double));
         boolean isMultiVar = false;
-        if (varNums.get(0) > 1) {
+        if (varNum > 1) {
             isMultiVar = true;
-            for (int v = 1; v < varNums.get(0); v++) {
-                aLayer.editAddField(new Field(varNames.get(0).get(v), DataTypes.Double));
+            for (int v = 1; v < varNum; v++) {
+                aLayer.editAddField(new Field(varNames.get(v), DataTypes.Double));
             }
         }
 
         int TrajNum = 0;
-        for (int t = 0; t < fileNames.size(); t++) {
-            try {
-                String aFile = fileNames.get(t);
-                BufferedReader sr = new BufferedReader(new FileReader(new File(aFile)));
-                String aLine;
-                String[] dataArray, tempArray;
-                int i;
+        try {
+            BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
+            String aLine;
+            String[] dataArray, tempArray;
+            int i;
 
-                //Record #1
+            //Record #1
+            sr.readLine();
+
+            //Record #2
+            for (i = 0; i < meteoFileNum; i++) {
                 sr.readLine();
+            }
 
-                //Record #2
-                for (i = 0; i < meteoFileNums.get(t); i++) {
-                    sr.readLine();
-                }
+            //Record #3
+            sr.readLine();
 
-                //Record #3
+            //Record #4             
+            for (i = 0; i < trajNum; i++) {
                 sr.readLine();
+            }
 
-                //Record #4             
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    sr.readLine();
+            //Record #5
+            sr.readLine();
+
+            //Record #6
+            int TrajIdx;
+            List<List<Object>> pList;
+            List<List<List<Object>>> PointList = new ArrayList<>();
+            for (i = 0; i < trajNum; i++) {
+                pList = new ArrayList<>();
+                PointList.add(pList);
+            }
+            PointZ aPoint;
+            double Height, Press;
+            int dn = 12 + this.varNum;
+            while (true) {
+                aLine = sr.readLine();
+                if (aLine == null) {
+                    break;
                 }
-
-                //Record #5
-                sr.readLine();
-
-                //Record #6
-                int TrajIdx;
-                List<List<Object>> pList;
-                List<List<List<Object>>> PointList = new ArrayList<>();
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    pList = new ArrayList<>();
-                    PointList.add(pList);
+                if (aLine.isEmpty()) {
+                    continue;
                 }
-                PointZ aPoint;
-                double Height, Press;
-                int dn = 12 + this.varNums.get(t);
-                while (true) {
-                    aLine = sr.readLine();
-                    if (aLine == null) {
-                        break;
+                aLine = aLine.trim();
+                dataArray = aLine.split("\\s+");
+                if (dataArray.length < dn) {
+                    aLine = sr.readLine().trim();
+                    tempArray = aLine.split("\\s+");
+                    dataArray = (String[]) DataConvert.resizeArray(dataArray, dn);
+                    for (i = 0; i < tempArray.length; i++) {
+                        dataArray[dn - tempArray.length + i] = tempArray[i];
                     }
-                    if (aLine.isEmpty()) {
-                        continue;
-                    }
-                    aLine = aLine.trim();
-                    dataArray = aLine.split("\\s+");
-                    if (dataArray.length < dn){
-                        aLine = sr.readLine().trim();
-                        tempArray = aLine.split("\\s+");
-                        dataArray = (String[])DataConvert.resizeArray(dataArray, dn);
-                        for (i = 0; i < tempArray.length; i++){
-                            dataArray[dn - tempArray.length + i] = tempArray[i];
-                        }
-                    }
-                    List<Object> dList = new ArrayList<>();
-                    TrajIdx = Integer.parseInt(dataArray[0]) - 1;
-                    int y = Integer.parseInt(dataArray[2]);
-                    if (y < 100) {
-                        if (y > 50) {
-                            y = 1900 + y;
-                        } else {
-                            y = 2000 + y;
-                        }
-                    }
-                    Calendar cal = new GregorianCalendar(y, Integer.parseInt(dataArray[3]) - 1,
-                            Integer.parseInt(dataArray[4]), Integer.parseInt(dataArray[5]), 0, 0);
-                    aPoint = new PointZ();
-                    aPoint.X = Double.parseDouble(dataArray[10]);
-                    aPoint.Y = Double.parseDouble(dataArray[9]);
-                    Height = Double.parseDouble(dataArray[11]);
-                    Press = Double.parseDouble(dataArray[12]);
-                    aPoint.Z = Height;
-                    aPoint.M = Press;
-                    dList.add(aPoint);
-                    dList.add(cal.getTime());
-                    dList.add(Height);
-                    dList.add(Press);
-                    if (isMultiVar) {
-                        for (i = 13; i < dataArray.length; i++) {
-                            dList.add(Double.parseDouble(dataArray[i]));
-                        }
-                    }
-                    PointList.get(TrajIdx).add(dList);
                 }
+                List<Object> dList = new ArrayList<>();
+                TrajIdx = Integer.parseInt(dataArray[0]) - 1;
+                int y = Integer.parseInt(dataArray[2]);
+                if (y < 100) {
+                    if (y > 50) {
+                        y = 1900 + y;
+                    } else {
+                        y = 2000 + y;
+                    }
+                }
+                Calendar cal = new GregorianCalendar(y, Integer.parseInt(dataArray[3]) - 1,
+                        Integer.parseInt(dataArray[4]), Integer.parseInt(dataArray[5]), 0, 0);
+                aPoint = new PointZ();
+                aPoint.X = Double.parseDouble(dataArray[10]);
+                aPoint.Y = Double.parseDouble(dataArray[9]);
+                Height = Double.parseDouble(dataArray[11]);
+                Press = Double.parseDouble(dataArray[12]);
+                aPoint.Z = Height;
+                aPoint.M = Press;
+                dList.add(aPoint);
+                dList.add(cal.getTime());
+                dList.add(Height);
+                dList.add(Press);
+                if (isMultiVar) {
+                    for (i = 13; i < dataArray.length; i++) {
+                        dList.add(Double.parseDouble(dataArray[i]));
+                    }
+                }
+                PointList.get(TrajIdx).add(dList);
+            }
 
-                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    TrajNum += 1;
-                    for (int j = 0; j < PointList.get(i).size(); j++) {
-                        PointZShape aPS = new PointZShape();
-                        aPS.setValue(TrajNum);
-                        aPS.setPoint((PointD) PointList.get(i).get(j).get(0));
-                        int shapeNum = aLayer.getShapeNum();
-                        if (aLayer.editInsertShape(aPS, shapeNum)) {
-                            aLayer.editCellValue("TrajID", shapeNum, TrajNum);
-                            aLayer.editCellValue("Date", shapeNum, format.format((Date) PointList.get(i).get(j).get(1)));
-                            aLayer.editCellValue("Lat", shapeNum, aPS.getPoint().Y);
-                            aLayer.editCellValue("Lon", shapeNum, aPS.getPoint().X);
-                            aLayer.editCellValue("Altitude", shapeNum, PointList.get(i).get(j).get(2));
-                            aLayer.editCellValue("Pressure", shapeNum, PointList.get(i).get(j).get(3));
-                            if (isMultiVar) {
-                                for (int v = 1; v < varNums.get(0); v++) {
-                                    aLayer.editCellValue(varNames.get(0).get(v), shapeNum, PointList.get(i).get(j).get(3 + v));
-                                }
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
+            for (i = 0; i < trajNum; i++) {
+                TrajNum += 1;
+                for (int j = 0; j < PointList.get(i).size(); j++) {
+                    PointZShape aPS = new PointZShape();
+                    aPS.setValue(TrajNum);
+                    aPS.setPoint((PointD) PointList.get(i).get(j).get(0));
+                    int shapeNum = aLayer.getShapeNum();
+                    if (aLayer.editInsertShape(aPS, shapeNum)) {
+                        aLayer.editCellValue("TrajID", shapeNum, TrajNum);
+                        aLayer.editCellValue("Date", shapeNum, format.format((Date) PointList.get(i).get(j).get(1)));
+                        aLayer.editCellValue("Lat", shapeNum, aPS.getPoint().Y);
+                        aLayer.editCellValue("Lon", shapeNum, aPS.getPoint().X);
+                        aLayer.editCellValue("Altitude", shapeNum, PointList.get(i).get(j).get(2));
+                        aLayer.editCellValue("Pressure", shapeNum, PointList.get(i).get(j).get(3));
+                        if (isMultiVar) {
+                            for (int v = 1; v < varNum; v++) {
+                                aLayer.editCellValue(varNames.get(v), shapeNum, PointList.get(i).get(j).get(3 + v));
                             }
                         }
                     }
                 }
-
-                sr.close();
-            } catch (IOException ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            sr.close();
+        } catch (IOException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         aLayer.setLayerName("Trajectory_Points");
@@ -611,90 +771,87 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
         aLayer.editAddField(new Field("StartHeight", DataTypes.Double));
 
         int TrajNum = 0;
-        for (int t = 0; t < fileNames.size(); t++) {
-            try {
-                String aFile = fileNames.get(t);
-                BufferedReader sr = new BufferedReader(new FileReader(new File(aFile)));
-                String aLine;
-                String[] dataArray;
-                int i;
+        try {
+            BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
+            String aLine;
+            String[] dataArray;
+            int i;
 
-                //Record #1
+            //Record #1
+            sr.readLine();
+
+            //Record #2
+            for (i = 0; i < meteoFileNum; i++) {
                 sr.readLine();
-
-                //Record #2
-                for (i = 0; i < meteoFileNums.get(t); i++) {
-                    sr.readLine();
-                }
-
-                //Record #3
-                sr.readLine();
-
-                //Record #4             
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    sr.readLine();
-                }
-
-                //Record #5
-                sr.readLine();
-
-                //Record #6
-                int TrajIdx;
-                List<PointZ> PointList = new ArrayList<>();
-                PointZ aPoint = new PointZ();
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    PointList.add(aPoint);
-                }
-
-                int dn = 12 + this.varNums.get(t);
-                //ArrayList polylines = new ArrayList();
-                while (true) {
-                    aLine = sr.readLine();
-                    if (aLine == null) {
-                        break;
-                    }
-                    if (aLine.isEmpty()) {
-                        continue;
-                    }
-                    aLine = aLine.trim();
-                    dataArray = aLine.split("\\s+");
-                    if (dataArray.length < dn){
-                        sr.readLine();
-                    }
-                    if (Float.parseFloat(dataArray[8]) == 0) {
-                        TrajIdx = Integer.parseInt(dataArray[0]) - 1;
-                        aPoint = new PointZ();
-                        aPoint.X = Double.parseDouble(dataArray[10]);
-                        aPoint.Y = Double.parseDouble(dataArray[9]);
-                        aPoint.Z = Double.parseDouble(dataArray[11]);
-                        aPoint.M = Double.parseDouble(dataArray[12]);
-                        PointList.set(TrajIdx, aPoint);
-                    }
-                }
-
-                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    PointZShape aPS = new PointZShape();
-                    TrajNum += 1;
-                    aPS.setValue(TrajNum);
-                    aPS.setPoint(PointList.get(i));
-
-                    int shapeNum = aLayer.getShapeNum();
-                    if (aLayer.editInsertShape(aPS, shapeNum)) {
-                        aLayer.editCellValue("TrajID", shapeNum, TrajNum);
-                        aLayer.editCellValue("StartDate", shapeNum, format.format(trajInfos.get(t).get(i).startTime));
-                        aLayer.editCellValue("StartLat", shapeNum, trajInfos.get(t).get(i).startLat);
-                        aLayer.editCellValue("StartLon", shapeNum, trajInfos.get(t).get(i).startLon);
-                        aLayer.editCellValue("StartHeight", shapeNum, trajInfos.get(t).get(i).startHeight);
-                    }
-                }
-
-                sr.close();
-            } catch (IOException ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            //Record #3
+            sr.readLine();
+
+            //Record #4             
+            for (i = 0; i < trajNum; i++) {
+                sr.readLine();
+            }
+
+            //Record #5
+            sr.readLine();
+
+            //Record #6
+            int TrajIdx;
+            List<PointZ> PointList = new ArrayList<>();
+            PointZ aPoint = new PointZ();
+            for (i = 0; i < trajNum; i++) {
+                PointList.add(aPoint);
+            }
+
+            int dn = 12 + this.varNum;
+            //ArrayList polylines = new ArrayList();
+            while (true) {
+                aLine = sr.readLine();
+                if (aLine == null) {
+                    break;
+                }
+                if (aLine.isEmpty()) {
+                    continue;
+                }
+                aLine = aLine.trim();
+                dataArray = aLine.split("\\s+");
+                if (dataArray.length < dn) {
+                    sr.readLine();
+                }
+                if (Float.parseFloat(dataArray[8]) == 0) {
+                    TrajIdx = Integer.parseInt(dataArray[0]) - 1;
+                    aPoint = new PointZ();
+                    aPoint.X = Double.parseDouble(dataArray[10]);
+                    aPoint.Y = Double.parseDouble(dataArray[9]);
+                    aPoint.Z = Double.parseDouble(dataArray[11]);
+                    aPoint.M = Double.parseDouble(dataArray[12]);
+                    PointList.set(TrajIdx, aPoint);
+                }
+            }
+
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
+            for (i = 0; i < trajNum; i++) {
+                PointZShape aPS = new PointZShape();
+                TrajNum += 1;
+                aPS.setValue(TrajNum);
+                aPS.setPoint(PointList.get(i));
+
+                int shapeNum = aLayer.getShapeNum();
+                if (aLayer.editInsertShape(aPS, shapeNum)) {
+                    aLayer.editCellValue("TrajID", shapeNum, TrajNum);
+                    aLayer.editCellValue("StartDate", shapeNum, format.format(trajInfos.get(i).startTime));
+                    aLayer.editCellValue("StartLat", shapeNum, trajInfos.get(i).startLat);
+                    aLayer.editCellValue("StartLon", shapeNum, trajInfos.get(i).startLon);
+                    aLayer.editCellValue("StartHeight", shapeNum, trajInfos.get(i).startHeight);
+                }
+            }
+
+            sr.close();
+        } catch (IOException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         aLayer.setLayerName("Trajectory_Start_Points");
@@ -717,102 +874,99 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
         XYListDataset dataset = new XYListDataset();
         Calendar cal = Calendar.getInstance();
         int trajNum = 1;
-        for (int t = 0; t < fileNames.size(); t++) {
-            try {
-                String aFile = fileNames.get(t);
-                BufferedReader sr = new BufferedReader(new FileReader(new File(aFile)));
-                String aLine;
-                String[] dataArray, tempArray;
-                int i;
+        try {
+            BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
+            String aLine;
+            String[] dataArray, tempArray;
+            int i;
 
-                //Record #1
+            //Record #1
+            sr.readLine();
+
+            //Record #2
+            for (i = 0; i < meteoFileNum; i++) {
                 sr.readLine();
-
-                //Record #2
-                for (i = 0; i < meteoFileNums.get(t); i++) {
-                    sr.readLine();
-                }
-
-                //Record #3
-                sr.readLine();
-
-                //Record #4             
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    sr.readLine();
-                }
-
-                //Record #5
-                sr.readLine();
-
-                //Record #6
-                int TrajIdx;
-                List<PointD> pList;
-                List<List<PointD>> PointList = new ArrayList<>();
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    pList = new ArrayList<>();
-                    PointList.add(pList);
-                }
-                PointD aPoint;
-                //ArrayList polylines = new ArrayList();
-                int dn = 12 + this.varNums.get(t);
-                while (true) {
-                    aLine = sr.readLine();
-                    if (aLine == null) {
-                        break;
-                    }
-                    if (aLine.isEmpty()) {
-                        continue;
-                    }
-                    aLine = aLine.trim();
-                    dataArray = aLine.split("\\s+");
-                    if (dataArray.length < dn){
-                        aLine = sr.readLine().trim();
-                        tempArray = aLine.split("\\s+");
-                        dataArray = (String[])DataConvert.resizeArray(dataArray, dn);
-                        for (i = 0; i < tempArray.length; i++){
-                            dataArray[dn - tempArray.length + i] = tempArray[i];
-                        }
-                    }
-                    TrajIdx = Integer.parseInt(dataArray[0]) - 1;
-                    int y = Integer.parseInt(dataArray[2]);
-                    if (y < 100) {
-                        if (y > 50) {
-                            y = 1900 + y;
-                        } else {
-                            y = 2000 + y;
-                        }
-                    }
-                    cal.set(y, Integer.parseInt(dataArray[3]) - 1,
-                            Integer.parseInt(dataArray[4]), Integer.parseInt(dataArray[5]), 0, 0);
-
-                    aPoint = new PointD();
-                    aPoint.X = DateUtil.toOADate(cal.getTime());
-                    aPoint.Y = Double.parseDouble(dataArray[varIndex]);
-                    PointList.get(TrajIdx).add(aPoint);
-                }
-
-                //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    int n = PointList.get(i).size();
-                    double[] xvs = new double[n];
-                    double[] yvs = new double[n];
-                    for (int j = 0; j < n; j++) {
-                        xvs[j] = PointList.get(i).get(j).X;
-                        yvs[j] = PointList.get(i).get(j).Y;
-                    }
-                    dataset.addSeries("Traj_" + String.valueOf(trajNum), xvs, yvs);
-                    trajNum += 1;
-                }
-
-                sr.close();
-            } catch (IOException | NumberFormatException ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            //Record #3
+            sr.readLine();
+
+            //Record #4             
+            for (i = 0; i < trajNum; i++) {
+                sr.readLine();
+            }
+
+            //Record #5
+            sr.readLine();
+
+            //Record #6
+            int TrajIdx;
+            List<PointD> pList;
+            List<List<PointD>> PointList = new ArrayList<>();
+            for (i = 0; i < trajNum; i++) {
+                pList = new ArrayList<>();
+                PointList.add(pList);
+            }
+            PointD aPoint;
+            //ArrayList polylines = new ArrayList();
+            int dn = 12 + this.varNum;
+            while (true) {
+                aLine = sr.readLine();
+                if (aLine == null) {
+                    break;
+                }
+                if (aLine.isEmpty()) {
+                    continue;
+                }
+                aLine = aLine.trim();
+                dataArray = aLine.split("\\s+");
+                if (dataArray.length < dn) {
+                    aLine = sr.readLine().trim();
+                    tempArray = aLine.split("\\s+");
+                    dataArray = (String[]) DataConvert.resizeArray(dataArray, dn);
+                    for (i = 0; i < tempArray.length; i++) {
+                        dataArray[dn - tempArray.length + i] = tempArray[i];
+                    }
+                }
+                TrajIdx = Integer.parseInt(dataArray[0]) - 1;
+                int y = Integer.parseInt(dataArray[2]);
+                if (y < 100) {
+                    if (y > 50) {
+                        y = 1900 + y;
+                    } else {
+                        y = 2000 + y;
+                    }
+                }
+                cal.set(y, Integer.parseInt(dataArray[3]) - 1,
+                        Integer.parseInt(dataArray[4]), Integer.parseInt(dataArray[5]), 0, 0);
+
+                aPoint = new PointD();
+                aPoint.X = DateUtil.toOADate(cal.getTime());
+                aPoint.Y = Double.parseDouble(dataArray[varIndex]);
+                PointList.get(TrajIdx).add(aPoint);
+            }
+
+            //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
+            for (i = 0; i < trajNum; i++) {
+                int n = PointList.get(i).size();
+                double[] xvs = new double[n];
+                double[] yvs = new double[n];
+                for (int j = 0; j < n; j++) {
+                    xvs[j] = PointList.get(i).get(j).X;
+                    yvs[j] = PointList.get(i).get(j).Y;
+                }
+                dataset.addSeries("Traj_" + String.valueOf(trajNum), xvs, yvs);
+                trajNum += 1;
+            }
+
+            sr.close();
+        } catch (IOException | NumberFormatException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return dataset;
     }
-    
+
     /**
      * Get XYDataset - X dimension is hours from start point
      *
@@ -823,107 +977,104 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
         XYListDataset dataset = new XYListDataset();
         Calendar cal = Calendar.getInstance();
         int trajNum = 1;
-        for (int t = 0; t < fileNames.size(); t++) {
-            try {
-                String aFile = fileNames.get(t);
-                BufferedReader sr = new BufferedReader(new FileReader(new File(aFile)));
-                String aLine;
-                String[] dataArray, tempArray;
-                int i;
+        try {
+            BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
+            String aLine;
+            String[] dataArray, tempArray;
+            int i;
 
-                //Record #1
+            //Record #1
+            sr.readLine();
+
+            //Record #2
+            for (i = 0; i < meteoFileNum; i++) {
                 sr.readLine();
-
-                //Record #2
-                for (i = 0; i < meteoFileNums.get(t); i++) {
-                    sr.readLine();
-                }
-
-                //Record #3
-                sr.readLine();
-
-                //Record #4             
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    sr.readLine();
-                }
-
-                //Record #5
-                sr.readLine();
-
-                //Record #6
-                int TrajIdx;
-                List<PointD> pList;
-                List<List<PointD>> PointList = new ArrayList<>();
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    pList = new ArrayList<>();
-                    PointList.add(pList);
-                }
-                PointD aPoint;
-                int dn = 12 + this.varNums.get(t);
-                while (true) {
-                    aLine = sr.readLine();
-                    if (aLine == null) {
-                        break;
-                    }
-                    if (aLine.isEmpty()) {
-                        continue;
-                    }
-                    aLine = aLine.trim();
-                    dataArray = aLine.split("\\s+");
-                    if (dataArray.length < dn){
-                        aLine = sr.readLine().trim();
-                        tempArray = aLine.split("\\s+");
-                        dataArray = (String[])DataConvert.resizeArray(dataArray, dn);
-                        for (i = 0; i < tempArray.length; i++){
-                            dataArray[dn - tempArray.length + i] = tempArray[i];
-                        }
-                    }
-                    TrajIdx = Integer.parseInt(dataArray[0]) - 1;
-                    int y = Integer.parseInt(dataArray[2]);
-                    if (y < 100) {
-                        if (y > 50) {
-                            y = 1900 + y;
-                        } else {
-                            y = 2000 + y;
-                        }
-                    }
-                    cal.set(y, Integer.parseInt(dataArray[3]) - 1,
-                            Integer.parseInt(dataArray[4]), Integer.parseInt(dataArray[5]), 0, 0);
-
-                    aPoint = new PointD();
-                    aPoint.X = DateUtil.toOADate(cal.getTime());
-                    aPoint.Y = Double.parseDouble(dataArray[varIndex]);
-                    PointList.get(TrajIdx).add(aPoint);
-                }
-
-                //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
-                for (i = 0; i < trajeoryNums.get(t); i++) {
-                    int n = PointList.get(i).size();
-                    double[] xvs = new double[n];
-                    double[] yvs = new double[n];
-                    Date cdate, sdate = new Date();
-                    for (int j = 0; j < n; j++) {
-                        cdate = DateUtil.fromOADate(PointList.get(i).get(j).X);
-                        if (j == 0) {
-                            sdate = cdate;
-                            xvs[j] = 0;
-                        } else {
-                            xvs[j] = DateUtil.getHours(cdate, sdate);
-                        }
-                        yvs[j] = PointList.get(i).get(j).Y;
-                    }
-                    dataset.addSeries("Traj_" + String.valueOf(trajNum), xvs, yvs);
-                    trajNum += 1;
-                }
-
-                sr.close();
-            } catch (IOException | NumberFormatException ex) {
-                Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            //Record #3
+            sr.readLine();
+
+            //Record #4             
+            for (i = 0; i < trajNum; i++) {
+                sr.readLine();
+            }
+
+            //Record #5
+            sr.readLine();
+
+            //Record #6
+            int TrajIdx;
+            List<PointD> pList;
+            List<List<PointD>> PointList = new ArrayList<>();
+            for (i = 0; i < trajNum; i++) {
+                pList = new ArrayList<>();
+                PointList.add(pList);
+            }
+            PointD aPoint;
+            int dn = 12 + this.varNum;
+            while (true) {
+                aLine = sr.readLine();
+                if (aLine == null) {
+                    break;
+                }
+                if (aLine.isEmpty()) {
+                    continue;
+                }
+                aLine = aLine.trim();
+                dataArray = aLine.split("\\s+");
+                if (dataArray.length < dn) {
+                    aLine = sr.readLine().trim();
+                    tempArray = aLine.split("\\s+");
+                    dataArray = (String[]) DataConvert.resizeArray(dataArray, dn);
+                    for (i = 0; i < tempArray.length; i++) {
+                        dataArray[dn - tempArray.length + i] = tempArray[i];
+                    }
+                }
+                TrajIdx = Integer.parseInt(dataArray[0]) - 1;
+                int y = Integer.parseInt(dataArray[2]);
+                if (y < 100) {
+                    if (y > 50) {
+                        y = 1900 + y;
+                    } else {
+                        y = 2000 + y;
+                    }
+                }
+                cal.set(y, Integer.parseInt(dataArray[3]) - 1,
+                        Integer.parseInt(dataArray[4]), Integer.parseInt(dataArray[5]), 0, 0);
+
+                aPoint = new PointD();
+                aPoint.X = DateUtil.toOADate(cal.getTime());
+                aPoint.Y = Double.parseDouble(dataArray[varIndex]);
+                PointList.get(TrajIdx).add(aPoint);
+            }
+
+            //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHH");
+            for (i = 0; i < trajNum; i++) {
+                int n = PointList.get(i).size();
+                double[] xvs = new double[n];
+                double[] yvs = new double[n];
+                Date cdate, sdate = new Date();
+                for (int j = 0; j < n; j++) {
+                    cdate = DateUtil.fromOADate(PointList.get(i).get(j).X);
+                    if (j == 0) {
+                        sdate = cdate;
+                        xvs[j] = 0;
+                    } else {
+                        xvs[j] = DateUtil.getHours(cdate, sdate);
+                    }
+                    yvs[j] = PointList.get(i).get(j).Y;
+                }
+                dataset.addSeries("Traj_" + String.valueOf(trajNum), xvs, yvs);
+                trajNum += 1;
+            }
+
+            sr.close();
+        } catch (IOException | NumberFormatException ex) {
+            Logger.getLogger(HYSPLITTrajDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return dataset;
     }
-    
+
     // </editor-fold>
 }

@@ -132,13 +132,30 @@ public class GraphicFactory {
         PolylineShape pls;
         List<PointD> points = new ArrayList<>();
         double x, y;
-        for (int i = 0; i < xdata.getSize(); i++) {
-            x = xdata.getDouble(i);
-            y = ydata.getDouble(i);
-            if (Double.isNaN(y) || Double.isNaN(x)) {
-                if (points.isEmpty()) {
-                    continue;
+        if (xdata.getRank() == 1) {
+            for (int i = 0; i < xdata.getSize(); i++) {
+                x = xdata.getDouble(i);
+                y = ydata.getDouble(i);
+                if (Double.isNaN(y) || Double.isNaN(x)) {
+                    if (points.isEmpty()) {
+                        continue;
+                    }
+                    if (points.size() == 1) {
+                        points.add((PointD) points.get(0).clone());
+                    }
+                    if (iscurve) {
+                        pls = new CurveLineShape();
+                    } else {
+                        pls = new PolylineShape();
+                    }
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cb));
+                    points = new ArrayList<>();
+                } else {
+                    points.add(new PointD(x, y));
                 }
+            }
+            if (!points.isEmpty()) {
                 if (points.size() == 1) {
                     points.add((PointD) points.get(0).clone());
                 }
@@ -149,22 +166,45 @@ public class GraphicFactory {
                 }
                 pls.setPoints(points);
                 gc.add(new Graphic(pls, cb));
+            }
+        } else {    //Two dimensions
+            int[] shape = xdata.getShape();
+            int yn = shape[0];
+            int xn = shape[1];
+            for (int j = 0; j < yn; j++) {
                 points = new ArrayList<>();
-            } else {
-                points.add(new PointD(x, y));
+                for (int i = 0; i < xn; i++) {
+                    x = xdata.getDouble(j * xn + i);
+                    y = ydata.getDouble(j * xn + i);
+                    if (Double.isNaN(y) || Double.isNaN(x)) {
+                        if (points.isEmpty()) {
+                            continue;
+                        }
+                        if (points.size() == 1) {
+                            points.add((PointD) points.get(0).clone());
+                        }
+                        if (iscurve) {
+                            pls = new CurveLineShape();
+                        } else {
+                            pls = new PolylineShape();
+                        }
+                        pls.setPoints(points);
+                        gc.add(new Graphic(pls, cb));
+                        points = new ArrayList<>();
+                    } else {
+                        points.add(new PointD(x, y));
+                    }
+                }
+                if (points.size() > 1) {
+                    if (iscurve) {
+                        pls = new CurveLineShape();
+                    } else {
+                        pls = new PolylineShape();
+                    }
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cb));
+                }
             }
-        }
-        if (!points.isEmpty()) {
-            if (points.size() == 1) {
-                points.add((PointD) points.get(0).clone());
-            }
-            if (iscurve) {
-                pls = new CurveLineShape();
-            } else {
-                pls = new PolylineShape();
-            }
-            pls.setPoints(points);
-            gc.add(new Graphic(pls, cb));
         }
 
         return gc;
@@ -182,23 +222,40 @@ public class GraphicFactory {
     public static GraphicCollection createLineString(Array xdata, Array ydata, List<ColorBreak> cbs, boolean iscurve) {
         GraphicCollection gc = new GraphicCollection();
         PolylineShape pls;
-        List<PointD> points = new ArrayList<>();
-        ColorBreakCollection cbc = new ColorBreakCollection();
+        List<PointD> points;
         double x, y;
         ColorBreak cb = cbs.get(0);
-        for (int i = 0; i < xdata.getSize(); i++) {
-            x = xdata.getDouble(i);
-            y = ydata.getDouble(i);
-            if (cbs.size() > i) {
-                cb = cbs.get(i);
+        if (xdata.getRank() == 1) {
+            points = new ArrayList<>();
+            ColorBreakCollection cbc = new ColorBreakCollection();
+            for (int i = 0; i < xdata.getSize(); i++) {
+                x = xdata.getDouble(i);
+                y = ydata.getDouble(i);
+                if (cbs.size() > i) {
+                    cb = cbs.get(i);
+                }
+                if (Double.isNaN(y) || Double.isNaN(x)) {
+                    if (points.isEmpty()) {
+                        continue;
+                    }
+                    if (points.size() == 1) {
+                        points.add((PointD) points.get(0).clone());
+                    }
+                    if (iscurve) {
+                        pls = new CurveLineShape();
+                    } else {
+                        pls = new PolylineShape();
+                    }
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cbc));
+                    points = new ArrayList<>();
+                    cbc = new ColorBreakCollection();
+                } else {
+                    points.add(new PointD(x, y));
+                    cbc.add(cb);
+                }
             }
-            if (Double.isNaN(y) || Double.isNaN(x)) {
-                if (points.isEmpty()) {
-                    continue;
-                }
-                if (points.size() == 1) {
-                    points.add((PointD) points.get(0).clone());
-                }
+            if (points.size() > 1) {
                 if (iscurve) {
                     pls = new CurveLineShape();
                 } else {
@@ -206,21 +263,47 @@ public class GraphicFactory {
                 }
                 pls.setPoints(points);
                 gc.add(new Graphic(pls, cbc));
+            }
+        } else {    //Two dimensions
+            int[] shape = xdata.getShape();
+            int yn = shape[0];
+            int xn = shape[1];
+            for (int j = 0; j < yn; j++) {
                 points = new ArrayList<>();
-                cbc = new ColorBreakCollection();
-            } else {
-                points.add(new PointD(x, y));
-                cbc.add(cb);
+                cb = cbs.get(j);
+                for (int i = 0; i < xn; i++) {
+                    x = xdata.getDouble(j * xn + i);
+                    y = ydata.getDouble(j * xn + i);
+                    if (Double.isNaN(y) || Double.isNaN(x)) {
+                        if (points.isEmpty()) {
+                            continue;
+                        }
+                        if (points.size() == 1) {
+                            points.add((PointD) points.get(0).clone());
+                        }
+                        if (iscurve) {
+                            pls = new CurveLineShape();
+                        } else {
+                            pls = new PolylineShape();
+                        }
+                        pls.setPoints(points);
+                        gc.add(new Graphic(pls, cb));
+                        points = new ArrayList<>();
+                    } else {
+                        points.add(new PointD(x, y));
+                    }
+                }
+                if (points.size() > 1) {
+                    if (iscurve) {
+                        pls = new CurveLineShape();
+                    } else {
+                        pls = new PolylineShape();
+                    }
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cb));
+                }
             }
-        }
-        if (points.size() > 1) {
-            if (iscurve) {
-                pls = new CurveLineShape();
-            } else {
-                pls = new PolylineShape();
-            }
-            pls.setPoints(points);
-            gc.add(new Graphic(pls, cbc));
+            gc.setSingleLegend(false);
         }
 
         return gc;
@@ -239,22 +322,40 @@ public class GraphicFactory {
     public static GraphicCollection createLineString(Array xdata, Array ydata, Array zdata, LegendScheme ls, boolean iscurve) {
         GraphicCollection gc = new GraphicCollection();
         PolylineShape pls;
-        List<PointD> points = new ArrayList<>();
-        ColorBreakCollection cbc = new ColorBreakCollection();
+        List<PointD> points;
+        ColorBreakCollection cbc;
         double x, y, z;
         ColorBreak cb;
-        for (int i = 0; i < xdata.getSize(); i++) {
-            x = xdata.getDouble(i);
-            y = ydata.getDouble(i);
-            z = zdata.getDouble(i);
-            cb = ls.findLegendBreak(z);
-            if (Double.isNaN(y) || Double.isNaN(x)) {
-                if (points.isEmpty()) {
-                    continue;
+        if (xdata.getRank() == 1) {
+            points = new ArrayList<>();
+            cbc = new ColorBreakCollection();
+            for (int i = 0; i < xdata.getSize(); i++) {
+                x = xdata.getDouble(i);
+                y = ydata.getDouble(i);
+                z = zdata.getDouble(i);
+                cb = ls.findLegendBreak(z);
+                if (Double.isNaN(y) || Double.isNaN(x)) {
+                    if (points.isEmpty()) {
+                        continue;
+                    }
+                    if (points.size() == 1) {
+                        points.add((PointD) points.get(0).clone());
+                    }
+                    if (iscurve) {
+                        pls = new CurveLineShape();
+                    } else {
+                        pls = new PolylineShape();
+                    }
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cbc));
+                    points = new ArrayList<>();
+                    cbc = new ColorBreakCollection();
+                } else {
+                    points.add(new PointD(x, y));
+                    cbc.add(cb);
                 }
-                if (points.size() == 1) {
-                    points.add((PointD) points.get(0).clone());
-                }
+            }
+            if (points.size() > 1) {
                 if (iscurve) {
                     pls = new CurveLineShape();
                 } else {
@@ -262,23 +363,54 @@ public class GraphicFactory {
                 }
                 pls.setPoints(points);
                 gc.add(new Graphic(pls, cbc));
+            }
+            gc.setLegendScheme(ls);
+        } else {    //Two dimensions
+            int[] shape = xdata.getShape();
+            int yn = shape[0];
+            int xn = shape[1];
+            for (int j = 0; j < yn; j++) {
                 points = new ArrayList<>();
                 cbc = new ColorBreakCollection();
-            } else {
-                points.add(new PointD(x, y));
-                cbc.add(cb);
+                for (int i = 0; i < xn; i++) {
+                    x = xdata.getDouble(j * xn + i);
+                    y = ydata.getDouble(j * xn + i);
+                    z = zdata.getDouble(j * xn + i);
+                    cb = ls.findLegendBreak(z);
+                    if (Double.isNaN(y) || Double.isNaN(x)) {
+                        if (points.isEmpty()) {
+                            continue;
+                        }
+                        if (points.size() == 1) {
+                            points.add((PointD) points.get(0).clone());
+                        }
+                        if (iscurve) {
+                            pls = new CurveLineShape();
+                        } else {
+                            pls = new PolylineShape();
+                        }
+                        pls.setPoints(points);
+                        gc.add(new Graphic(pls, cbc));
+                        points = new ArrayList<>();
+                        cbc = new ColorBreakCollection();
+                    } else {
+                        points.add(new PointD(x, y));
+                        cbc.add(cb);
+                    }
+                }
+                if (points.size() > 1) {
+                    if (iscurve) {
+                        pls = new CurveLineShape();
+                    } else {
+                        pls = new PolylineShape();
+                    }
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cbc));
+                }
             }
+            gc.setLegendScheme(ls);
+            gc.setSingleLegend(false);
         }
-        if (points.size() > 1) {
-            if (iscurve) {
-                pls = new CurveLineShape();
-            } else {
-                pls = new PolylineShape();
-            }
-            pls.setPoints(points);
-            gc.add(new Graphic(pls, cbc));
-        }
-        gc.setLegendScheme(ls);
 
         return gc;
     }
@@ -322,7 +454,7 @@ public class GraphicFactory {
      */
     public static GraphicCollection createLineString3D(Array xdata, Array ydata, Array zdata, ColorBreak cb) {
         GraphicCollection3D gc = new GraphicCollection3D();
-        PolylineShape pls;
+        PolylineZShape pls;
         List<PointZ> points = new ArrayList<>();
         double x, y, z = 0;
         boolean fixZ = false;
@@ -330,33 +462,154 @@ public class GraphicFactory {
             fixZ = true;
             z = zdata.getDouble(0);
         }
-        for (int i = 0; i < xdata.getSize(); i++) {
-            x = xdata.getDouble(i);
-            y = ydata.getDouble(i);
-            if (!fixZ) {
-                z = zdata.getDouble(i);
+        if (xdata.getRank() == 1) {
+            for (int i = 0; i < xdata.getSize(); i++) {
+                x = xdata.getDouble(i);
+                y = ydata.getDouble(i);
+                if (!fixZ) {
+                    z = zdata.getDouble(i);
+                }
+                if (Double.isNaN(y) || Double.isNaN(x)) {
+                    if (points.isEmpty()) {
+                        continue;
+                    }
+                    if (points.size() == 1) {
+                        points.add((PointZ) points.get(0).clone());
+                    }
+                    pls = new PolylineZShape();
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cb));
+                    points = new ArrayList<>();
+                } else {
+                    points.add(new PointZ(x, y, z));
+                }
             }
-            if (Double.isNaN(y) || Double.isNaN(x)) {
-                if (points.isEmpty()) {
-                    continue;
-                }
-                if (points.size() == 1) {
-                    points.add((PointZ) points.get(0).clone());
-                }
-                pls = new PolylineShape();
+            if (points.size() > 1) {
+                pls = new PolylineZShape();
                 pls.setPoints(points);
                 gc.add(new Graphic(pls, cb));
-                points = new ArrayList<>();
-            } else {
-                points.add(new PointZ(x, y, z));
+            }
+        } else {    //two dimensions
+            int[] shape = xdata.getShape();
+            int yn = shape[0];
+            int xn = shape[1];
+            for (int j = 0; j < yn; j++){
+                for (int i = 0; i < xn; i++) {
+                    x = xdata.getDouble(j * xn + i);
+                    y = ydata.getDouble(j * xn + i);
+                    if (!fixZ) {
+                        z = zdata.getDouble(j * xn + i);
+                    }
+                    if (Double.isNaN(y) || Double.isNaN(x)) {
+                        if (points.isEmpty()) {
+                            continue;
+                        }
+                        if (points.size() == 1) {
+                            points.add((PointZ) points.get(0).clone());
+                        }
+                        pls = new PolylineZShape();
+                        pls.setPoints(points);
+                        gc.add(new Graphic(pls, cb));
+                        points = new ArrayList<>();
+                    } else {
+                        points.add(new PointZ(x, y, z));
+                    }
+                }
+                if (points.size() > 1) {
+                    pls = new PolylineZShape();
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cb));
+                    points = new ArrayList<>();
+                }
             }
         }
-        if (points.size() == 1) {
-            points.add((PointZ) points.get(0).clone());
+
+        return gc;
+    }
+    
+    /**
+     * Create 3D LineString graphic
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param zdata Z data array
+     * @param cbs Color break list
+     * @return LineString graphic
+     */
+    public static GraphicCollection createLineString3D(Array xdata, Array ydata, Array zdata, List<ColorBreak> cbs) {
+        GraphicCollection3D gc = new GraphicCollection3D();
+        PolylineZShape pls;
+        List<PointZ> points = new ArrayList<>();
+        double x, y, z = 0;
+        boolean fixZ = false;
+        if (zdata.getSize() == 1 && xdata.getSize() > 1) {
+            fixZ = true;
+            z = zdata.getDouble(0);
         }
-        pls = new PolylineZShape();
-        pls.setPoints(points);
-        gc.add(new Graphic(pls, cb));
+        ColorBreak cb;
+        if (xdata.getRank() == 1) {
+            cb = cbs.get(0);
+            for (int i = 0; i < xdata.getSize(); i++) {
+                x = xdata.getDouble(i);
+                y = ydata.getDouble(i);
+                if (!fixZ) {
+                    z = zdata.getDouble(i);
+                }
+                if (Double.isNaN(y) || Double.isNaN(x)) {
+                    if (points.isEmpty()) {
+                        continue;
+                    }
+                    if (points.size() == 1) {
+                        points.add((PointZ) points.get(0).clone());
+                    }
+                    pls = new PolylineZShape();
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cb));
+                    points = new ArrayList<>();
+                } else {
+                    points.add(new PointZ(x, y, z));
+                }
+            }
+            if (points.size() > 1) {
+                pls = new PolylineZShape();
+                pls.setPoints(points);
+                gc.add(new Graphic(pls, cb));
+            }
+        } else {    //two dimensions
+            int[] shape = xdata.getShape();
+            int yn = shape[0];
+            int xn = shape[1];
+            for (int j = 0; j < yn; j++){
+                cb = cbs.get(j);
+                for (int i = 0; i < xn; i++) {
+                    x = xdata.getDouble(j * xn + i);
+                    y = ydata.getDouble(j * xn + i);
+                    if (!fixZ) {
+                        z = zdata.getDouble(j * xn + i);
+                    }
+                    if (Double.isNaN(y) || Double.isNaN(x)) {
+                        if (points.isEmpty()) {
+                            continue;
+                        }
+                        if (points.size() == 1) {
+                            points.add((PointZ) points.get(0).clone());
+                        }
+                        pls = new PolylineZShape();
+                        pls.setPoints(points);
+                        gc.add(new Graphic(pls, cb));
+                        points = new ArrayList<>();
+                    } else {
+                        points.add(new PointZ(x, y, z));
+                    }
+                }
+                if (points.size() > 1) {
+                    pls = new PolylineZShape();
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cb));
+                    points = new ArrayList<>();
+                }
+            }
+        }
 
         return gc;
     }
@@ -383,38 +636,78 @@ public class GraphicFactory {
             z = zdata.getDouble(0);
         }
         ColorBreak cb;
-        ColorBreakCollection cbs = new ColorBreakCollection();
-        for (int i = 0; i < xdata.getSize(); i++) {
-            x = xdata.getDouble(i);
-            y = ydata.getDouble(i);
-            if (!fixZ) {
-                z = zdata.getDouble(i);
+        ColorBreakCollection cbs;
+        if (xdata.getRank() == 1) {
+            cbs = new ColorBreakCollection();
+            for (int i = 0; i < xdata.getSize(); i++) {
+                x = xdata.getDouble(i);
+                y = ydata.getDouble(i);
+                if (!fixZ) {
+                    z = zdata.getDouble(i);
+                }
+                m = mdata.getDouble(i);
+                cb = ls.findLegendBreak(m);
+                if (Double.isNaN(y) || Double.isNaN(x)) {
+                    if (points.isEmpty()) {
+                        continue;
+                    }
+                    if (points.size() == 1) {
+                        points.add((PointZ) points.get(0).clone());
+                    }
+                    pls = new PolylineZShape();
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cbs));
+                    points = new ArrayList<>();
+                    cbs = new ColorBreakCollection();
+                } else {
+                    points.add(new PointZ(x, y, z));
+                    cbs.add(cb);
+                }
             }
-            m = mdata.getDouble(i);
-            cb = ls.findLegendBreak(m);
-            if (Double.isNaN(y) || Double.isNaN(x)) {
-                if (points.isEmpty()) {
-                    continue;
-                }
-                if (points.size() == 1) {
-                    points.add((PointZ) points.get(0).clone());
-                }
+            if (points.size() > 1) {            
                 pls = new PolylineZShape();
                 pls.setPoints(points);
-                gc.add(new Graphic(pls, cbs));
-                points = new ArrayList<>();
+                gc.add(new Graphic(pls, cbs));        
+            }
+        } else {    //two dimensions
+            int[] shape = xdata.getShape();
+            int yn = shape[0];
+            int xn = shape[1];
+            for (int j = 0; j < yn; j++){
                 cbs = new ColorBreakCollection();
-            } else {
-                points.add(new PointZ(x, y, z));
-                cbs.add(cb);
+                for (int i = 0; i < xn; i++) {
+                    x = xdata.getDouble(j * xn + i);
+                    y = ydata.getDouble(j * xn + i);
+                    if (!fixZ) {
+                        z = zdata.getDouble(j * xn + i);
+                    }
+                    m = mdata.getDouble(j * xn + i);
+                    cb = ls.findLegendBreak(m);
+                    if (Double.isNaN(y) || Double.isNaN(x)) {
+                        if (points.isEmpty()) {
+                            continue;
+                        }
+                        if (points.size() == 1) {
+                            points.add((PointZ) points.get(0).clone());
+                        }
+                        pls = new PolylineZShape();
+                        pls.setPoints(points);
+                        gc.add(new Graphic(pls, cbs));
+                        points = new ArrayList<>();
+                        cbs = new ColorBreakCollection();
+                    } else {
+                        points.add(new PointZ(x, y, z));
+                        cbs.add(cb);
+                    }
+                }
+                if (points.size() > 1) {            
+                    pls = new PolylineZShape();
+                    pls.setPoints(points);
+                    gc.add(new Graphic(pls, cbs));        
+                    points = new ArrayList<>();
+                }
             }
         }
-        if (points.size() == 1) {
-            points.add((PointZ) points.get(0).clone());
-        }
-        pls = new PolylineZShape();
-        pls.setPoints(points);
-        gc.add(new Graphic(pls, cbs));
         gc.setLegendScheme(ls);
 
         return gc;
@@ -1881,8 +2174,9 @@ public class GraphicFactory {
         for (int i = 0; i < n; i++) {
             x = xdata.getDouble(i);
             y = ydata.getDouble(i);
-            if (Double.isNaN(x) || Double.isNaN(y))
+            if (Double.isNaN(x) || Double.isNaN(y)) {
                 continue;
+            }
             // Add stem
             if (y < miny) {
                 baseLine = true;

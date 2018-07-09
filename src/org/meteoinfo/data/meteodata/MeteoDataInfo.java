@@ -671,32 +671,32 @@ public class MeteoDataInfo {
         _infoText = aDataInfo.generateInfoText();
     }
 
-    /**
-     * Open HYSPLIT traject data
-     *
-     * @param trajFiles File paths
-     */
-    public void openHYSPLITTrajData(String[] trajFiles) {
-        try {
-            //Read data info                            
-            HYSPLITTrajDataInfo aDataInfo = new HYSPLITTrajDataInfo();
-            aDataInfo.readDataInfo(trajFiles);
-            _dataInfo = aDataInfo;
-            _infoText = aDataInfo.generateInfoText();
-        } catch (IOException ex) {
-            Logger.getLogger(MeteoDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    /**
-     * Open HYSPLIT traject data
-     *
-     * @param trajFiles File paths
-     */
-    public void openHYSPLITTrajData(List<String> trajFiles) {
-        String[] files = trajFiles.toArray(new String[0]);
-        openHYSPLITTrajData(files);
-    }
+//    /**
+//     * Open HYSPLIT traject data
+//     *
+//     * @param trajFiles File paths
+//     */
+//    public void openHYSPLITTrajData(String[] trajFiles) {
+//        try {
+//            //Read data info                            
+//            HYSPLITTrajDataInfo aDataInfo = new HYSPLITTrajDataInfo();
+//            aDataInfo.readDataInfo(trajFiles);
+//            _dataInfo = aDataInfo;
+//            _infoText = aDataInfo.generateInfoText();
+//        } catch (IOException ex) {
+//            Logger.getLogger(MeteoDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
+//
+//    /**
+//     * Open HYSPLIT traject data
+//     *
+//     * @param trajFiles File paths
+//     */
+//    public void openHYSPLITTrajData(List<String> trajFiles) {
+//        String[] files = trajFiles.toArray(new String[0]);
+//        openHYSPLITTrajData(files);
+//    }
 
     /**
      * Open HYSPLIT particle data

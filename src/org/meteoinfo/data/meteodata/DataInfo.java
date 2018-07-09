@@ -45,7 +45,7 @@ public abstract class DataInfo {
     private boolean _isGlobal = false;
     private double _missingValue = -9999.0;
     private ProjectionInfo _projInfo = KnownCoordinateSystems.geographic.world.WGS1984;
-    private MeteoDataType dataType;
+    protected MeteoDataType dataType;
 
     // </editor-fold>
     // <editor-fold desc="Constructor">

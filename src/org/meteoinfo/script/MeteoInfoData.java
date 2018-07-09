@@ -164,19 +164,19 @@ public class MeteoInfoData {
         return aDataInfo;
     }
 
-    /**
-     * Open HYSPLIT trajectory data files
-     *
-     * @param fileNames HYSPLIT trajectory data file names
-     * @return MeteoDataInfo
-     */
-    public MeteoDataInfo openHYSPLITTrajData(String[] fileNames) {
-        MeteoDataInfo aDataInfo = new MeteoDataInfo();
-        aDataInfo.openHYSPLITTrajData(fileNames);
-        addMeteoData(aDataInfo);
-
-        return aDataInfo;
-    }
+//    /**
+//     * Open HYSPLIT trajectory data files
+//     *
+//     * @param fileNames HYSPLIT trajectory data file names
+//     * @return MeteoDataInfo
+//     */
+//    public MeteoDataInfo openHYSPLITTrajData(String[] fileNames) {
+//        MeteoDataInfo aDataInfo = new MeteoDataInfo();
+//        aDataInfo.openHYSPLITTrajData(fileNames);
+//        addMeteoData(aDataInfo);
+//
+//        return aDataInfo;
+//    }
 
     /**
      * Open NetCDF, GRIB, HDF... data file

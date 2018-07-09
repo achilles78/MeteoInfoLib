@@ -1,4 +1,4 @@
- /* Copyright 2012 Yaqiang Wang,
+/* Copyright 2012 Yaqiang Wang,
  * yaqiang.wang@gmail.com
  * 
  * This library is free software; you can redistribute it and/or modify it
@@ -55,6 +55,8 @@ import org.meteoinfo.legend.PointBreak;
 import org.meteoinfo.legend.PolygonBreak;
 import org.meteoinfo.shape.Graphic;
 import org.meteoinfo.shape.ImageShape;
+import org.meteoinfo.shape.PointZ;
+import org.meteoinfo.shape.PolylineZShape;
 import org.meteoinfo.shape.StationModelShape;
 import ucar.ma2.Array;
 import wContour.Global.PolyLine;
@@ -120,7 +122,7 @@ public class DrawMeteoData {
 
         return layer;
     }
-    
+
     /**
      * Create a polyline layer
      *
@@ -176,8 +178,10 @@ public class DrawMeteoData {
      * @param ls Legend scheme
      * @param layerName Layer name
      * @param fieldName Field name
-     * @param westLon West border longitude - split polyline if the points cross it
-     * @param eastLon East border longitude - split polyline if the points cross it
+     * @param westLon West border longitude - split polyline if the points cross
+     * it
+     * @param eastLon East border longitude - split polyline if the points cross
+     * it
      * @return Polyline layer
      */
     public static VectorLayer createPolylineLayer(XYListDataset data, LegendScheme ls,
@@ -201,21 +205,25 @@ public class DrawMeteoData {
                     pList.add(aPoint);
                 } else {
                     if (Math.abs(aPoint.X - preLon) > 350) {
-                        if (aPoint.X > preLon)
+                        if (aPoint.X > preLon) {
                             pList.add(new PointD(westLon, aPoint.Y));
-                        else
+                        } else {
                             pList.add(new PointD(eastLon, aPoint.Y));
-                        if (pList.size() > 1)
+                        }
+                        if (pList.size() > 1) {
                             ppList.add(new ArrayList<>(pList));
+                        }
                         pList.clear();
                         pList.add(aPoint);
-                    } else
+                    } else {
                         pList.add(aPoint);
+                    }
                     preLon = xd[j];
-                }                
+                }
             }
-            if (pList.size() > 1)
+            if (pList.size() > 1) {
                 ppList.add(pList);
+            }
             for (List<PointD> ps : ppList) {
                 PolylineShape aPolyline = new PolylineShape();
                 aPolyline.setPoints(ps);
@@ -239,7 +247,7 @@ public class DrawMeteoData {
 
         return layer;
     }
-    
+
     /**
      * Create a polyline layer
      *
@@ -248,8 +256,10 @@ public class DrawMeteoData {
      * @param ls Legend scheme
      * @param layerName Layer name
      * @param fieldName Field name
-     * @param westLon West border longitude - split polyline if the points cross it
-     * @param eastLon East border longitude - split polyline if the points cross it
+     * @param westLon West border longitude - split polyline if the points cross
+     * it
+     * @param eastLon East border longitude - split polyline if the points cross
+     * it
      * @return Polyline layer
      */
     public static VectorLayer createPolylineLayer(List<Array> xdata, List<Array> ydata, LegendScheme ls,
@@ -259,58 +269,240 @@ public class DrawMeteoData {
         layer.editAddField(aDC);
         for (int i = 0; i < xdata.size(); i++) {
             Array xd = xdata.get(i);
-            Array yd = ydata.get(i);            
+            Array yd = ydata.get(i);
             PointD aPoint;
-            List<PointD> pList = new ArrayList<>();
+            List<PointD> pList;
             List<List<PointD>> ppList = new ArrayList<>();
-            double preLon = 0;
-            for (int j = 0; j < xd.getSize(); j++) {
-                aPoint = new PointD();
-                aPoint.X = xd.getDouble(j);
-                aPoint.Y = yd.getDouble(j);
-                if (j == 0) {
-                    preLon = xd.getDouble(j);
-                    pList.add(aPoint);
-                } else {
-                    if (Double.isNaN(aPoint.X)){
-                        if (pList.size() > 1)
-                            ppList.add(new ArrayList<>(pList));
-                        pList.clear();
-                    } else if (Math.abs(aPoint.X - preLon) > 350) {
-                        if (aPoint.X > preLon)
-                            pList.add(new PointD(westLon, aPoint.Y));
-                        else
-                            pList.add(new PointD(eastLon, aPoint.Y));
-                        if (pList.size() > 1)
-                            ppList.add(new ArrayList<>(pList));
-                        pList.clear();
+            double preLon;
+            if (xd.getRank() == 1) {
+                pList = new ArrayList<>();
+                preLon = 0;
+                for (int j = 0; j < xd.getSize(); j++) {
+                    aPoint = new PointD();
+                    aPoint.X = xd.getDouble(j);
+                    aPoint.Y = yd.getDouble(j);
+                    if (j == 0) {
+                        preLon = xd.getDouble(j);
                         pList.add(aPoint);
-                    } else
-                        pList.add(aPoint);
-                    preLon = xd.getDouble(j);
-                }                
+                    } else {
+                        if (Double.isNaN(aPoint.X)) {
+                            if (pList.size() > 1) {
+                                ppList.add(new ArrayList<>(pList));
+                            }
+                            pList.clear();
+                        } else if (Math.abs(aPoint.X - preLon) > 350) {
+                            if (aPoint.X > preLon) {
+                                pList.add(new PointD(westLon, aPoint.Y));
+                            } else {
+                                pList.add(new PointD(eastLon, aPoint.Y));
+                            }
+                            if (pList.size() > 1) {
+                                ppList.add(new ArrayList<>(pList));
+                            }
+                            pList.clear();
+                            pList.add(aPoint);
+                        } else {
+                            pList.add(aPoint);
+                        }
+                        preLon = xd.getDouble(j);
+                    }
+                }
+                if (pList.size() > 1) {
+                    ppList.add(pList);
+                }
+            } else {    //Two dimensions
+                int[] shape = xd.getShape();
+                int ny = shape[0];
+                int nx = shape[1];
+                for (int k = 0; k < ny; k++) {
+                    pList = new ArrayList<>();
+                    preLon = 0;
+                    for (int j = 0; j < nx; j++) {
+                        aPoint = new PointD();
+                        aPoint.X = xd.getDouble(k * nx + j);
+                        aPoint.Y = yd.getDouble(k * nx + j);
+                        if (j == 0) {
+                            preLon = aPoint.X;
+                            pList.add(aPoint);
+                        } else {
+                            if (Double.isNaN(aPoint.X)) {
+                                if (pList.size() > 1) {
+                                    ppList.add(new ArrayList<>(pList));
+                                }
+                                pList.clear();
+                            } else if (Math.abs(aPoint.X - preLon) > 350) {
+                                if (aPoint.X > preLon) {
+                                    pList.add(new PointD(westLon, aPoint.Y));
+                                } else {
+                                    pList.add(new PointD(eastLon, aPoint.Y));
+                                }
+                                if (pList.size() > 1) {
+                                    ppList.add(new ArrayList<>(pList));
+                                }
+                                pList.clear();
+                                pList.add(aPoint);
+                            } else {
+                                pList.add(aPoint);
+                            }
+                            preLon = xd.getDouble(j);
+                        }
+                    }
+                    if (pList.size() > 1) {
+                        ppList.add(pList);
+                    }
+                }
             }
-            if (pList.size() > 1)
-                ppList.add(pList);
+            int k = 0;
             for (List<PointD> ps : ppList) {
                 PolylineShape aPolyline = new PolylineShape();
                 aPolyline.setPoints(ps);
-                aPolyline.setValue(i);
+                aPolyline.setValue(k);
                 aPolyline.setExtent(MIMath.getPointsExtent(ps));
 
                 int shapeNum = layer.getShapeNum();
                 try {
                     if (layer.editInsertShape(aPolyline, shapeNum)) {
-                        layer.editCellValue(fieldName, shapeNum, i);
+                        layer.editCellValue(fieldName, shapeNum, k);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(DrawMeteoData.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                k += 1;
             }
         }
 
         layer.setLayerName(layerName);
         ls.setFieldName(fieldName);
+        layer.setLegendScheme(ls);
+
+        return layer;
+    }
+
+    /**
+     * Create a polyline z layer
+     *
+     * @param xdata X array
+     * @param ydata Y array
+     * @param zdata Z array
+     * @param ls Legend scheme
+     * @param layerName Layer name
+     * @param fieldName Field name
+     * @param westLon West border longitude - split polyline if the points cross
+     * it
+     * @param eastLon East border longitude - split polyline if the points cross
+     * it
+     * @return PolylineZ layer
+     */
+    public static VectorLayer createPolylineLayer(Array xdata, Array ydata, Array zdata, LegendScheme ls,
+            String layerName, String fieldName, double westLon, double eastLon) {
+        VectorLayer layer = new VectorLayer(ShapeTypes.PolylineZ);
+        Field aDC = new Field(fieldName, DataTypes.Double);
+        layer.editAddField(aDC);
+
+        PointZ aPoint;
+        List<PointZ> pList;
+        List<List<PointZ>> ppList = new ArrayList<>();
+        double preLon;
+        if (xdata.getRank() == 1) {
+            pList = new ArrayList<>();
+            preLon = 0;
+            for (int j = 0; j < xdata.getSize(); j++) {
+                aPoint = new PointZ();
+                aPoint.X = xdata.getDouble(j);
+                aPoint.Y = ydata.getDouble(j);
+                aPoint.Z = zdata.getDouble(j);
+                if (j == 0) {
+                    preLon = xdata.getDouble(j);
+                    pList.add(aPoint);
+                } else {
+                    if (Double.isNaN(aPoint.X)) {
+                        if (pList.size() > 1) {
+                            ppList.add(new ArrayList<>(pList));
+                        }
+                        pList.clear();
+                    } else if (Math.abs(aPoint.X - preLon) > 350) {
+                        if (aPoint.X > preLon) {
+                            pList.add(new PointZ(westLon, aPoint.Y, aPoint.Z));
+                        } else {
+                            pList.add(new PointZ(eastLon, aPoint.Y, aPoint.Z));
+                        }
+                        if (pList.size() > 1) {
+                            ppList.add(new ArrayList<>(pList));
+                        }
+                        pList.clear();
+                        pList.add(aPoint);
+                    } else {
+                        pList.add(aPoint);
+                    }
+                    preLon = xdata.getDouble(j);
+                }
+            }
+
+            if (pList.size() > 1) {
+                ppList.add(pList);
+            }
+        } else {    //Two dimensions
+            int[] shape = xdata.getShape();
+            int ny = shape[0];
+            int nx = shape[1];
+            for (int i = 0; i < ny; i++) {
+                pList = new ArrayList<>();
+                preLon = 0;
+                for (int j = 0; j < nx; j++) {
+                    aPoint = new PointZ();
+                    aPoint.X = xdata.getDouble(i * nx + j);
+                    aPoint.Y = ydata.getDouble(i * nx + j);
+                    aPoint.Z = zdata.getDouble(i * nx + j);
+                    if (j == 0) {
+                        preLon = aPoint.X;
+                        pList.add(aPoint);
+                    } else {
+                        if (Double.isNaN(aPoint.X)) {
+                            if (pList.size() > 1) {
+                                ppList.add(new ArrayList<>(pList));
+                            }
+                            pList.clear();
+                        } else if (Math.abs(aPoint.X - preLon) > 350) {
+                            if (aPoint.X > preLon) {
+                                pList.add(new PointZ(westLon, aPoint.Y, aPoint.Z));
+                            } else {
+                                pList.add(new PointZ(eastLon, aPoint.Y, aPoint.Z));
+                            }
+                            if (pList.size() > 1) {
+                                ppList.add(new ArrayList<>(pList));
+                            }
+                            pList.clear();
+                            pList.add(aPoint);
+                        } else {
+                            pList.add(aPoint);
+                        }
+                        preLon = xdata.getDouble(j);
+                    }
+                }
+
+                if (pList.size() > 1) {
+                    ppList.add(pList);
+                }
+            }
+        }
+
+        for (List<PointZ> ps : ppList) {
+            PolylineZShape aPolyline = new PolylineZShape();
+            aPolyline.setPoints(ps);
+            aPolyline.setValue(0);
+            aPolyline.setExtent(MIMath.getPointsExtent(ps));
+
+            int shapeNum = layer.getShapeNum();
+            try {
+                if (layer.editInsertShape(aPolyline, shapeNum)) {
+                    layer.editCellValue(fieldName, shapeNum, 0);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(DrawMeteoData.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        layer.setLayerName(layerName);
         layer.setLegendScheme(ls);
 
         return layer;
@@ -344,7 +536,7 @@ public class DrawMeteoData {
 
         return createContourLayer(gridData, ls, lName, fieldName, isSmooth);
     }
-    
+
     /**
      * Create contour layer
      *
@@ -377,10 +569,10 @@ public class DrawMeteoData {
         Object[] ccs = LegendManage.getContoursAndColors(ls);
         double[] cValues = (double[]) ccs[0];
 
-        int[][] S1 = new int[gridData.data.length][gridData.data[0].length];     
+        int[][] S1 = new int[gridData.data.length][gridData.data[0].length];
         Object[] cbs = ContourDraw.tracingContourLines(gridData.data,
                 cValues, gridData.xArray, gridData.yArray, gridData.missingValue, S1);
-        List<wContour.Global.PolyLine> ContourLines = (List<wContour.Global.PolyLine>)cbs[0];
+        List<wContour.Global.PolyLine> ContourLines = (List<wContour.Global.PolyLine>) cbs[0];
 
         if (ContourLines.isEmpty()) {
             return null;
@@ -466,10 +658,10 @@ public class DrawMeteoData {
         Object[] ccs = LegendManage.getContoursAndColors(ls);
         double[] cValues = (double[]) ccs[0];
 
-        int[][] S1 = new int[data.length][data[0].length];   
-        Object[] cbs =  ContourDraw.tracingContourLines(data,
-            cValues, xArray, yArray, missingValue, S1);
-        List<wContour.Global.PolyLine> ContourLines = (List<wContour.Global.PolyLine>)cbs[0];
+        int[][] S1 = new int[data.length][data[0].length];
+        Object[] cbs = ContourDraw.tracingContourLines(data,
+                cValues, xArray, yArray, missingValue, S1);
+        List<wContour.Global.PolyLine> ContourLines = (List<wContour.Global.PolyLine>) cbs[0];
 
         if (ContourLines.isEmpty()) {
             return null;
@@ -553,7 +745,7 @@ public class DrawMeteoData {
 
         return createShadedLayer(gridData, ls, lName, fieldName, isSmooth);
     }
-    
+
     /**
      * Create shaded layer
      *
@@ -596,11 +788,11 @@ public class DrawMeteoData {
         maxData = maxmin[0];
         minData = maxmin[1];
 
-        int[][] S1 = new int[gridData.data.length][gridData.data[0].length];   
+        int[][] S1 = new int[gridData.data.length][gridData.data[0].length];
         Object[] cbs = ContourDraw.tracingContourLines(gridData.data,
                 cValues, gridData.xArray, gridData.yArray, gridData.missingValue, S1);
-        ContourLines = (List<wContour.Global.PolyLine>)cbs[0];
-        List<wContour.Global.Border> borders = (List<wContour.Global.Border>)cbs[1];
+        ContourLines = (List<wContour.Global.PolyLine>) cbs[0];
+        List<wContour.Global.Border> borders = (List<wContour.Global.Border>) cbs[1];
 
         if (isSmooth) {
             ContourLines = wContour.Contour.smoothLines(ContourLines);
@@ -637,8 +829,9 @@ public class DrawMeteoData {
             aPolygonShape.lowValue = aValue;
             if (aPolygon.HasHoles()) {
                 for (PolyLine holeLine : aPolygon.HoleLines) {
-                    if (holeLine.PointList.size() < 3)
+                    if (holeLine.PointList.size() < 3) {
                         continue;
+                    }
                     pList = new ArrayList<>();
                     for (wContour.Global.PointD pointList : holeLine.PointList) {
                         aPoint = new PointD();
@@ -650,8 +843,9 @@ public class DrawMeteoData {
                 }
             }
             valueIdx = Arrays.binarySearch(cValues, aValue);
-            if (valueIdx < 0)
+            if (valueIdx < 0) {
                 valueIdx = -valueIdx - 1;
+            }
             //valueIdx = Arrays.asList(cValues).indexOf(aValue);            
             if (valueIdx == cValues.length - 1) {
                 aPolygonShape.highValue = maxData;
@@ -777,7 +971,7 @@ public class DrawMeteoData {
 
         return aLayer;
     }
-    
+
     /**
      * Create grid fill layer
      *
@@ -793,28 +987,31 @@ public class DrawMeteoData {
         VectorLayer aLayer = new VectorLayer(ShapeTypes.Polygon);
         Field aDC = new Field(fieldName, DataTypes.Double);
         aLayer.editAddField(aDC);
-        
-        int colNum = (int)x_s.getSize();
-        int rowNum = (int)y_s.getSize();
+
+        int colNum = (int) x_s.getSize();
+        int rowNum = (int) y_s.getSize();
         double x, x1 = 0, x2, y, y1 = 0, y2, xd, yd, v;
         PolygonBreak pb;
         for (int i = 0; i < rowNum; i++) {
-            if (i == 0)
+            if (i == 0) {
                 y1 = y_s.getDouble(i);
+            }
             y = y_s.getDouble(i);
-            if (i < rowNum - 1) {                
+            if (i < rowNum - 1) {
                 y2 = y_s.getDouble(i + 1);
-                yd = y2 - y;                
+                yd = y2 - y;
             } else {
                 y2 = y_s.getDouble(i - 1);
                 yd = y - y2;
             }
-            if (i == 0)
+            if (i == 0) {
                 y1 = y1 - yd * 0.5;
+            }
             y2 = y + yd * 0.5;
             for (int j = 0; j < colNum; j++) {
-                if (j == 0)
+                if (j == 0) {
                     x1 = x_s.getDouble(j);
+                }
                 x = x_s.getDouble(j);
                 if (j < colNum - 1) {
                     x2 = x_s.getDouble(j + 1);
@@ -1301,7 +1498,7 @@ public class DrawMeteoData {
         LegendScheme ls = LegendManage.createSingleSymbolLegendScheme(ShapeTypes.Polyline, Color.blue, 1);
         return createStreamlineLayer(uData, vData, density, ls, lName, isUV);
     }
-    
+
     /**
      * Create streamline layer by U/V or wind direction/speed grid data
      *
@@ -1385,34 +1582,36 @@ public class DrawMeteoData {
 
         return aLayer;
     }
-    
+
     /**
      * Create image layer
+     *
      * @param x X array
      * @param y Y array
      * @param graphic Image graphic
      * @param layerName Layer name
      * @return Image layer
      */
-    public static ImageLayer createImageLayer(Array x, Array y, Graphic graphic, String layerName){
-        BufferedImage image = ((ImageShape)graphic.getShape()).getImage();
+    public static ImageLayer createImageLayer(Array x, Array y, Graphic graphic, String layerName) {
+        BufferedImage image = ((ImageShape) graphic.getShape()).getImage();
         return createImageLayer(x, y, image, layerName);
     }
-    
+
     /**
      * Create image layer
+     *
      * @param x X array
      * @param y Y array
      * @param image Image
      * @param layerName Layer name
      * @return Image layer
      */
-    public static ImageLayer createImageLayer(Array x, Array y, BufferedImage image, String layerName){
+    public static ImageLayer createImageLayer(Array x, Array y, BufferedImage image, String layerName) {
         ImageLayer aImageLayer = new ImageLayer();
         aImageLayer.setImage(image);
         aImageLayer.setLayerName(layerName);
         aImageLayer.setVisible(true);
-        
+
         WorldFilePara aWFP = new WorldFilePara();
         double xdelta = x.getDouble(1) - x.getDouble(0);
         double ydelta = y.getDouble(1) - y.getDouble(0);
@@ -1458,7 +1657,7 @@ public class DrawMeteoData {
 
         return createRasterLayer(gridData, lName, ls);
     }
-    
+
     /**
      * Create reaster layer
      *
@@ -1478,7 +1677,7 @@ public class DrawMeteoData {
 
         return createRasterLayer(gridData, lName, ls);
     }
-    
+
     /**
      * Create reaster layer
      *
@@ -1554,7 +1753,7 @@ public class DrawMeteoData {
 
         return createSTPointLayer(stationData, ls, lName, fieldName);
     }
-    
+
     /**
      * Create station point layer
      *
@@ -1569,7 +1768,7 @@ public class DrawMeteoData {
     public static VectorLayer createSTPointLayer(Array data, Array x, Array y, LegendScheme aLS, String lName, String fieldName) {
         int i;
         PointD aPoint;
-        
+
         if (data.getRank() == 2 && x.getRank() == 1) {
             Array[] xy = ArrayUtil.meshgrid(x, y);
             x = xy[0];
@@ -1583,8 +1782,9 @@ public class DrawMeteoData {
             aPoint = new PointD();
             aPoint.X = x.getDouble(i);
             aPoint.Y = y.getDouble(i);
-            if (Double.isNaN(aPoint.X))
+            if (Double.isNaN(aPoint.X)) {
                 continue;
+            }
             PointShape aPointShape = new PointShape();
             aPointShape.setPoint(aPoint);
             aPointShape.setValue(data.getDouble(i));
@@ -1628,8 +1828,9 @@ public class DrawMeteoData {
             aPoint = new PointD();
             aPoint.X = stationData.data[i][0];
             aPoint.Y = stationData.data[i][1];
-            if (Double.isNaN(aPoint.X))
+            if (Double.isNaN(aPoint.X)) {
                 continue;
+            }
             PointShape aPointShape = new PointShape();
             aPointShape.setPoint(aPoint);
             aPointShape.setValue(stationData.data[i][2]);
@@ -1653,7 +1854,7 @@ public class DrawMeteoData {
 
         return aLayer;
     }
-    
+
     /**
      * Create station point layer
      *
@@ -1668,7 +1869,7 @@ public class DrawMeteoData {
     public static VectorLayer createSTPointLayer_Unique(Array data, Array x, Array y, LegendScheme aLS, String lName, String fieldName) {
         int i;
         PointD aPoint;
-        
+
         if (data.getRank() == 2 && x.getRank() == 1) {
             Array[] xy = ArrayUtil.meshgrid(x, y);
             x = xy[0];
@@ -1683,8 +1884,9 @@ public class DrawMeteoData {
             aPoint = new PointD();
             aPoint.X = x.getDouble(i);
             aPoint.Y = y.getDouble(i);
-            if (Double.isNaN(aPoint.X))
+            if (Double.isNaN(aPoint.X)) {
                 continue;
+            }
             PointShape aPointShape = new PointShape();
             aPointShape.setPoint(aPoint);
             aPointShape.setValue(data.getDouble(i));
@@ -1707,7 +1909,7 @@ public class DrawMeteoData {
 
         return aLayer;
     }
-    
+
     /**
      * Create station point layer
      *
@@ -1730,8 +1932,9 @@ public class DrawMeteoData {
             aPoint = new PointD();
             aPoint.X = stationData.data[i][0];
             aPoint.Y = stationData.data[i][1];
-            if (Double.isNaN(aPoint.X))
+            if (Double.isNaN(aPoint.X)) {
                 continue;
+            }
             PointShape aPointShape = new PointShape();
             aPointShape.setPoint(aPoint);
             aPointShape.setValue(stationData.data[i][2]);
@@ -1942,7 +2145,7 @@ public class DrawMeteoData {
 
         return aLayer;
     }
-    
+
     /**
      * Create vector layer
      *
@@ -2001,11 +2204,12 @@ public class DrawMeteoData {
 
                     WindArrow aArraw = new WindArrow();
                     aArraw.angle = windDir;
-                    aArraw.length = (float)windSpeed;
+                    aArraw.length = (float) windSpeed;
                     aArraw.size = 6;
                     aArraw.setPoint(aPoint);
-                    if (stData != null)
+                    if (stData != null) {
                         aArraw.setValue(stData.getDouble(i));
+                    }
 
                     int shapeNum = aLayer.getShapeNum();
                     try {
@@ -2017,8 +2221,9 @@ public class DrawMeteoData {
                             aLayer.editCellValue("WindDirection", shapeNum, windDir);
                             aLayer.editCellValue("WindSpeed", shapeNum, windSpeed);
                             if (ifAdd) {
-                                if (stData != null)
+                                if (stData != null) {
                                     aLayer.editCellValue(columnName, shapeNum, stData.getDouble(i));
+                                }
                             }
                         }
                     } catch (Exception ex) {
@@ -2035,7 +2240,7 @@ public class DrawMeteoData {
 
         return aLayer;
     }
-    
+
     /**
      * Create barb layer
      *
@@ -2090,30 +2295,31 @@ public class DrawMeteoData {
             if (!Double.isNaN(windDir)) {
                 if (!Double.isNaN(windSpeed)) {
                     aPoint = new PointD();
-                        aPoint.X = xData.getDouble(i);
-                        aPoint.Y = yData.getDouble(i);
-                        aWB = Draw.calWindBarb((float) windDir, (float) windSpeed, 0, 10, aPoint);
-                        if (stData != null) {
-                            aWB.setValue(stData.getDouble(i));
-                        }
+                    aPoint.X = xData.getDouble(i);
+                    aPoint.Y = yData.getDouble(i);
+                    aWB = Draw.calWindBarb((float) windDir, (float) windSpeed, 0, 10, aPoint);
+                    if (stData != null) {
+                        aWB.setValue(stData.getDouble(i));
+                    }
 
-                        int shapeNum = aLayer.getShapeNum();
-                        try {
-                            if (aLayer.editInsertShape(aWB, shapeNum)) {
-                                if (isUV) {
-                                    aLayer.editCellValue("U", shapeNum, uData.getDouble(i));
-                                    aLayer.editCellValue("V", shapeNum, vData.getDouble(i));
-                                }
-                                aLayer.editCellValue("WindDirection", shapeNum, aWB.angle);
-                                aLayer.editCellValue("WindSpeed", shapeNum, aWB.windSpeed);
-                                if (ifAdd) {
-                                    if (stData != null)
-                                        aLayer.editCellValue(columnName, shapeNum, stData.getDouble(i));
+                    int shapeNum = aLayer.getShapeNum();
+                    try {
+                        if (aLayer.editInsertShape(aWB, shapeNum)) {
+                            if (isUV) {
+                                aLayer.editCellValue("U", shapeNum, uData.getDouble(i));
+                                aLayer.editCellValue("V", shapeNum, vData.getDouble(i));
+                            }
+                            aLayer.editCellValue("WindDirection", shapeNum, aWB.angle);
+                            aLayer.editCellValue("WindSpeed", shapeNum, aWB.windSpeed);
+                            if (ifAdd) {
+                                if (stData != null) {
+                                    aLayer.editCellValue(columnName, shapeNum, stData.getDouble(i));
                                 }
                             }
-                        } catch (Exception ex) {
-                            Logger.getLogger(DrawMeteoData.class.getName()).log(Level.SEVERE, null, ex);
                         }
+                    } catch (Exception ex) {
+                        Logger.getLogger(DrawMeteoData.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }
@@ -2743,7 +2949,7 @@ public class DrawMeteoData {
 
         return weatherList;
     }
-    
+
     /**
      * Create could amount legend scheme
      *
@@ -2754,7 +2960,7 @@ public class DrawMeteoData {
     public static LegendScheme createCloudLegendScheme(int size, Color color) {
         LegendScheme aLS = new LegendScheme(ShapeTypes.Point);
         aLS.setLegendType(LegendType.UniqueValue);
-        int[] clouds = new int[]{0,1,2,3,4,5,6,7,8,9};
+        int[] clouds = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         for (int w : clouds) {
             PointBreak aPB = new PointBreak();
             aPB.setMarkerType(MarkerType.Character);
