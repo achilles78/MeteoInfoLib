@@ -332,7 +332,7 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
             DataType dtype = DataType.FLOAT;
             switch (col.getDataType()){
                 case Date:
-                    dtype = DataType.OBJECT;
+                    dtype = DataType.DOUBLE;
                     break;
                 case Integer:
                     dtype = DataType.INT;
@@ -348,7 +348,11 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
                 ColumnData colData = dTable.getColumnData(varName);
                 for (int obsIdx = obsRange.first(); obsIdx <= obsRange.last(); obsIdx += obsRange.stride()){
                     if (colData.size() > obsIdx)
-                        array.setObject(index, colData.getValue(obsIdx));
+                        if (col.getDataType() == DataTypes.Date) {
+                            array.setObject(index, DateUtil.toOADate((Date)colData.getValue(obsIdx)));
+                        } else {
+                            array.setObject(index, colData.getValue(obsIdx));
+                        }
                     else
                         array.setObject(index, Double.NaN);
                     index.incr();
@@ -873,7 +877,6 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
     public XYListDataset getXYDataset(int varIndex) {
         XYListDataset dataset = new XYListDataset();
         Calendar cal = Calendar.getInstance();
-        int trajNum = 1;
         try {
             BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
             String aLine;
@@ -956,7 +959,6 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
                     yvs[j] = PointList.get(i).get(j).Y;
                 }
                 dataset.addSeries("Traj_" + String.valueOf(trajNum), xvs, yvs);
-                trajNum += 1;
             }
 
             sr.close();
@@ -976,7 +978,6 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
     public XYListDataset getXYDataset_HourX(int varIndex) {
         XYListDataset dataset = new XYListDataset();
         Calendar cal = Calendar.getInstance();
-        int trajNum = 1;
         try {
             BufferedReader sr = new BufferedReader(new FileReader(new File(this.getFileName())));
             String aLine;
@@ -1065,7 +1066,6 @@ public class HYSPLITTrajDataInfo extends DataInfo implements TrajDataInfo {
                     yvs[j] = PointList.get(i).get(j).Y;
                 }
                 dataset.addSeries("Traj_" + String.valueOf(trajNum), xvs, yvs);
-                trajNum += 1;
             }
 
             sr.close();
