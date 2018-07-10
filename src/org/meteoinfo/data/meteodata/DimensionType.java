@@ -34,6 +34,7 @@ public enum DimensionType {
         /// Time dimension
         /// </summary>
         T,
+        E,    //Ensemble dimension
         /// <summary>
         /// Xtrack dimension - for HDF EOS swath data
         /// </summary>

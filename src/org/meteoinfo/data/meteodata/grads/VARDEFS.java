@@ -25,7 +25,7 @@ import java.util.List;
 public class VARDEFS {
     // <editor-fold desc="Variables">
 
-    private List<Variable> _vars = new ArrayList<Variable>();
+    private List<Variable> _vars = new ArrayList<>();
     // </editor-fold>
     // <editor-fold desc="Constructor">
     // </editor-fold>
