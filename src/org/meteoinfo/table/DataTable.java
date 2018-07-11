@@ -602,6 +602,26 @@ public class DataTable {
             i++;
         }
     }
+    
+    /**
+     * Add column data
+     *
+     * @param index Column index
+     * @param colName Column name
+     * @param dataType Data type
+     * @param colData The column data
+     * @throws Exception
+     */
+    public void addColumnData(int index, String colName, DataTypes dataType, List<Object> colData) throws Exception {
+        DataColumn col = this.addColumn(index, colName, dataType);
+        int i = 0;
+        for (DataRow row : this.rows) {
+            if (i < colData.size()) {
+                row.setValue(col, colData.get(i));
+            }
+            i++;
+        }
+    }
 
     /**
      * Add column data

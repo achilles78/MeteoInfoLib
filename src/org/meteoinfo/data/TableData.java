@@ -143,6 +143,33 @@ public class TableData extends DataTable {
                 break;
         }
     }
+    
+    /**
+     * Add column data
+     *
+     * @param index Column index
+     * @param colName Column name
+     * @param dt Data type string
+     * @param colData The column data
+     * @throws Exception
+     */
+    public void addColumnData(int index, String colName, String dt, List<Object> colData) throws Exception {
+        DataTypes dataType = TableUtil.toDataTypes(dt);
+        switch (dataType) {
+            case Date:
+                if (colData.get(0) instanceof Date) {
+                    this.addColumnData(index, colName, dataType, colData);
+                } else {
+                    String dformat = TableUtil.getDateFormat(dt);
+                    this.addColumn(index, new DataColumn(colName, dataType, dformat));
+                    this.setValues(colName, colData);
+                }
+                break;
+            default:
+                this.addColumnData(index, colName, dataType, colData);
+                break;
+        }
+    }
 
     /**
      * Remove a column
