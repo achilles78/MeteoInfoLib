@@ -4788,6 +4788,44 @@ public class ArrayMath {
         
         return sum;
     }
+    
+    /**
+     * Compute standard deviation value of an array
+     *
+     * @param a Array a
+     * @return Standard deviation value
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static double std(Array a) throws InvalidRangeException {
+        double mean = 0.0, v;
+        int n = 0;
+        IndexIterator ii = a.getIndexIterator();
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                mean += v;
+                n += 1;
+            }
+        }
+        if (n > 0) {
+            mean = mean / n;
+        } else {
+            mean = Double.NaN;
+            return mean;
+        }
+        
+        double sum = 0;
+        ii = a.getIndexIterator();
+        while (ii.hasNext()) {
+            v = ii.getDoubleNext();
+            if (!Double.isNaN(v)) {
+                sum += Math.pow((v - mean), 2);
+            }
+        }
+        sum = Math.sqrt(sum / n);
+        
+        return sum;
+    }
 
     /**
      * Compute variance value of an array along an axis (dimension)

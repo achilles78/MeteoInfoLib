@@ -566,6 +566,47 @@ public class DataTable {
             this.rows.add(row);
         }
     }
+    
+    /**
+     * Add column data
+     *
+     * @param col The column
+     * @param colData The column data
+     * @throws Exception
+     */
+    public void setColumnData(DataColumn col, List<Object> colData) throws Exception {
+        if (this.getRowCount() == 0) {
+            for (int i = 0; i < colData.size(); i++){
+                DataRow row = this.addRow();
+                row.setValue(col, colData.get(i));
+            }
+        } else {
+            int i = 0;
+            for (DataRow row : this.rows) {
+                if (i < colData.size()) {
+                    row.setValue(col, colData.get(i));
+                }
+                i++;
+            }
+        }
+    }
+    
+    /**
+     * Add column data
+     *
+     * @param colName Column name
+     * @param colData The column data
+     * @throws Exception
+     */
+    public void setColumnData(String colName, List<Object> colData) throws Exception {
+        DataColumn col = this.findColumn(colName);
+        if (col == null){
+            System.out.println("The column not exists: " + colName + "!");
+            return;
+        }
+        
+        setColumnData(col, colData);
+    }
 
     /**
      * Add column data
@@ -594,13 +635,7 @@ public class DataTable {
      */
     public void addColumnData(String colName, DataTypes dataType, List<Object> colData) throws Exception {
         DataColumn col = this.addColumn(colName, dataType);
-        int i = 0;
-        for (DataRow row : this.rows) {
-            if (i < colData.size()) {
-                row.setValue(col, colData.get(i));
-            }
-            i++;
-        }
+        setColumnData(col, colData);
     }
     
     /**
@@ -614,13 +649,7 @@ public class DataTable {
      */
     public void addColumnData(int index, String colName, DataTypes dataType, List<Object> colData) throws Exception {
         DataColumn col = this.addColumn(index, colName, dataType);
-        int i = 0;
-        for (DataRow row : this.rows) {
-            if (i < colData.size()) {
-                row.setValue(col, colData.get(i));
-            }
-            i++;
-        }
+        setColumnData(col, colData);
     }
 
     /**

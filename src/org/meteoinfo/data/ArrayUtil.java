@@ -476,7 +476,11 @@ public class ArrayUtil {
             }
             return a;
         } else {
-            return null;
+            Array a = Array.factory(DataType.OBJECT, new int[]{data.size()});
+            for (int i = 0; i < data.size(); i++) {
+                a.setObject(i, data.get(i));
+            }
+            return a;
         }
     }
 

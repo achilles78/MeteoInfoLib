@@ -17,6 +17,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Hours;
+import org.joda.time.Minutes;
+import org.joda.time.Months;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import org.joda.time.ReadablePeriod;
+import org.joda.time.Seconds;
+import org.joda.time.Years;
 
 /**
  *
@@ -228,6 +238,158 @@ public class DateUtil {
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.DAY_OF_YEAR, doy);
         return cal.getTime();
+    }
+    
+    /**
+     * Get period type from string
+     * @param p Period type string
+     * @return PeriodType
+     */
+    public static PeriodType getPeriodType(String p){
+        PeriodType pt = PeriodType.days();
+        switch (p) {
+            case "H":
+                pt = PeriodType.hours();                
+                break;
+            case "M":
+                pt = PeriodType.minutes();
+                break;
+            case "S":
+                pt = PeriodType.seconds();
+                break;
+            case "m":
+                pt = PeriodType.months();
+                break;
+            case "Y":
+                pt = PeriodType.years();
+                break;
+        }        
+        
+        return pt;
+    }
+    
+    /**
+     * Get period from string
+     * @param pStr Period string
+     * @return Period
+     */
+    public static ReadablePeriod getPeriod(String pStr) {
+        String p;
+        int n = 1;
+        if (pStr.length() == 1){
+            p = pStr;
+        } else {
+            p = pStr.substring(pStr.length() - 1);
+            n = Integer.parseInt(pStr.substring(0, pStr.length() - 1));
+        }
+        
+        ReadablePeriod pe;
+        switch (p) {
+            case "H":
+                pe = Hours.hours(n);
+                break;
+            case "M":
+                pe = Minutes.minutes(n);
+                break;
+            case "S":
+                pe = Seconds.seconds(n);
+                break;
+            case "D":
+                pe = Days.days(n);
+                break;
+            case "m":
+                pe = Months.months(n);
+                break;
+            case "Y":
+                pe = Years.years(n);
+                break;
+            default:
+                pe = new Period();
+                break;
+        }            
+        
+        return pe;
+    }
+    
+    /**
+     * Get date format string
+     * @param p Period
+     * @return Date format string
+     */
+    public static String getDateFormat(ReadablePeriod p){
+        String df = "yyyy-MM-dd";
+        if (p instanceof Hours)
+            df = "yyyy-MM-dd HH";
+        else if (p instanceof Minutes)
+            df = "yyyy-MM-dd HH:mm";
+        else if (p instanceof Seconds)
+            df = "yyyy-MM-dd HH:mm:ss";
+        
+        return df;
+    }
+    
+    /**
+     * Get date time from string
+     * @param dts Date time string
+     * @return DateTime
+     */
+    public static DateTime getDateTime(String dts){
+        if (!dts.contains("/") && dts.length() == 8) {
+            dts = dts.substring(0, 4) + "-" + dts.substring(4, 6) + "-" + dts.substring(6);
+        }
+        DateTime dt = new DateTime(dts);
+        return dt;
+    }
+    
+    /**
+     * Get date time list
+     * @param start Start date time
+     * @param end End date time
+     * @param p Peroid
+     * @return Date time list
+     */
+    public static List<DateTime> getDateTimes(DateTime start, DateTime end, ReadablePeriod p) {
+        List<DateTime> dts = new ArrayList<>();
+        while (!start.isAfter(end)) {
+            dts.add(start);
+            start = start.plus(p);
+        }
+        
+        return dts;
+    }
+    
+    /**
+     * Get date time list
+     * @param start Start date time
+     * @param tNum Date time number
+     * @param p Peroid
+     * @return Date time list
+     */
+    public static List<DateTime> getDateTimes(DateTime start, int tNum, ReadablePeriod p) {
+        List<DateTime> dts = new ArrayList<>();
+        for (int i = 0; i < tNum; i++){
+            dts.add(start);
+            start = start.plus(p);
+        }
+        
+        return dts;
+    }
+    
+    /**
+     * Get date time list
+     * @param end End date time
+     * @param tNum Date time number
+     * @param p Peroid
+     * @return Date time list
+     */
+    public static List<DateTime> getDateTimes(int tNum, DateTime end, ReadablePeriod p) {
+        List<DateTime> dts = new ArrayList<>();
+        for (int i = 0; i < tNum; i++){
+            dts.add(end);
+            end = end.minus(p);
+        }
+        
+        return dts;
     }
     // </editor-fold>
 }
