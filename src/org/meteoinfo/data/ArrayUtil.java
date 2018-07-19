@@ -1080,6 +1080,26 @@ public class ArrayUtil {
         }
         return dataType;
     }
+    
+    /**
+     * Merge data type to one data type
+     * @param dt1 Data type 1
+     * @param dt2 Data type 2
+     * @return Merged data type
+     */
+    public static DataType mergeDataType(DataType dt1, DataType dt2) {
+        if (dt1 == DataType.OBJECT || dt2 == DataType.OBJECT) {
+            return DataType.OBJECT;
+        } else if (dt1 == DataType.STRING || dt2 == DataType.STRING){
+            return DataType.STRING;
+        } else if (dt1 == DataType.DOUBLE || dt2 == DataType.DOUBLE) {
+            return DataType.DOUBLE;
+        } else if (dt1 == DataType.FLOAT || dt2 == DataType.FLOAT) {
+            return DataType.FLOAT;
+        } else {
+            return dt1;
+        }
+    }
 
     // </editor-fold>
     // <editor-fold desc="Output">
@@ -1321,6 +1341,27 @@ public class ArrayUtil {
         } else {
             for (int i = 0; i < r.getSize(); i++) {
                 r.setFloat(i, Float.valueOf(a.getObject(i).toString()));
+            }
+        }
+
+        return r;
+    }
+    
+    /**
+     * Convert array to double type
+     *
+     * @param a Array a
+     * @return Result array
+     */
+    public static Array toDouble(Array a) {
+        Array r = Array.factory(DataType.DOUBLE, a.getShape());
+        if (a.getDataType().isNumeric()) {
+            for (int i = 0; i < r.getSize(); i++) {
+                r.setDouble(i, a.getDouble(i));
+            }
+        } else {
+            for (int i = 0; i < r.getSize(); i++) {
+                r.setDouble(i, Double.valueOf(a.getObject(i).toString()));
             }
         }
 

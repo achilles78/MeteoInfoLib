@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.meteoinfo.data.ArrayMath;
+import org.meteoinfo.global.MIMath;
 import ucar.ma2.Array;
 
 /**
@@ -18,8 +19,13 @@ import ucar.ma2.Array;
 public class Index implements Iterable{
     // <editor-fold desc="Variables">
     protected List values;
+    protected String format = "%4s";
+    protected String name = "Index";
     // </editor-fold>
     // <editor-fold desc="Constructor">
+    /**
+     * Constructor
+     */
     public Index(){
         values = new ArrayList<>();
     }
@@ -27,9 +33,23 @@ public class Index implements Iterable{
     /**
      * Constructor
      * @param array Index array
+     * @param name Index name
+     */
+    public Index(Array array, String name) {
+        this();
+        values = ArrayMath.asList(array);
+        this.name = name;
+        this.updateFormat();
+    }
+    
+    /**
+     * Constructor
+     * @param array Index array
      */
     public Index(Array array) {
+        this();
         values = ArrayMath.asList(array);
+        this.updateFormat();
     }
     
     /**
@@ -37,10 +57,23 @@ public class Index implements Iterable{
      * @param size Index size
      */
     public Index(int size) {
-        values = new ArrayList<>();
+        this();
         for (int i = 0; i < size; i++){
             values.add(i);
         }
+        this.updateFormat();
+    }
+    
+    /**
+     * Constructor
+     * @param values Index values
+     * @param name Index name
+     */
+    public Index(List values, String name){
+        this();
+        this.values = values;
+        this.name = name;
+        this.updateFormat();
     }
     
     /**
@@ -48,7 +81,9 @@ public class Index implements Iterable{
      * @param values Index values
      */
     public Index(List values){
+        this();
         this.values = values;
+        this.updateFormat();
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
@@ -66,6 +101,7 @@ public class Index implements Iterable{
      */
     public void setValues(List value){
         this.values = value;
+        this.updateFormat();
     }
     
     @Override
@@ -80,8 +116,66 @@ public class Index implements Iterable{
     public int size(){
         return values.size();
     }
+    
+    /**
+     * Get string format
+     * @return String format
+     */
+    public String getFormat(){
+        return this.format;
+    }
+    
+    /**
+     * Get Name format
+     * @return 
+     */
+    public String getNameFormat() {
+        return format.substring(0, format.length() - 1) + "s";
+    }
+    
+    /**
+     * Set string format
+     * @param value String format
+     */
+    public void setFormat(String value){
+        this.format = value;
+    }
+    
+    /**
+     * Get name
+     * @return Name
+     */
+    public String getName(){
+        return this.name;
+    }
+    
+    /**
+     * Set name
+     * @param value Name
+     */
+    public void setName(String value){
+        this.name = value;
+    }
     // </editor-fold>
     // <editor-fold desc="Methods">
+    /**
+     * Update format
+     */
+    public void updateFormat(){
+        if (values.get(0) instanceof Integer){
+            int max = MIMath.getMinMaxInt(values)[1];
+            int len = String.valueOf(max).length();
+            this.format = "%" + String.valueOf(len) + "s";
+        } else {    //String
+            int len = 0;
+            for (String s : (List<String>)this.values){
+                if (len < s.length())
+                    len = s.length();
+            }
+            this.format = "%" + String.valueOf(len) + "s";
+        }
+    }
+    
     /**
      * Index of
      * @param v Value
@@ -110,6 +204,7 @@ public class Index implements Iterable{
      */
     public Index subIndex(){
         Index r = new Index(this.values);
+        r.setFormat(format);
         return r;
     }
     
@@ -122,7 +217,9 @@ public class Index implements Iterable{
         List rv = new ArrayList<>();
         for (int i : idx)
             rv.add(this.values.get(i));
-        return new Index(rv);
+        Index r = new Index(rv);
+        r.setFormat(format);
+        return r;
     }
     
     /**
@@ -137,7 +234,9 @@ public class Index implements Iterable{
         for (int i = start; i < end; i+=step){
             rv.add(this.values.get(i));
         }
-        return new Index(rv);
+        Index r = new Index(rv);
+        r.setFormat(format);
+        return r;
     }
     
     /**
@@ -273,10 +372,20 @@ public class Index implements Iterable{
     
     @Override
     public String toString(){
-        if (this.size() < 100)
-            return this.values.toString();
-        else
-            return this.values.subList(0, 98).toString() + ", ...";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Index([");
+        for (int i = 0; i < this.size(); i++){
+            sb.append(toString(i));
+            if (i < 100 && i < this.size() - 1) {
+                sb.append(", ");
+            } else {
+                sb.append(", ...");
+                break;
+            }
+        }
+        sb.append("])");
+        
+        return sb.toString();
     }
     
     /**
@@ -285,7 +394,7 @@ public class Index implements Iterable{
      * @return String
      */
     public String toString(int idx) {
-        return this.values.get(idx).toString();
+        return String.format(this.format, this.values.get(idx));
     }
     // </editor-fold>    
 }

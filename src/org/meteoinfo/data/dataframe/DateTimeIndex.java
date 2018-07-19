@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.meteoinfo.global.util.DateUtil;
 
 /**
@@ -19,14 +21,14 @@ import org.meteoinfo.global.util.DateUtil;
 public class DateTimeIndex extends Index {    
     // <editor-fold desc="Variables">
     ReadablePeriod period;
-    String format = "yyyy-MM-dd";
+    DateTimeFormatter dtFormatter;
     // </editor-fold>
     // <editor-fold desc="Constructor">
     /**
      * Constructor
      */
     public DateTimeIndex(){
-        
+        this.setFormat("yyyy-MM-dd");
     }
     
     /**
@@ -34,6 +36,7 @@ public class DateTimeIndex extends Index {
      * @param data Data list
      */
     public DateTimeIndex(List data){
+        this();
         if (data.get(0) instanceof Date) {
             this.values = new ArrayList<>();
             for (Date d : (List<Date>)data) {
@@ -51,10 +54,11 @@ public class DateTimeIndex extends Index {
      * @param freq Frequent
      */
     public DateTimeIndex(String start, String end, String freq) {
+        this();
         DateTime sdt = DateUtil.getDateTime(start);
         DateTime edt = DateUtil.getDateTime(end);
         period = DateUtil.getPeriod(freq);
-        this.format = DateUtil.getDateFormat(period);
+        this.setFormat(DateUtil.getDateFormat(period));
         this.values = DateUtil.getDateTimes(sdt, edt, period);
     }
     
@@ -65,9 +69,10 @@ public class DateTimeIndex extends Index {
      * @param freq Frequent
      */
     public DateTimeIndex(String start, int tNum, String freq) {
+        this();
         DateTime sdt = DateUtil.getDateTime(start);
         period = DateUtil.getPeriod(freq);
-        this.format = DateUtil.getDateFormat(period);
+        this.setFormat(DateUtil.getDateFormat(period));
         this.values = DateUtil.getDateTimes(sdt, tNum, period);
     }
 
@@ -78,13 +83,49 @@ public class DateTimeIndex extends Index {
      * @param freq Frequent
      */
     public DateTimeIndex(int tNum, String end, String freq) {
+        this();
         DateTime edt = DateUtil.getDateTime(end);
         period = DateUtil.getPeriod(freq);
-        this.format = DateUtil.getDateFormat(period);
+        this.setFormat(DateUtil.getDateFormat(period));
         this.values = DateUtil.getDateTimes(tNum, edt, period);
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
+    /**
+     * Set string format
+     * @param value String format
+     */
+    @Override
+    public void setFormat(String value){
+        super.setFormat(value);
+        this.dtFormatter = DateTimeFormat.forPattern(format);
+    }
+    
+    /**
+     * Get Name format
+     * @return 
+     */
+    @Override
+    public String getNameFormat() {
+        String str = ((DateTime)this.values.get(0)).toString(this.format);
+        return "%" + String.valueOf(str.length()) + "s";
+    }
+    
+    /**
+     * Get date time formatter
+     * @return Date time formatter
+     */
+    public DateTimeFormatter getDateTimeFormatter(){
+        return this.dtFormatter;
+    }
+    
+    /**
+     * Set date time formatter
+     * @param value Date time formatter
+     */
+    public void setDateTimeFormatter(DateTimeFormatter value){
+        this.dtFormatter = value;
+    }
     // </editor-fold>
     // <editor-fold desc="Methods">
     /**
@@ -148,6 +189,7 @@ public class DateTimeIndex extends Index {
     @Override
     public DateTimeIndex subIndex(){
         DateTimeIndex r = new DateTimeIndex(this.values);
+        r.setDateTimeFormatter(dtFormatter);
         return r;
     }
     
@@ -161,7 +203,9 @@ public class DateTimeIndex extends Index {
         List rv = new ArrayList<>();
         for (int i : idx)
             rv.add(this.values.get(i));
-        return new DateTimeIndex(rv);
+        DateTimeIndex r = new DateTimeIndex(rv);
+        r.setDateTimeFormatter(dtFormatter);
+        return r;
     }
     
     /**
@@ -177,7 +221,9 @@ public class DateTimeIndex extends Index {
         for (int i = start; i < end; i+=step){
             rv.add(this.values.get(i));
         }
-        return new DateTimeIndex(rv);
+        DateTimeIndex r = new DateTimeIndex(rv);
+        r.setDateTimeFormatter(dtFormatter);
+        return r;
     }
     
     /**
@@ -201,6 +247,7 @@ public class DateTimeIndex extends Index {
             if (i < 100 && i < this.size() - 1) {
                 sb.append(", ");
             } else {
+                sb.append(", ...");
                 break;
             }
         }
@@ -216,7 +263,8 @@ public class DateTimeIndex extends Index {
      */
     @Override
     public String toString(int idx) {
-        return ((DateTime)this.values.get(idx)).toString(this.format);
+        //return ((DateTime)this.values.get(idx)).toString(this.format);
+        return this.dtFormatter.print((DateTime)this.values.get(idx));
     }
     // </editor-fold>
 }

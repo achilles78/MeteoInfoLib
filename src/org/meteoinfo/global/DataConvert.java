@@ -14,11 +14,25 @@
 package org.meteoinfo.global;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.ParseException;
 import java.util.BitSet;
+import java.text.SimpleDateFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.meteoinfo.global.util.TypeUtils;
+import ucar.ma2.DataType;
 
 /**
  *
@@ -98,6 +112,7 @@ public class DataConvert {
 
     /**
      * Byte array (3 bytes) convert to integer
+     *
      * @param bytes Byte array
      * @return Integer value
      */
@@ -352,9 +367,381 @@ public class DataConvert {
         try {
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(bitSet);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
         return baos.toByteArray();
+    }
+
+    /**
+     * Convert input data to current data type
+     *
+     * @param value Data value
+     * @param dataType Data type
+     * @param dateFormat Date format
+     * @return Converted data
+     */
+    public static Object convertTo(Object value, DataType dataType, String dateFormat) {
+        if (value == null) {
+            switch (dataType) {
+                case INT:
+                    return Integer.MIN_VALUE;
+                case FLOAT:
+                    return Float.NaN;
+                case DOUBLE:
+                    return Double.NaN;
+                case BOOLEAN:
+                    return false;
+                case STRING:
+                    return "";
+                default:
+                    return value;
+            }
+        } else {
+            switch (dataType) {
+                case INT:
+                    if (!(value instanceof Integer)) {
+                        String vStr = value.toString();
+                        if (vStr.isEmpty()) {
+                            return Integer.MIN_VALUE;
+                        }
+                        return Integer.valueOf(vStr);
+                    }
+                    break;
+                case DOUBLE:
+                    if (!(value instanceof Double)) {
+                        String vStr = value.toString();
+                        if (vStr.isEmpty() || vStr.equalsIgnoreCase("nan")) {
+                            return Double.NaN;
+                        } else {
+                            return Double.valueOf(vStr);
+                        }
+                    }
+                    break;
+                case FLOAT:
+                    if (!(value instanceof Float)) {
+                        String vStr = value.toString();
+                        if (vStr.isEmpty() || vStr.equalsIgnoreCase("nan")) {
+                            return Float.NaN;
+                        } else {
+                            try {
+                                float v = Float.valueOf(vStr);
+                                return v;
+                            } catch (NumberFormatException e) {
+                                return Float.NaN;
+                            }
+                        }
+                    }
+                    break;
+                case BOOLEAN:
+                    if (!(value instanceof Boolean)) {
+                        String vStr = value.toString();
+                        if (vStr.isEmpty()) {
+                            return false;
+                        }
+                        return Boolean.valueOf(vStr);
+                    }
+                    break;
+                case OBJECT:
+                    if (!(value instanceof Date)) {
+                        String vStr = value.toString();
+                        if (vStr.isEmpty()) {
+                            return null;
+                        }
+                        SimpleDateFormat dformat = new SimpleDateFormat(dateFormat);
+                        try {
+                            return dformat.parse(vStr);
+                        } catch (ParseException ex) {
+                            Logger.getLogger(DataConvert.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return value;
+    }
+
+    /**
+     * Convert input string data to current data type
+     *
+     * @param vStr String value
+     * @param dataType Data type
+     * @param dateFormat Date format
+     * @return Converted data
+     */
+    public static Object convertStringTo(String vStr, DataType dataType, String dateFormat) {
+        if (vStr == null) {
+            switch (dataType) {
+                case INT:
+                    return Integer.MIN_VALUE;
+                case FLOAT:
+                    return Float.NaN;
+                case DOUBLE:
+                    return Double.NaN;
+                case BOOLEAN:
+                    return false;
+                case STRING:
+                    return "";
+                default:
+                    return vStr;
+            }
+        } else {
+            switch (dataType) {
+                case INT:
+                    if (vStr.isEmpty()) {
+                        return Integer.MIN_VALUE;
+                    }
+                    return Integer.valueOf(vStr);
+                case DOUBLE:
+                    if (vStr.isEmpty() || vStr.equalsIgnoreCase("nan")) {
+                        return Double.NaN;
+                    } else {
+                        return Double.valueOf(vStr);
+                    }
+                case FLOAT:
+                    if (vStr.isEmpty() || vStr.equalsIgnoreCase("nan")) {
+                        return Float.NaN;
+                    } else {
+                        try {
+                            float v = Float.valueOf(vStr);
+                            return v;
+                        } catch (NumberFormatException e) {
+                            return Float.NaN;
+                        }
+                    }
+                case BOOLEAN:
+                    if (vStr.isEmpty()) {
+                        return false;
+                    }
+                    return Boolean.valueOf(vStr);
+                case OBJECT:
+                    if (vStr.isEmpty()) {
+                        return null;
+                    }
+                    SimpleDateFormat dformat = new SimpleDateFormat(dateFormat);
+                    try {
+                        return dformat.parse(vStr);
+                    } catch (ParseException ex) {
+                        Logger.getLogger(DataConvert.class.getName()).log(Level.SEVERE, null, ex);
+                        return null;
+                    }
+            }
+        }
+
+        return vStr;
+    }
+
+    /**
+     * Get data type
+     *
+     * @param format Format string
+     * @return Data type
+     */
+    public static DataType getDataType(String format) {
+        DataType dt = DataType.STRING;
+        switch (format) {
+            case "C":
+            case "s":
+                dt = DataType.STRING;
+                break;
+            case "i":
+                dt = DataType.INT;
+                break;
+            case "f":
+                dt = DataType.FLOAT;
+                break;
+            case "d":
+                dt = DataType.DOUBLE;
+                break;
+            case "B":
+                dt = DataType.BOOLEAN;
+                break;
+            default:
+                if (format.substring(0, 1).equals("{")) {    //Date
+                    int eidx = format.indexOf("}");
+                    String formatStr = format.substring(1, eidx);
+                    dt = DataType.OBJECT;
+                }
+                break;
+        }
+
+        return dt;
+    }
+    
+    /**
+     * Get date format string
+     * @param format Format string
+     * @return Date format string
+     */
+    public static String getDateFormat(String format) {
+        int eidx = format.indexOf("}");
+        String formatStr = format.substring(1, eidx);
+        return formatStr;
+    }
+
+    /**
+     * Check a string is double or not
+     *
+     * @param s The string
+     * @return Boolean
+     */
+    public static boolean isDouble(String s) {
+        try {
+            Double.parseDouble(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check a string is float or not
+     *
+     * @param s The string
+     * @return Boolean
+     */
+    public static boolean isFloat(String s) {
+        try {
+            Float.parseFloat(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check a string is integer or not
+     *
+     * @param s The string
+     * @return Boolean
+     */
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check a string is boolean or not
+     *
+     * @param s The string
+     * @return Boolean
+     */
+    public static boolean isBoolean(String s) {
+        return TypeUtils.TRUE_STRINGS_FOR_DETECTION.contains(s) || TypeUtils.FALSE_STRINGS_FOR_DETECTION.contains(s);
+    }
+
+    /**
+     * Check a string is local date or not
+     *
+     * @param s The string
+     * @param dateTimeFormatter DateTimeFormatter
+     * @return
+     */
+    public static boolean isLocalDate(String s, DateTimeFormatter dateTimeFormatter) {
+        try {
+            if (dateTimeFormatter == null) {
+                LocalDate.parse(s, TypeUtils.DATE_FORMATTER);
+                return true;
+            } else {
+                LocalDate.parse(s, dateTimeFormatter);
+                return true;
+            }
+        } catch (Exception e) {
+            // it's all part of the plan
+            return false;
+        }
+    }
+
+    /**
+     * Check a string is local time or not
+     *
+     * @param s The string
+     * @param formatter DateTimeFormatter
+     * @return
+     */
+    public static boolean isLocalTime(String s, DateTimeFormatter formatter) {
+        try {
+            if (formatter == null) {
+                LocalTime.parse(s, TypeUtils.TIME_DETECTION_FORMATTER);
+                return true;
+            } else {
+                LocalDate.parse(s, formatter);
+                return true;
+            }
+        } catch (Exception e) {
+            // it's all part of the plan
+            return false;
+        }
+    }
+
+    /**
+     * Check a string is local date time or not
+     *
+     * @param s The string
+     * @param formatter DateTimeFormatter
+     * @return
+     */
+    public static boolean isLocalDateTime(String s, DateTimeFormatter formatter) {
+        try {
+            if (formatter == null) {
+                LocalDateTime.parse(s, TypeUtils.DATE_TIME_FORMATTER);
+                return true;
+            } else {
+                LocalDate.parse(s, formatter);
+                return true;
+            }
+        } catch (Exception e) {
+            // it's all part of the plan
+            return false;
+        }
+    }
+
+    /**
+     * Detect data type
+     * @param valuesList Values list
+     * @param dtFormatter DateIimeFormatter
+     * @return Data type
+     */
+    public static DataType detectDataType(List<String> valuesList, DateTimeFormatter dtFormatter) {
+        List<DataType> dts = Arrays.asList(DataType.OBJECT, DataType.BOOLEAN, DataType.INT, DataType.FLOAT, 
+                DataType.DOUBLE, DataType.STRING);
+        for (String s : valuesList) {
+            if (dts.contains(DataType.OBJECT) && !isLocalDateTime(s, dtFormatter)) {
+                dts.remove(DataType.OBJECT);
+            }
+            if (dts.contains(DataType.BOOLEAN) && !isBoolean(s)) {
+                dts.remove(DataType.BOOLEAN);
+            }
+            if (dts.contains(DataType.INT) && !isInteger(s)) {
+                dts.remove(DataType.INT);
+            }
+            if (dts.contains(DataType.FLOAT) && !isFloat(s)) {
+                dts.remove(DataType.FLOAT);
+            }
+            if (dts.contains(DataType.DOUBLE) && !isDouble(s)) {
+                dts.remove(DataType.DOUBLE);
+            }
+        }
+
+        return dts.get(0);
+    }
+    
+    /**
+     * Detect data type
+     * @param valuesList Values list
+     * @param n Value number used for detect
+     * @param dtFormatter DateIimeFormatter
+     * @return Data type
+     */
+    public static DataType detectDataType(List<String> valuesList, int n, DateTimeFormatter dtFormatter) {
+        if (n > valuesList.size())
+            n = valuesList.size();
+        List<String> vl = valuesList.subList(0, n);
+        return detectDataType(vl, dtFormatter);
     }
 }

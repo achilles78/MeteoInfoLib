@@ -1,4 +1,4 @@
- /* Copyright 2012 Yaqiang Wang,
+/* Copyright 2012 Yaqiang Wang,
  * yaqiang.wang@gmail.com
  * 
  * This library is free software; you can redistribute it and/or modify it
@@ -26,7 +26,9 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.Seconds;
+import org.joda.time.Weeks;
 import org.joda.time.Years;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  *
@@ -129,7 +131,7 @@ public class DateUtil {
 
         return value;
     }
-    
+
     /**
      * Get days difference between two dates
      *
@@ -149,7 +151,7 @@ public class DateUtil {
 
         return value;
     }
-    
+
     /**
      * Get hours difference between two dates
      *
@@ -169,7 +171,7 @@ public class DateUtil {
 
         return value;
     }
-    
+
     /**
      * Convert OA date to date
      *
@@ -180,7 +182,7 @@ public class DateUtil {
         Date date = new Date();
         //long t = (long)((oaDate - 25569) * 24 * 3600 * 1000);
         //long t = (long) (oaDate * 1000000);
-        long t = (long)BigDecimalUtil.mul(oaDate, 1000000);
+        long t = (long) BigDecimalUtil.mul(oaDate, 1000000);
         date.setTime(t);
         return date;
     }
@@ -199,57 +201,62 @@ public class DateUtil {
 
         return oaDate;
     }
-    
+
     /**
      * Date equals
+     *
      * @param a Date a
      * @param b Date b
      * @return If equals
      */
     public static boolean equals(Date a, Date b) {
-        if (a.getTime() == b.getTime())
+        if (a.getTime() == b.getTime()) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
-    
+
     /**
      * Get day of year
+     *
      * @param year Year
      * @param month Month
      * @param day Day
      * @return Day of year
      */
-    public static int dayOfYear(int year, int month, int day){
+    public static int dayOfYear(int year, int month, int day) {
         Calendar cal = Calendar.getInstance();
         cal.set(year, month, day);
         int doy = cal.get(Calendar.DAY_OF_YEAR);
         return doy;
     }
-    
+
     /**
      * Convert day of year to date
+     *
      * @param year Year
      * @param doy Day of year
      * @return The date
      */
-    public static Date doy2date(int year, int doy){
+    public static Date doy2date(int year, int doy) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.DAY_OF_YEAR, doy);
         return cal.getTime();
     }
-    
+
     /**
      * Get period type from string
+     *
      * @param p Period type string
      * @return PeriodType
      */
-    public static PeriodType getPeriodType(String p){
+    public static PeriodType getPeriodType(String p) {
         PeriodType pt = PeriodType.days();
         switch (p) {
             case "H":
-                pt = PeriodType.hours();                
+                pt = PeriodType.hours();
                 break;
             case "M":
                 pt = PeriodType.minutes();
@@ -263,32 +270,33 @@ public class DateUtil {
             case "Y":
                 pt = PeriodType.years();
                 break;
-        }        
-        
+        }
+
         return pt;
     }
-    
+
     /**
      * Get period from string
+     *
      * @param pStr Period string
      * @return Period
      */
     public static ReadablePeriod getPeriod(String pStr) {
         String p;
         int n = 1;
-        if (pStr.length() == 1){
+        if (pStr.length() == 1) {
             p = pStr;
         } else {
             p = pStr.substring(pStr.length() - 1);
             n = Integer.parseInt(pStr.substring(0, pStr.length() - 1));
         }
-        
+
         ReadablePeriod pe;
         switch (p) {
             case "H":
                 pe = Hours.hours(n);
                 break;
-            case "M":
+            case "T":
                 pe = Minutes.minutes(n);
                 break;
             case "S":
@@ -297,7 +305,10 @@ public class DateUtil {
             case "D":
                 pe = Days.days(n);
                 break;
-            case "m":
+            case "W":
+                pe = Weeks.weeks(n);
+                break;
+            case "M":
                 pe = Months.months(n);
                 break;
             case "Y":
@@ -306,43 +317,91 @@ public class DateUtil {
             default:
                 pe = new Period();
                 break;
-        }            
-        
+        }
+
         return pe;
     }
-    
+
     /**
      * Get date format string
+     *
      * @param p Period
      * @return Date format string
      */
-    public static String getDateFormat(ReadablePeriod p){
+    public static String getDateFormat(ReadablePeriod p) {
         String df = "yyyy-MM-dd";
-        if (p instanceof Hours)
+        if (p instanceof Hours) {
             df = "yyyy-MM-dd HH";
-        else if (p instanceof Minutes)
+        } else if (p instanceof Minutes) {
             df = "yyyy-MM-dd HH:mm";
-        else if (p instanceof Seconds)
+        } else if (p instanceof Seconds) {
             df = "yyyy-MM-dd HH:mm:ss";
-        
+        }
+
         return df;
     }
-    
+
     /**
      * Get date time from string
+     *
      * @param dts Date time string
      * @return DateTime
      */
-    public static DateTime getDateTime(String dts){
-        if (!dts.contains("/") && dts.length() == 8) {
-            dts = dts.substring(0, 4) + "-" + dts.substring(4, 6) + "-" + dts.substring(6);
+    public static DateTime getDateTime(String dts) {
+        int year, month, day;
+        String dateStr = dts;
+        String timeStr = null;
+        if (dts.contains(":")) {
+            String[] v = dts.split("\\s+");
+            dateStr = v[0].trim();
+            timeStr = v[1].trim();
         }
-        DateTime dt = new DateTime(dts);
+        if (dateStr.contains("/")) {
+            String[] ymd = dateStr.split("/");
+            month = Integer.parseInt(ymd[0]);
+            day = Integer.parseInt(ymd[1]);
+            year = Integer.parseInt(ymd[2]);
+        } else if (dateStr.contains("-")) {
+            String[] ymd = dateStr.split("-");
+            month = Integer.parseInt(ymd[1]);
+            day = Integer.parseInt(ymd[2]);
+            year = Integer.parseInt(ymd[0]);
+        } else {
+            year = Integer.parseInt(dateStr.substring(0, 4));
+            month = Integer.parseInt(dateStr.substring(4, 6));
+            day = Integer.parseInt(dateStr.substring(6));
+        }
+        int hour = 0, minute = 0, second = 0;        
+        if (timeStr != null) {            
+            String[] hms = timeStr.split(":");
+            hour = Integer.parseInt(hms[0]);
+            minute = Integer.parseInt(hms[1]);
+            second = hms.length == 3 ? Integer.parseInt(hms[2]) : 0;            
+        }
+
+        return new DateTime(year, month, day, hour, minute, second);
+    }
+
+    /**
+     * Get date time from string
+     *
+     * @param dts Date time string
+     * @return DateTime
+     */
+    public static DateTime getDateTime_(String dts) {
+        DateTimeFormatter dtf;
+        if (dts.contains(":")) {
+            dtf = TypeUtils.getDateTimeFormatter(dts);
+        } else {
+            dtf = TypeUtils.getDateFormatter(dts);
+        }
+        DateTime dt = dtf.parseDateTime(dts);
         return dt;
     }
-    
+
     /**
      * Get date time list
+     *
      * @param start Start date time
      * @param end End date time
      * @param p Peroid
@@ -354,12 +413,13 @@ public class DateUtil {
             dts.add(start);
             start = start.plus(p);
         }
-        
+
         return dts;
     }
-    
+
     /**
      * Get date time list
+     *
      * @param start Start date time
      * @param tNum Date time number
      * @param p Peroid
@@ -367,16 +427,17 @@ public class DateUtil {
      */
     public static List<DateTime> getDateTimes(DateTime start, int tNum, ReadablePeriod p) {
         List<DateTime> dts = new ArrayList<>();
-        for (int i = 0; i < tNum; i++){
+        for (int i = 0; i < tNum; i++) {
             dts.add(start);
             start = start.plus(p);
         }
-        
+
         return dts;
     }
-    
+
     /**
      * Get date time list
+     *
      * @param end End date time
      * @param tNum Date time number
      * @param p Peroid
@@ -384,11 +445,11 @@ public class DateUtil {
      */
     public static List<DateTime> getDateTimes(int tNum, DateTime end, ReadablePeriod p) {
         List<DateTime> dts = new ArrayList<>();
-        for (int i = 0; i < tNum; i++){
+        for (int i = 0; i < tNum; i++) {
             dts.add(end);
             end = end.minus(p);
         }
-        
+
         return dts;
     }
     // </editor-fold>

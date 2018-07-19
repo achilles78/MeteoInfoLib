@@ -123,6 +123,54 @@ public class MIMath {
 
         return new double[]{min, max};
     }
+    
+    /**
+     * Get mininum and maximum values
+     *
+     * @param S Data list
+     * @return Minimum and Maximum data array
+     */
+    public static double[] getMinMaxValue(List S) {
+        double min = 0, max = 0, v;
+        for (int i = 0; i < S.size(); i++) {
+            v = (double)S.get(i);
+            if (i == 0){
+                min = v;
+                max = v;
+            } else {
+                if (min > v)
+                    min = v;
+                if (max < v)
+                    max = v;
+            }
+        }
+
+        return new double[]{min, max};
+    }
+    
+    /**
+     * Get mininum and maximum values
+     *
+     * @param S Data list
+     * @return Minimum and Maximum data array
+     */
+    public static int[] getMinMaxInt(List S) {
+        int min = 0, max = 0, v;
+        for (int i = 0; i < S.size(); i++) {
+            v = (int)S.get(i);
+            if (i == 0){
+                min = v;
+                max = v;
+            } else {
+                if (min > v)
+                    min = v;
+                if (max < v)
+                    max = v;
+            }
+        }
+
+        return new int[]{min, max};
+    }
 
     /**
      * Determine if a string is digital
