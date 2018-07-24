@@ -6,8 +6,10 @@
 package org.meteoinfo.data.dataframe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import org.joda.time.DateTime;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.global.MIMath;
 import ucar.ma2.Array;
@@ -15,10 +17,11 @@ import ucar.ma2.Array;
 /**
  *
  * @author Yaqiang Wang
+ * @param <V> Index data type
  */
-public class Index implements Iterable{
+public class Index<V> implements Iterable<V>{
     // <editor-fold desc="Variables">
-    protected List values;
+    protected List<V> values;
     protected String format = "%4s";
     protected String name = "Index";
     // </editor-fold>
@@ -37,7 +40,7 @@ public class Index implements Iterable{
      */
     public Index(Array array, String name) {
         this();
-        values = ArrayMath.asList(array);
+        values = (List<V>)ArrayMath.asList(array);
         this.name = name;
         this.updateFormat();
     }
@@ -48,7 +51,7 @@ public class Index implements Iterable{
      */
     public Index(Array array) {
         this();
-        values = ArrayMath.asList(array);
+        values = (List<V>)ArrayMath.asList(array);
         this.updateFormat();
     }
     
@@ -57,9 +60,8 @@ public class Index implements Iterable{
      * @param size Index size
      */
     public Index(int size) {
-        this();
-        for (int i = 0; i < size; i++){
-            values.add(i);
+        for (Integer i = 0; i < size; i++){
+            values.add((V)i);
         }
         this.updateFormat();
     }
@@ -91,7 +93,7 @@ public class Index implements Iterable{
      * Get values
      * @return Values
      */
-    public List getValues(){
+    public List<V> getValues(){
         return this.values;
     }
     
@@ -99,7 +101,7 @@ public class Index implements Iterable{
      * Set values
      * @param value Values
      */
-    public void setValues(List value){
+    public void setValues(List<V> value){
         this.values = value;
         this.updateFormat();
     }
@@ -159,6 +161,32 @@ public class Index implements Iterable{
     // </editor-fold>
     // <editor-fold desc="Methods">
     /**
+     * Factory method to create a new index object
+     * @param values Values
+     * @return Index object
+     */
+    public static Index factory(List<Object> values) {
+        if (values.get(0) instanceof DateTime) {
+            return new DateTimeIndex(values);
+        } else {
+            return new Index(values);
+        }
+    }
+    
+    /**
+     * Factory method to create a new index object
+     * @param values Values
+     * @return Index object
+     */
+    public static Index factory(Array values) {
+        if (values.getObject(0) instanceof DateTime) {
+            return new DateTimeIndex(values);
+        } else {
+            return new Index(values);
+        }
+    }
+    
+    /**
      * Update format
      */
     public void updateFormat(){
@@ -166,7 +194,7 @@ public class Index implements Iterable{
             int max = MIMath.getMinMaxInt(values)[1];
             int len = String.valueOf(max).length();
             this.format = "%" + String.valueOf(len) + "s";
-        } else {    //String
+        } else if (values.get(0) instanceof String) {    //String
             int len = 0;
             for (String s : (List<String>)this.values){
                 if (len < s.length())
@@ -174,6 +202,55 @@ public class Index implements Iterable{
             }
             this.format = "%" + String.valueOf(len) + "s";
         }
+    }
+    
+    /**
+     * Add a value
+     * @param v Value
+     */
+    public void add(V v) {
+        this.values.add(v);
+    }
+    
+    /**
+     * Add a value
+     * @param i Index
+     * @param v Value
+     */
+    public void add(int i, V v){
+        this.values.add(i, v);
+    }
+    
+    /**
+     * Get a value
+     * @param i Index
+     * @return Value
+     */
+    public V get(int i) {
+        return this.values.get(i);
+    }
+    
+    /**
+     * Get indices
+     * @param names Names
+     * @return Indices
+     */
+    public Integer[] indices(final Object[] names) {
+        return indices(Arrays.asList(names));
+    }
+
+    /**
+     * Get indices
+     * @param names Names
+     * @return Indices
+     */
+    public Integer[] indices(final List<Object> names) {
+        final int size = names.size();
+        final Integer[] indices = new Integer[size];
+        for (int i = 0; i < size; i++) {
+            indices[i] = indexOf(names.get(i));
+        }
+        return indices;
     }
     
     /**
@@ -190,12 +267,21 @@ public class Index implements Iterable{
      * @param vs Value list
      * @return Index list
      */
-    public List<Integer> indexOf(List vs) {
+    public List<Integer> indexOf(List<V> vs) {
         List<Integer> r = new ArrayList<>();
-        for (Object v : vs)
+        for (V v : vs)
             r.add(indexOf(v));
         
         return r;
+    }
+    
+    /**
+     * Contains function
+     * @param v Value
+     * @return Boolean
+     */
+    public boolean contains(V v) {
+        return this.values.contains(v);
     }
     
     /**
@@ -214,10 +300,9 @@ public class Index implements Iterable{
      * @return Index
      */
     public Index subIndex(List<Integer> idx){
-        List rv = new ArrayList<>();
+        Index r = new Index();
         for (int i : idx)
-            rv.add(this.values.get(i));
-        Index r = new Index(rv);
+            r.add(this.values.get(i));
         r.setFormat(format);
         return r;
     }

@@ -284,11 +284,18 @@ public class DateUtil {
     public static ReadablePeriod getPeriod(String pStr) {
         String p;
         int n = 1;
-        if (pStr.length() == 1) {
+        int idx = 0;
+        for (int i = 0; i < pStr.length(); i++) {
+            if (Character.isLetter(pStr.charAt(i))){
+                break;
+            }
+            idx += 1;
+        }
+        if (idx == 0) {
             p = pStr;
         } else {
-            p = pStr.substring(pStr.length() - 1);
-            n = Integer.parseInt(pStr.substring(0, pStr.length() - 1));
+            p = pStr.substring(idx);
+            n = Integer.parseInt(pStr.substring(0, idx));
         }
 
         ReadablePeriod pe;
@@ -297,6 +304,7 @@ public class DateUtil {
                 pe = Hours.hours(n);
                 break;
             case "T":
+            case "Min":
                 pe = Minutes.minutes(n);
                 break;
             case "S":

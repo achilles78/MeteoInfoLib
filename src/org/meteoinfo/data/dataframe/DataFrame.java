@@ -16,12 +16,26 @@ import java.io.InputStreamReader;
 import org.joda.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.joda.time.Period;
+import org.joda.time.ReadablePeriod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.data.ArrayUtil;
+import org.meteoinfo.data.dataframe.impl.Aggregation;
+import org.meteoinfo.data.dataframe.impl.Grouping;
+import org.meteoinfo.data.dataframe.impl.KeyFunction;
+import org.meteoinfo.data.dataframe.impl.Views;
+import org.meteoinfo.data.dataframe.impl.WindowFunction;
 import org.meteoinfo.global.DataConvert;
+import org.meteoinfo.global.util.DateUtil;
 import org.meteoinfo.global.util.GlobalUtil;
 import org.meteoinfo.global.util.TypeUtils;
 import ucar.ma2.Array;
@@ -33,15 +47,16 @@ import ucar.ma2.DataType;
  *
  * @author Yaqiang Wang
  */
-public class DataFrame {
+public class DataFrame implements Iterable{
 
     // <editor-fold desc="Variables">
     private Index index;
-    private ColumnCollection columns;
+    private ColumnIndex columns;
     private Object data;    //Two dimension array or array list
     private boolean array2D = false;
     private int rowNum;
     private int colNum;
+    private Grouping groups;
     //private Range rowRange;
     //private Range colRange;
 
@@ -49,31 +64,20 @@ public class DataFrame {
     // <editor-fold desc="Constructor">
     /**
      * Constructor
+     */
+    public DataFrame() {
+        this.groups = new Grouping();
+    }
+    
+    /**
+     * Constructor
      *
      * @param data Data array
      * @param columns Columns
      * @param index Index
      */
-    public DataFrame(Array data, Index index, ColumnCollection columns) {
-        if (data.getRank() == 1) {    //One dimension array
-            if (columns.size() == 1) {
-                this.data = new ArrayList<>();
-                ((List) this.data).add(data);
-            } else {
-                if (data.getSize() == columns.size()) {
-                    this.data = data.reshape(new int[]{1, columns.size()});
-                    this.array2D = true;
-                }
-            }
-        } else {   //Two dimension array
-            this.data = data;
-            this.array2D = true;
-        }
-        this.columns = columns;
-
-        this.index = index;
-        this.rowNum = this.index.size();
-        this.colNum = this.columns.size();
+    public DataFrame(Array data, Index index, ColumnIndex columns) {
+        this(index, columns, data, new Grouping());
     }
 
     /**
@@ -84,35 +88,96 @@ public class DataFrame {
      * @param index Index
      */
     public DataFrame(Array data, Index index, List<String> columns) {
-        int n;
-        List<DataType> dtypes = new ArrayList<>();
-        if (data.getRank() == 1) {    //One dimension array
-            this.data = new ArrayList<>();
-            ((List) this.data).add(data);
-            n = 1;
-            dtypes.add(data.getDataType());
-        } else {   //Two dimension array
+        this(index, columns, data, new Grouping());
+    }
+    
+    /**
+     * Constructor
+     * @param index Index
+     * @param columns Columns
+     * @param data Data
+     * @param groups Grouping
+     */
+    public DataFrame(Index index, ColumnIndex columns, Object data, Grouping groups) {
+        if (data instanceof Array) {
+            if (((Array)data).getRank() == 1) {    //One dimension array
+                if (columns.size() == 1) {
+                    this.data = new ArrayList<>();
+                    ((List) this.data).add(data);
+                } else {
+                    if (((Array)data).getSize() == columns.size()) {
+                        this.data = ((Array)data).reshape(new int[]{1, columns.size()});
+                        this.array2D = true;
+                    }
+                }
+            } else {   //Two dimension array
+                this.data = data;
+                this.array2D = true;
+            }
+        } else {
             this.data = data;
-            this.array2D = true;
-            n = data.getShape()[1];
-            for (int i = 0; i < n; i++) {
-                dtypes.add(data.getDataType());
-            }
         }
-        if (columns == null) {
-            columns = new ArrayList<>();
-            for (int i = 0; i < n; i++) {
-                columns.add("C_" + String.valueOf(i));
+        
+        this.columns = columns;
+        this.index = index;
+        this.rowNum = this.index.size();
+        this.colNum = this.columns.size();
+        this.groups = groups == null ? new Grouping() : groups;
+    }
+    
+    /**
+     * Constructor
+     * @param index Index
+     * @param columns Columns
+     * @param data Data
+     * @param groups Grouping
+     */
+    public DataFrame(Index index, List<String> columns, Object data, Grouping groups) {
+        if (data instanceof Array) {
+            int n;
+            List<DataType> dtypes = new ArrayList<>();
+            if (((Array)data).getRank() == 1) {    //One dimension array
+                this.data = new ArrayList<>();
+                ((List) this.data).add(data);
+                n = 1;
+                dtypes.add(((Array)data).getDataType());
+            } else {   //Two dimension array
+                this.data = data;
+                this.array2D = true;
+                n = ((Array)data).getShape()[1];
+                for (int i = 0; i < n; i++) {
+                    dtypes.add(((Array)data).getDataType());
+                }
             }
-        }
-        this.columns = new ColumnCollection();
-        for (int i = 0; i < n; i++) {
-            this.columns.add(new Column(columns.get(i), dtypes.get(i)));
+            if (columns == null) {
+                columns = new ArrayList<>();
+                for (int i = 0; i < n; i++) {
+                    columns.add("C_" + String.valueOf(i));
+                }
+            }
+            this.columns = new ColumnIndex();
+            for (int i = 0; i < n; i++) {
+                this.columns.add(new Column(columns.get(i), dtypes.get(i)));
+            }
+        } else {
+            this.data = data;
+            int n = ((List)data).size();
+            if (columns == null) {
+                columns = new ArrayList<>();
+                for (int i = 0; i < n; i++) {
+                    columns.add("C_" + String.valueOf(i));
+                }
+            }
+            this.columns = new ColumnIndex();
+            for (int i = 0; i < n; i++) {
+                this.columns.add(new Column(columns.get(i), ((List<Array>)data).get(i).getDataType()));
+            }
         }
 
         this.index = index;
         this.rowNum = this.index.size();
         this.colNum = this.columns.size();
+        this.groups = groups == null ? new Grouping() : groups;
     }
 
     /**
@@ -133,12 +198,8 @@ public class DataFrame {
      * @param columns Columns
      * @param index Index
      */
-    public DataFrame(List<Array> data, Index index, ColumnCollection columns) {
-        this.data = data;
-        this.columns = columns;
-        this.index = index;
-        this.rowNum = this.index.size();
-        this.colNum = this.columns.size();
+    public DataFrame(List<Array> data, Index index, ColumnIndex columns) {
+        this(index, columns, data, new Grouping());
     }
 
     /**
@@ -149,21 +210,7 @@ public class DataFrame {
      * @param index Index
      */
     public DataFrame(List<Array> data, Index index, List<String> columns) {
-        this.data = data;
-        int n = data.size();
-        if (columns == null) {
-            columns = new ArrayList<>();
-            for (int i = 0; i < n; i++) {
-                columns.add("C_" + String.valueOf(i));
-            }
-        }
-        this.columns = new ColumnCollection();
-        for (int i = 0; i < n; i++) {
-            this.columns.add(new Column(columns.get(i), data.get(i).getDataType()));
-        }
-        this.index = index;
-        this.rowNum = this.index.size();
-        this.colNum = this.columns.size();
+        this(index, columns, data, new Grouping());
     }
 
     /**
@@ -173,8 +220,8 @@ public class DataFrame {
      * @param columns Columns
      * @param index Index
      */
-    public DataFrame(List<Array> data, List index, List<String> columns) {
-        this(data, new Index(index), columns);
+    public DataFrame(List<Array> data, List index, List columns) {
+        this(data, Index.factory(index), columns);
     }
 
     // </editor-fold>
@@ -246,7 +293,7 @@ public class DataFrame {
      *
      * @return Columns
      */
-    public ColumnCollection getColumns() {
+    public ColumnIndex getColumns() {
         return this.columns;
     }
 
@@ -273,7 +320,7 @@ public class DataFrame {
      *
      * @param value Columns
      */
-    public void setColumns(ColumnCollection value) {
+    public void setColumns(ColumnIndex value) {
         this.columns = value;
         this.colNum = this.columns.size();
     }
@@ -302,6 +349,15 @@ public class DataFrame {
 
     // </editor-fold>
     // <editor-fold desc="Methods">
+    @Override
+    public Iterator iterator() {
+        return iterrows();
+    }
+    
+    public ListIterator<List<Object>> iterrows() {
+        return new Views.ListView<>(this, true).listIterator();
+    }
+    
     /**
      * Update columns formats
      */
@@ -319,6 +375,58 @@ public class DataFrame {
             }
         }
     }
+    
+    /**
+     * Get the number of columns
+     * @return The number of columns
+     */
+    public int size() {
+        return this.colNum;
+    }
+    
+    /**
+     * Get the number of rows
+     * @return The number of rows
+     */
+    public int length() {
+        return this.rowNum;
+    }
+    
+    /**
+     * Return {@code true} if the data frame contains no data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>();
+     * > df.isEmpty();
+     * true }</pre>
+     *
+     * @return the number of columns
+     */
+    public boolean isEmpty() {
+        return length() == 0;
+    }
+    
+    /**
+     * Return a data frame column as a list.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.emptyList(),
+     * >         Arrays.asList("name", "value"),
+     * >         Arrays.asList(
+     * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >             Arrays.<Object>asList(1, 2, 3)
+     * >         )
+     * >     );
+     * > df.col(1);
+     * [1, 2, 3] }</pre>
+     *
+     * @param column the column index
+     * @return the list of values
+     */
+    public List col(final Integer column) {
+        return new Views.DataFrameListView<>(this, column, true);
+    }
 
     /**
      * Get shape
@@ -330,6 +438,16 @@ public class DataFrame {
         shape[0] = this.index.size();
         shape[1] = this.columns.size();
         return shape;
+    }
+    
+    /**
+     * Get value
+     * @param row Row object
+     * @param col Column object
+     * @return Value
+     */
+    public Object getValue(Object row, Column col) {
+        return getValue(this.index.indexOf(row), this.columns.indexOf(col));
     }
 
     /**
@@ -355,13 +473,25 @@ public class DataFrame {
      * @return Value
      */
     public Object getValue(int row, String colName) {
-        int col = this.columns.indexOf(colName);
+        int col = this.columns.indexOfName(colName);
         if (col >= 0) {
             return getValue(row, col);
         } else {
             System.out.println("Column not exists: " + colName + "!");
             return null;
         }
+    }
+    
+    /**
+     * Set value
+     *
+     * @param row Row
+     * @param col Column
+     * @param v Value
+     */
+    public void setValue(Object row, Column col, Object v) {
+        int ri = this.index.indexOf(row);
+        this.setValue(ri, col, v);
     }
 
     /**
@@ -387,11 +517,27 @@ public class DataFrame {
      * @param v Value
      */
     public void setValue(int row, String colName, Object v) {
-        int col = this.columns.indexOf(colName);
+        int col = this.columns.indexOfName(colName);
         if (col >= 0) {
             setValue(row, col, v);
         } else {
             System.out.println("Column not exists: " + colName + "!");
+        }
+    }
+    
+    /**
+     * Set value
+     *
+     * @param row Row index
+     * @param column Column
+     * @param v Value
+     */
+    public void setValue(int row, Column column, Object v) {
+        int col = this.columns.indexOf(column);
+        if (col >= 0) {
+            setValue(row, col, v);
+        } else {
+            System.out.println("Column not exists: " + column.getName() + "!");
         }
     }
 
@@ -433,6 +579,59 @@ public class DataFrame {
             return null;
         }
     }
+    
+    /**
+     * Add column data
+     * @param column Column
+     */
+    public void addColumn(Column column) {
+        Array array = Array.factory(column.getDataType(), new int[]{this.rowNum});
+        try {
+            this.addColumn(column, array);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(DataFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
+     * Add column data
+     *
+     * @param column Column
+     * @param a Column data array
+     * @throws InvalidRangeException
+     */
+    public void addColumn(Column column, Array a) throws InvalidRangeException {
+        DataType dt = a.getDataType();
+        if (this.array2D) {
+            DataType dt1 = this.columns.get(0).getDataType();
+            if (dt1 != dt) {
+                if (dt1.isNumeric() && dt.isNumeric()) {
+                    if (dt1 == DataType.DOUBLE) {
+                        a = ArrayUtil.toDouble(a);
+                        dt = a.getDataType();
+                    } else if (dt1 == DataType.FLOAT) {
+                        a = ArrayUtil.toFloat(a);
+                        dt = a.getDataType();
+                    }
+                }
+            }
+            if (dt1 == dt) {
+                Array ra = Array.factory(dt, new int[]{this.rowNum, this.colNum + 1});
+                Range rowRange = new Range(0, this.rowNum - 1, 1);
+                Range colRange = new Range(0, this.colNum - 1, 1);
+                List<Range> ranges = Arrays.asList(rowRange, colRange);
+                ArrayMath.setSection(ra, ranges, (Array) this.data);
+                colRange = new Range(this.colNum, this.colNum, 1);
+                ranges = Arrays.asList(rowRange, colRange);
+                ArrayMath.setSection(ra, ranges, a);
+                this.data = ra;
+            } else {
+
+            }
+        }
+        this.columns.add(column);
+        this.colNum += 1;
+    }
 
     /**
      * Add column data
@@ -441,7 +640,7 @@ public class DataFrame {
      * @param a Column data array
      * @throws InvalidRangeException
      */
-    public void addColumnData(String colName, Array a) throws InvalidRangeException {
+    public void addColumn(String colName, Array a) throws InvalidRangeException {
         DataType dt = a.getDataType();
         if (this.array2D) {
             DataType dt1 = this.columns.get(0).getDataType();
@@ -482,13 +681,181 @@ public class DataFrame {
      * @param a Column data array
      * @throws InvalidRangeException
      */
-    public void setColumnData(String colName, Array a) throws InvalidRangeException {
+    public void setColumn(String colName, Array a) throws InvalidRangeException {
         int col = this.columns.getNames().indexOf(colName);
         if (col >= 0) {
 
         } else {
-            this.addColumnData(colName, a);
+            this.addColumn(colName, a);
         }
+    }     
+    
+    private void dataToList() {
+        if (this.array2D) {
+            List<Array> r = new ArrayList<>();
+            for (int i = 0; i < this.colNum; i++) {
+                Array ra = Array.factory(((Array)this.data).getDataType(), new int[]{this.rowNum});
+                for (int j = 0; j < this.rowNum; j++) {
+                    ra.setObject(i, ((Array)data).getObject(j * this.colNum + i));
+                }
+                r.add(ra);
+            }
+            this.data = r;
+            this.array2D = false;
+        }
+    }
+    
+    /**
+     * Data reshape
+     * @param nrow Number of rows
+     * @param ncol Number of columns
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public void dataReshape(int nrow, int ncol) throws InvalidRangeException {
+        if (this.array2D) {
+            Array r = Array.factory(((Array)this.data).getDataType(), new int[]{nrow, ncol});
+            Range rowRange = new Range(0, Math.min(nrow - 1, this.rowNum - 1), 1);
+            Range colRange = new Range(0, Math.min(ncol - 1, this.colNum - 1), 1);
+            List<Range> ranges = Arrays.asList(rowRange, colRange);
+            ArrayMath.setSection(r, ranges, (Array) this.data);
+            this.data = r;
+        } else {
+            List<Array> r = new ArrayList<>();
+            for (Array a : (List<Array>) this.data){
+                Array ra = Array.factory(a.getDataType(), new int[]{nrow});
+                for (int i = 0; i < a.getSize(); i++){
+                    ra.setObject(i, a.getObject(i));
+                }
+                r.add(ra);
+            }
+            this.data = r;
+        }
+    }
+    
+    /**
+     * Append row data
+     * @param name Index element
+     * @param row Row data list
+     */
+    public void append(Object name, List row) {
+        this.index.add(name);
+        try {
+            this.dataReshape(rowNum + 1, colNum);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(DataFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        if (this.array2D) {
+            for (int i = 0; i < this.colNum; i++){
+                ((Array)this.data).setObject(rowNum * colNum  + i, row.get(i));
+            }
+        } else {
+            for (int i = 0; i < this.colNum; i++){
+                ((List<Array>)this.data).get(i).setObject(rowNum, i < row.size() ? row.get(i) : null);
+            }
+        }
+        this.rowNum += 1;
+    }
+    
+    /**
+     * Create a new data frame by leaving out the specified columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     * > df.drop("category").columns();
+     * [name, value] }</pre>
+     *
+     * @param cols the names of columns to be removed
+     * @return a shallow copy of the data frame with the columns removed
+     */
+    public DataFrame drop(final Column ... cols) {
+        return drop(columns.indices(cols));
+    }
+    
+    /**
+     * Create a new data frame by leaving out the specified columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     * > df.drop(2).columns();
+     * [name, value] }</pre>
+     *
+     * @param cols the indices of the columns to be removed
+     * @return a shallow copy of the data frame with the columns removed
+     */
+    public DataFrame drop(final Integer ... cols) {
+        final List<String> colnames = new ArrayList<>(columns.getNames());
+        final List<String> todrop = new ArrayList<>(cols.length);
+        for (final int col : cols) {
+            todrop.add(colnames.get(col));
+        }
+        colnames.removeAll(todrop);
+
+        if (this.array2D){
+            return null;
+        } else {
+            final List<Array> keep = new ArrayList<>(colnames.size());
+            for (final String col : colnames) {
+                keep.add(((List<Array>)this.data).get(this.columns.indexOfName(col)));
+            }
+
+            return new DataFrame(keep, index.getValues(), colnames);
+        }
+    }
+    
+    /**
+     * Create a new data frame containing only the specified columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     * > df.retain("name", "category").columns();
+     * [name, category] }</pre>
+     *
+     * @param cols the columns to include in the new data frame
+     * @return a new data frame containing only the specified columns
+     */
+    public DataFrame retain(final Object ... cols) {
+        return retain(columns.indices(cols));
+    }
+    
+    /**
+     * Create a new data frame containing only the specified columns.
+     *
+     * <pre> {@code
+     *  DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     *  df.retain(0, 2).columns();
+     * [name, category] }</pre>
+     *
+     * @param cols the columns to include in the new data frame
+     * @return a new data frame containing only the specified columns
+     */
+    public DataFrame retain(final Integer ... cols) {
+        final Set<Integer> keep = new HashSet<>(Arrays.asList(cols));
+        final Integer[] todrop = new Integer[size() - keep.size()];
+        for (int i = 0, c = 0; c < size(); c++) {
+            if (!keep.contains(c)) {
+                todrop[i++] = c;
+            }
+        }
+        return drop(todrop);
+    }
+    
+    /**
+     * Return a data frame containing only columns with numeric data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append(Arrays.asList("one", 1));
+     * > df.append(Arrays.asList("two", 2));
+     * > df.numeric().columns();
+     * [value] }</pre>
+     *
+     * @return a data frame containing only the numeric columns
+     */
+    public DataFrame numeric(){
+//        final SparseBitSet numeric = Inspection.numeric(this);
+//        final List keep = Selection.select(columns, numeric).getValues();
+//        return retain(keep.toArray(new Object[keep.size()]));
+        return null;
     }
 
     /**
@@ -500,7 +867,7 @@ public class DataFrame {
      * @throws ucar.ma2.InvalidRangeException
      */
     public Object select(Range rowRange, Range colRange) throws InvalidRangeException {
-        ColumnCollection cols = new ColumnCollection();
+        ColumnIndex cols = new ColumnIndex();
         for (int i = colRange.first(); i < colRange.last(); i += colRange.stride()) {
             cols.add((Column) this.columns.get(i).clone());
         }
@@ -555,7 +922,7 @@ public class DataFrame {
      * @throws ucar.ma2.InvalidRangeException
      */
     public Object select(Range rowRange, List<Integer> colRange) throws InvalidRangeException {
-        ColumnCollection cols = new ColumnCollection();
+        ColumnIndex cols = new ColumnIndex();
         for (int i : colRange) {
             cols.add(this.columns.get(i));
         }
@@ -610,7 +977,7 @@ public class DataFrame {
      * @throws ucar.ma2.InvalidRangeException
      */
     public Object select(List<Integer> rowRange, Range colRange) throws InvalidRangeException {
-        ColumnCollection cols = new ColumnCollection();
+        ColumnIndex cols = new ColumnIndex();
         for (int i = colRange.first(); i < colRange.last(); i += colRange.stride()) {
             cols.add(this.columns.get(i));
         }
@@ -664,7 +1031,7 @@ public class DataFrame {
      * @return Selected data frame or series
      */
     public Object select(List<Integer> rowRange, List<Integer> colRange) {
-        ColumnCollection cols = new ColumnCollection();
+        ColumnIndex cols = new ColumnIndex();
         for (int i : colRange) {
             cols.add(this.columns.get(i));
         }
@@ -739,7 +1106,7 @@ public class DataFrame {
         StringBuilder sb = new StringBuilder();
         String format = this.index.getNameFormat();
         sb.append(String.format(format, " "));
-        for (Column col : this.getColumns()) {
+        for (Column col : this.columns.getValues()) {
             sb.append(" ");
             sb.append(String.format(col.getNameFormat(), col.getName()));
         }
@@ -846,7 +1213,7 @@ public class DataFrame {
         }
 
         //Get fields
-        ColumnCollection cols = new ColumnCollection();
+        ColumnIndex cols = new ColumnIndex();
         Column col;
         List<List> values = new ArrayList<>();
         String[] colFormats;
@@ -1075,6 +1442,109 @@ public class DataFrame {
         }
         sw.flush();
         sw.close();
+    }
+    
+    /**
+     * Group the data frame rows using the specified key function.
+     *
+     * @param function the function to reduce rows to grouping keys
+     * @return the grouping
+     */
+    public DataFrame groupBy(final KeyFunction function) {
+        return new DataFrame(
+                index,
+                columns,
+                data,
+                new Grouping(this, function)
+            );
+    }
+    
+    /**
+     * Group the data frame rows using columns
+     * @param columns The columns
+     * @return The grouping
+     */
+    public DataFrame groupBy(final Integer ... columns) {
+        return new DataFrame(
+                index,
+                this.columns,
+                data,
+                new Grouping(this, columns)
+            );
+    }
+    
+    /**
+     * Group the data frame rows using columns
+     * @param columns The columns
+     * @return The grouping
+     */
+    public DataFrame groupBy(final Object ... columns) {
+        Integer[] icols = this.columns.indices(columns);
+        return groupBy(icols);
+    }
+    
+    /**
+     * Group the data frame rows using columns
+     * @param columns The columns
+     * @return The grouping
+     */
+    public DataFrame groupBy(final List<Object>columns) {
+        Integer[] icols = this.columns.indices(columns);
+        return groupBy(icols);
+    }
+    
+    /**
+     * Group the data frame rows using the specified key function.
+     *
+     * @param function the function to reduce rows to grouping keys
+     * @return the grouping
+     */
+    public DataFrame groupByIndex(final WindowFunction function) {
+        ((DateTimeIndex)index).setResamplPeriod(function.getPeriod());
+        return new DataFrame(
+                index,
+                columns,
+                data,
+                new Grouping(this, function)
+            );
+    }
+    
+    /**
+     * Group the data frame rows using the specified key function.
+     *
+     * @param pStr Period string
+     * @return the grouping
+     */
+    public DataFrame groupByIndex(final String pStr) {
+        ReadablePeriod period = DateUtil.getPeriod(pStr);
+        WindowFunction function = new WindowFunction(period);
+        return groupByIndex(function);
+    }
+    
+    /**
+     * Compute the sum of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * @return the new data frame
+     */
+    public DataFrame sum() {
+        DataFrame r = groups.apply(this, new Aggregation.Sum());
+        if (this.index instanceof DateTimeIndex)
+            ((DateTimeIndex)r.getIndex()).setPeriod(((DateTimeIndex)this.index).getResamplePeriod());
+        return r;
+    }
+    
+    /**
+     * Compute the mean of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * @return the new data frame
+     */
+    public DataFrame mean() {
+        DataFrame r = groups.apply(this, new Aggregation.Mean());
+        if (this.index instanceof DateTimeIndex)
+            ((DateTimeIndex)r.getIndex()).setPeriod(((DateTimeIndex)this.index).getResamplePeriod());
+        return r;
     }
     // </editor-fold>
 }

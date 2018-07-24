@@ -12,15 +12,18 @@ import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.global.util.DateUtil;
+import ucar.ma2.Array;
 
 /**
  *
  * @author Yaqiang Wang
  */
-public class DateTimeIndex extends Index {    
+public class DateTimeIndex extends Index<DateTime> {    
     // <editor-fold desc="Variables">
     ReadablePeriod period;
+    ReadablePeriod resamplePeriod;
     DateTimeFormatter dtFormatter;
     // </editor-fold>
     // <editor-fold desc="Constructor">
@@ -29,6 +32,14 @@ public class DateTimeIndex extends Index {
      */
     public DateTimeIndex(){
         this.setFormat("yyyy-MM-dd");
+    }
+    
+    /**
+     * Constructor
+     * @param data Data
+     */
+    public DateTimeIndex(Array data){
+        this(ArrayMath.asList(data));
     }
     
     /**
@@ -91,6 +102,35 @@ public class DateTimeIndex extends Index {
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
+    public ReadablePeriod getPeriod(){
+        return this.period;
+    }
+    
+    /**
+     * Set period
+     * @param value Period
+     */
+    public void setPeriod(ReadablePeriod value) {
+        this.period = value;
+        this.setFormat(DateUtil.getDateFormat(value));
+    }
+    
+    /**
+     * Get resample period
+     * @return Resample period
+     */
+    public ReadablePeriod getResamplePeriod(){
+        return this.resamplePeriod == null ? this.period : this.resamplePeriod;
+    }
+    
+    /**
+     * Set resample period
+     * @param value Resample period
+     */
+    public void setResamplPeriod(ReadablePeriod value){
+        this.resamplePeriod = value;
+    }
+    
     /**
      * Set string format
      * @param value String format
@@ -199,11 +239,10 @@ public class DateTimeIndex extends Index {
      * @return Index
      */
     @Override
-    public Index subIndex(List<Integer> idx){
-        List rv = new ArrayList<>();
+    public DateTimeIndex subIndex(List<Integer> idx){
+        DateTimeIndex r = new DateTimeIndex();
         for (int i : idx)
-            rv.add(this.values.get(i));
-        DateTimeIndex r = new DateTimeIndex(rv);
+            r.add(this.values.get(i));
         r.setDateTimeFormatter(dtFormatter);
         return r;
     }

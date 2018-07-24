@@ -789,10 +789,11 @@ public class GridArray {
      * @param level Levels
      * @param smooth Smooth coefficient
      * @param boldValue Bold value
+     * @param floatFormat Float format
      * @throws IOException 
      */
     public void saveAsMICAPS4File(String aFile, String description, Date aTime, int hours, int level,
-            float smooth, float boldValue) throws IOException {
+            float smooth, float boldValue, String floatFormat) throws IOException {
         //Get contour values
         double[] CValues;
         double undef = 9999;
@@ -804,8 +805,10 @@ public class GridArray {
         double cDelt = 0;
         if (CValues.length > 1)
             cDelt = CValues[1] - CValues[0];
-        int dNum = MIMath.getDecimalNum(min);
-        String dFormat = "%1$." + String.valueOf(dNum) + "f";
+        if (floatFormat == null) {
+            int dNum = MIMath.getDecimalNum(min);
+            floatFormat = "%." + String.valueOf(dNum) + "f";
+        }
 
         //Write file
         SimpleDateFormat format = new SimpleDateFormat("yy MM dd HH");
@@ -837,9 +840,9 @@ public class GridArray {
                 }
 
                 if (j == 0) {
-                    aLine = String.format(dFormat, value);
+                    aLine = String.format(floatFormat, value);
                 } else {
-                    aLine = aLine + " " + String.format(dFormat, value);
+                    aLine = aLine + " " + String.format(floatFormat, value);
                 }
             }
             sw.write(aLine);
@@ -858,11 +861,12 @@ public class GridArray {
      * @param level Levels
      * @param smooth Smooth coefficient
      * @param boldValue Bold value
+     * @param floatFormat Float format
      * @param projInfo Projection info
      * @throws IOException 
      */
     public void saveAsMICAPS4File(String aFile, String description, Date aTime, int hours, int level,
-            float smooth, float boldValue, ProjectionInfo projInfo) throws IOException {
+            float smooth, float boldValue, String floatFormat, ProjectionInfo projInfo) throws IOException {
         //Get contour values
         double[] CValues;
         double undef = 9999;
@@ -873,8 +877,10 @@ public class GridArray {
         double max = maxmin[0];
         CValues = LegendManage.createContourValues(min, max);
         double cDelt = CValues[1] - CValues[0];
-        int dNum = MIMath.getDecimalNum(min);
-        String dFormat = "%1$." + String.valueOf(dNum) + "f";
+        if (floatFormat == null) {
+            int dNum = MIMath.getDecimalNum(min);
+            floatFormat = "%1$." + String.valueOf(dNum) + "f";
+        }
 
         //Write file
         SimpleDateFormat format = new SimpleDateFormat("yy MM dd HH");
@@ -936,9 +942,9 @@ public class GridArray {
                 }
 
                 if (j == 0) {
-                    aLine = String.format(dFormat, value);
+                    aLine = String.format(floatFormat, value);
                 } else {
-                    aLine = aLine + " " + String.format(dFormat, value);
+                    aLine = aLine + " " + String.format(floatFormat, value);
                 }
             }
             sw.write(aLine);

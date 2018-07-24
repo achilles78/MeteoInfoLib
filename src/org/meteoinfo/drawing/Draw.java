@@ -415,6 +415,42 @@ public class Draw {
 //        path.lineTo(eP1.X, eP1.Y);
 //        g.draw(path);
     }
+    
+    /**
+     * Draw wind arrow
+     *
+     * @param sP Start point
+     * @param aArraw The arrow
+     * @param pb PointBreak
+     * @param g Graphics2D
+     * @param zoom Zoom
+     * @return Border rectangle
+     */
+    public static Rectangle2D drawArraw(PointF sP, WindArrow aArraw, PointBreak pb, Graphics2D g, double zoom) {
+        PointF eP = new PointF(0, 0);
+        //PointF eP1 = new PointF(0, 0);
+        double len = aArraw.length;
+        double angle = aArraw.angle + 180;
+        if (angle >= 360) {
+            angle -= 360;
+        }
+
+        len = len * zoom;
+
+        eP.X = (int) (sP.X + len * Math.sin(angle * Math.PI / 180));
+        eP.Y = (int) (sP.Y - len * Math.cos(angle * Math.PI / 180));
+
+        if (angle == 90) {
+            eP.Y = sP.Y;
+        }
+
+        g.setColor(pb.getColor());
+        g.setStroke(new BasicStroke(pb.getOutlineSize()));
+        g.draw(new Line2D.Float(sP.X, sP.Y, eP.X, eP.Y));
+        drawArraw(g, eP, angle);
+        return new Rectangle2D.Double(Math.min(sP.X, eP.X), Math.min(sP.Y, eP.Y),
+                Math.abs(eP.X - sP.X), Math.abs(eP.Y - sP.Y));
+    }
 
     /**
      * Draw arraw
@@ -512,6 +548,62 @@ public class Draw {
         eP.X = (float) (sP.X + len * Math.sin(aWB.angle * Math.PI / 180));
         eP.Y = (float) (sP.Y - len * Math.cos(aWB.angle * Math.PI / 180));
         g.setColor(aColor);
+        g.draw(new Line2D.Float(sP.X, sP.Y, eP.X, eP.Y));
+
+        len = len / 2;
+        if (aWB.windSpeesLine.W20 > 0) {
+            for (i = 0; i < aWB.windSpeesLine.W20; i++) {
+                eP1 = new PointF();
+                eP1.X = (float) (eP.X - len * Math.sin((aWB.angle - 105) * Math.PI / 180));
+                eP1.Y = (float) (eP.Y + len * Math.cos((aWB.angle - 105) * Math.PI / 180));
+                g.draw(new Line2D.Float(eP.X, eP.Y, eP1.X, eP1.Y));
+                eP.X = (float) (eP.X - aLen / 8 * Math.sin((aWB.angle) * Math.PI / 180));
+                eP.Y = (float) (eP.Y + aLen / 8 * Math.cos((aWB.angle) * Math.PI / 180));
+                g.draw(new Line2D.Float(eP.X, eP.Y, eP1.X, eP1.Y));
+            }
+            eP.X = (float) (eP.X - aLen / 8 * Math.sin((aWB.angle) * Math.PI / 180));
+            eP.Y = (float) (eP.Y + aLen / 8 * Math.cos((aWB.angle) * Math.PI / 180));
+        }
+        if (aWB.windSpeesLine.W4 > 0) {
+            for (i = 0; i < aWB.windSpeesLine.W4; i++) {
+                eP1 = new PointF();
+                eP1.X = (float) (eP.X - len * Math.sin((aWB.angle - 120) * Math.PI / 180));
+                eP1.Y = (float) (eP.Y + len * Math.cos((aWB.angle - 120) * Math.PI / 180));
+                g.draw(new Line2D.Float(eP.X, eP.Y, eP1.X, eP1.Y));
+                eP.X = (float) (eP.X - aLen / 8 * Math.sin((aWB.angle) * Math.PI / 180));
+                eP.Y = (float) (eP.Y + aLen / 8 * Math.cos((aWB.angle) * Math.PI / 180));
+            }
+        }
+        if (aWB.windSpeesLine.W2 > 0) {
+            len = len / 2;
+            eP1 = new PointF();
+            eP1.X = (float) (eP.X - len * Math.sin((aWB.angle - 120) * Math.PI / 180));
+            eP1.Y = (float) (eP.Y + len * Math.cos((aWB.angle - 120) * Math.PI / 180));
+            g.draw(new Line2D.Float(eP.X, eP.Y, eP1.X, eP1.Y));
+        }
+    }
+    
+    /**
+     * Draw wind barb
+     *
+     * @param sP Point
+     * @param aWB WindBarb
+     * @param pb PointBreak
+     * @param g Grahics2D
+     */
+    public static void drawWindBarb(PointF sP, WindBarb aWB, PointBreak pb, Graphics2D g) {
+        PointF eP;
+        PointF eP1;
+        double len = pb.getSize() * 2;
+        int i;
+
+        double aLen = len;
+
+        eP = new PointF();
+        eP.X = (float) (sP.X + len * Math.sin(aWB.angle * Math.PI / 180));
+        eP.Y = (float) (sP.Y - len * Math.cos(aWB.angle * Math.PI / 180));
+        g.setColor(pb.getColor());
+        g.setStroke(new BasicStroke(pb.getOutlineSize()));
         g.draw(new Line2D.Float(sP.X, sP.Y, eP.X, eP.Y));
 
         len = len / 2;

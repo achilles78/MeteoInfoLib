@@ -5,20 +5,44 @@
  */
 package org.meteoinfo.data.dataframe;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import org.joda.time.ReadablePeriod;
+import org.meteoinfo.data.dataframe.impl.Aggregation;
+import org.meteoinfo.data.dataframe.impl.Grouping;
+import org.meteoinfo.data.dataframe.impl.KeyFunction;
+import org.meteoinfo.data.dataframe.impl.Views;
+import org.meteoinfo.data.dataframe.impl.WindowFunction;
+import org.meteoinfo.global.util.DateUtil;
 import ucar.ma2.Array;
 
 /**
  *
  * @author Yaqiang Wang
  */
-public class Series {
+public class Series implements Iterable{
     // <editor-fold desc="Variables">
     private Index index; 
     private Array data;    //One dimension array
     private String name;
+    private Grouping groups;
     // </editor-fold>
     // <editor-fold desc="Constructor">
+    /**
+     * Constructor
+     * @param data Data array
+     * @param index Index
+     * @param name Name
+     * @param groups Groups
+     */
+    public Series(Array data, Index index, String name, Grouping groups) {
+        this.data = data;
+        this.index = index;
+        this.name = name;
+        this.groups = groups;
+    }
+    
     /**
      * Constructor
      * @param data Data array
@@ -29,6 +53,7 @@ public class Series {
         this.data = data;
         this.index = index;
         this.name = name;
+        this.groups = new Grouping();
     }
     
     /**
@@ -38,7 +63,7 @@ public class Series {
      * @param name Name
      */
     public Series(Array data, List idxValue, String name) {
-        this(data, new Index(idxValue), name);
+        this(data, Index.factory(idxValue), name);
     }
     
     /**
@@ -109,11 +134,116 @@ public class Series {
     // </editor-fold>
     // <editor-fold desc="Methods">
     /**
+     * Get if the series contains no data
+     * @return Boolean
+     */
+    public boolean isEmpty(){
+        return this.size() == 0;
+    }
+    
+    /**
+     * Get a data value
+     * @param i Index
+     * @return Data value
+     */
+    public Object getValue(int i) {
+        return this.data.getObject(i);
+    }
+    
+    /**
+     * Get a index value
+     * @param i Index
+     * @return Index value
+     */
+    public Object getIndexValue(int i) {
+        return this.index.get(i);
+    }
+    
+    @Override
+    public Iterator iterator() {
+        return iterrows();
+    }
+    
+    public ListIterator<List<Object>> iterrows() {
+        return new Views.ListView<>(this).listIterator();
+    }
+    
+    /**
      * Get size
      * @return Size
      */
     public int size(){
         return this.index.size();
+    }
+    
+    /**
+     * Group the series rows using the specified key function.
+     *
+     * @param function the function to reduce rows to grouping keys
+     * @return the grouping
+     */
+    public Series groupBy(final KeyFunction function) {
+        return new Series(                
+                data,
+                index,
+                name,
+                new Grouping(this, function)
+            );
+    }
+    
+    /**
+     * Group the series rows using the specified key function.
+     *
+     * @return the grouping
+     */
+    public Series groupBy() {
+        return new Series(
+            data,
+            index,
+            name,
+            new Grouping(this)
+        );
+    }
+    
+    /**
+     * Group the data frame rows using the specified key function.
+     *
+     * @param function the function to reduce rows to grouping keys
+     * @return the grouping
+     */
+    public Series groupByIndex(final WindowFunction function) {
+        ((DateTimeIndex)index).setResamplPeriod(function.getPeriod());
+        return new Series(
+                data,
+                index,
+                name,
+                new Grouping(this, function)
+            );
+    }
+    
+    /**
+     * Group the data frame rows using the specified key function.
+     *
+     * @param pStr Period string
+     * @return the grouping
+     */
+    public Series groupByIndex(final String pStr) {
+        ReadablePeriod period = DateUtil.getPeriod(pStr);
+        WindowFunction function = new WindowFunction(period);
+        return groupByIndex(function);
+    }
+    
+     /**
+     * Compute the mean of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * @return the new series
+     */
+    public Series mean() {
+        Series r = groups.apply(this, new Aggregation.Mean());
+        if (this.index instanceof DateTimeIndex)
+            ((DateTimeIndex)r.getIndex()).setPeriod(((DateTimeIndex)this.index).getResamplePeriod());
+        return r;
     }
     
     /**

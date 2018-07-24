@@ -438,8 +438,7 @@ public class Plot2D extends AbstractPlot2D {
         PointD p = aPS.getPoint();
         double[] sXY = projToScreen(p.X, p.Y, area);
         PointF pf = new PointF((float) sXY[0], (float) sXY[1]);
-        g.setStroke(new BasicStroke(1));
-        Draw.drawWindBarb(aPB.getColor(), pf, aPS, g, aPB.getSize());
+        Draw.drawWindBarb(pf, aPS, aPB, g);
     }
 
     private void drawWindArrow(Graphics2D g, WindArrow aPS, PointBreak aPB, Rectangle2D area) {
@@ -447,8 +446,7 @@ public class Plot2D extends AbstractPlot2D {
         double[] sXY = projToScreen(p.X, p.Y, area);
         PointF pf = new PointF((float) sXY[0], (float) sXY[1]);
         float zoom = aPB.getSize() / 10;
-        g.setStroke(new BasicStroke(1));
-        Draw.drawArraw(aPB.getColor(), pf, aPS, g, zoom);
+        Draw.drawArraw(pf, aPS, aPB, g, zoom);
     }
 
     private void drawPolyline(Graphics2D g, PolylineShape aPLS, PointBreak aPB, Rectangle2D area) {

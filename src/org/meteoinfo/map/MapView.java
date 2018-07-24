@@ -4717,7 +4717,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         LegendScheme aLS = aLayer.getLegendScheme();
         Color aColor;
         double value;
-        g.setStroke(new BasicStroke(1));
+        //g.setStroke(new BasicStroke(1));
         switch (aLS.getLegendType()) {
             case SingleSymbol:
                 PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(0);
@@ -4727,7 +4727,8 @@ public class MapView extends JPanel implements IWebMapPanel {
                     double[] xy = projToScreen(aPoint.X, aPoint.Y, LonShift);
                     sPoint.X = (float) xy[0];
                     sPoint.Y = (float) xy[1];
-                    Draw.drawArraw(aColor, sPoint, aArraw, g, zoom);
+                    //Draw.drawArraw(aColor, sPoint, aArraw, g, zoom);
+                    Draw.drawArraw(sPoint, aArraw, aPB, g, zoom);
                 }
                 break;
             case UniqueValue:
@@ -4756,7 +4757,8 @@ public class MapView extends JPanel implements IWebMapPanel {
                                 && value < Double.parseDouble(aPB.getEndValue().toString()))
                                 || (blNum == aLS.getLegendBreaks().size() && value == Double.parseDouble(aPB.getEndValue().toString()))) {
                             aColor = aPB.getColor();
-                            Draw.drawArraw(aColor, sPoint, aArraw, g, zoom);
+                            //Draw.drawArraw(aColor, sPoint, aArraw, g, zoom);
+                            Draw.drawArraw(sPoint, aArraw, aPB, g, zoom);
                         }
                     }
                 }
@@ -4781,7 +4783,6 @@ public class MapView extends JPanel implements IWebMapPanel {
         PointD aPoint;
         PointF sPoint = new PointF(0, 0);
         LegendScheme aLS = aLayer.getLegendScheme();
-        Color aColor;
         double value;
         List<WindBarb> windBarbs = new ArrayList<>();
         int shapeIdx = 0;
@@ -4802,7 +4803,6 @@ public class MapView extends JPanel implements IWebMapPanel {
         Extent aExtent = new Extent();
         if (aLS.getLegendType() == LegendType.SingleSymbol) {
             PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(0);
-            aColor = aPB.getColor();
             for (WindBarb aWB : windBarbs) {
                 aPoint = aWB.getPoint();
                 double[] xy = projToScreen(aPoint.X, aPoint.Y, LonShift);
@@ -4819,11 +4819,13 @@ public class MapView extends JPanel implements IWebMapPanel {
                     if (extentList.isEmpty()) {
                         maxExtent = (Extent) aExtent.clone();
                         extentList.add((Extent) aExtent.clone());
-                        Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                        //Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                        Draw.drawWindBarb(sPoint, aWB, aPB, g);
                     } else if (!MIMath.isExtentCross(aExtent, maxExtent)) {
                         extentList.add((Extent) aExtent.clone());
                         maxExtent = MIMath.getLagerExtent(maxExtent, aExtent);
-                        Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                        //Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                        Draw.drawWindBarb(sPoint, aWB, aPB, g);
                     } else {
                         boolean ifDraw = true;
                         for (int i = 0; i < extentList.size(); i++) {
@@ -4835,11 +4837,13 @@ public class MapView extends JPanel implements IWebMapPanel {
                         if (ifDraw) {
                             extentList.add((Extent) aExtent.clone());
                             maxExtent = MIMath.getLagerExtent(maxExtent, aExtent);
-                            Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                            //Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                            Draw.drawWindBarb(sPoint, aWB, aPB, g);
                         }
                     }
                 } else {
-                    Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                    //Draw.drawWindBarb(aColor, sPoint, aWB, g, aPB.getSize());
+                    Draw.drawWindBarb(sPoint, aWB, aPB, g);
                 }
 
             }
@@ -4869,25 +4873,23 @@ public class MapView extends JPanel implements IWebMapPanel {
                     if (extentList.isEmpty()) {
                         maxExtent = (Extent) aExtent.clone();
                         extentList.add((Extent) aExtent.clone());
-                        float bSize = ((PointBreak) aLS.getLegendBreaks().get(0)).getSize();
                         for (ColorBreak aCB : aLS.getLegendBreaks()) {
                             PointBreak aPB = (PointBreak) aCB;
                             if (value == Double.parseDouble(aPB.getStartValue().toString()) || (value > Double.parseDouble(aPB.getStartValue().toString())
                                     && value < Double.parseDouble(aPB.getEndValue().toString()))) {
-                                aColor = aPB.getColor();
-                                Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                                //Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                                Draw.drawWindBarb(sPoint, aWB, aPB, g);
                             }
                         }
                     } else if (!MIMath.isExtentCross(aExtent, maxExtent)) {
                         extentList.add((Extent) aExtent.clone());
                         maxExtent = MIMath.getLagerExtent(maxExtent, aExtent);
-                        float bSize = ((PointBreak) aLS.getLegendBreaks().get(0)).getSize();
                         for (ColorBreak aCB : aLS.getLegendBreaks()) {
                             PointBreak aPB = (PointBreak) aCB;
                             if (value == Double.parseDouble(aPB.getStartValue().toString()) || (value > Double.parseDouble(aPB.getStartValue().toString())
                                     && value < Double.parseDouble(aPB.getEndValue().toString()))) {
-                                aColor = aPB.getColor();
-                                Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                                //Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                                Draw.drawWindBarb(sPoint, aWB, aPB, g);
                             }
                         }
                     } else {
@@ -4901,25 +4903,23 @@ public class MapView extends JPanel implements IWebMapPanel {
                         if (ifDraw) {
                             extentList.add((Extent) aExtent.clone());
                             maxExtent = MIMath.getLagerExtent(maxExtent, aExtent);
-                            float bSize = ((PointBreak) aLS.getLegendBreaks().get(0)).getSize();
                             for (ColorBreak aCB : aLS.getLegendBreaks()) {
                                 PointBreak aPB = (PointBreak) aCB;
                                 if (value == Double.parseDouble(aPB.getStartValue().toString()) || (value > Double.parseDouble(aPB.getStartValue().toString())
                                         && value < Double.parseDouble(aPB.getEndValue().toString()))) {
-                                    aColor = aPB.getColor();
-                                    Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                                    //Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                                    Draw.drawWindBarb(sPoint, aWB, aPB, g);
                                 }
                             }
                         }
                     }
                 } else {
-                    float bSize = ((PointBreak) aLS.getLegendBreaks().get(0)).getSize();
                     for (ColorBreak aCB : aLS.getLegendBreaks()) {
                         PointBreak aPB = (PointBreak) aCB;
                         if (value == Double.parseDouble(aPB.getStartValue().toString()) || (value > Double.parseDouble(aPB.getStartValue().toString())
                                 && value < Double.parseDouble(aPB.getEndValue().toString()))) {
-                            aColor = aPB.getColor();
-                            Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                            //Draw.drawWindBarb(aColor, sPoint, aWB, g, bSize);
+                            Draw.drawWindBarb(sPoint, aWB, aPB, g);
                         }
                     }
                 }
