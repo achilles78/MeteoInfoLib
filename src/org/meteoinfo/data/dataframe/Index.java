@@ -60,6 +60,7 @@ public class Index<V> implements Iterable<V>{
      * @param size Index size
      */
     public Index(int size) {
+        this();
         for (Integer i = 0; i < size; i++){
             values.add((V)i);
         }

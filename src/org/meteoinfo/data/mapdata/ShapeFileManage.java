@@ -61,7 +61,7 @@ import org.meteoinfo.shape.PolygonZShape;
  */
 public class ShapeFileManage {
     
-    public static String encoding = "UTF-8";
+    private final static String ENCODING = "UTF-8";
 
     /**
      * Load shape file
@@ -74,6 +74,7 @@ public class ShapeFileManage {
     public static VectorLayer loadShapeFile(String shpfilepath) throws IOException, FileNotFoundException, Exception {
         String cpgfilepath = shpfilepath.replaceFirst(shpfilepath.substring(shpfilepath.lastIndexOf(".")), ".cpg");
         File cpgFile = new File(cpgfilepath);
+        String encoding = ENCODING;
         if (cpgFile.exists()){
             BufferedReader sr = new BufferedReader(new FileReader(cpgFile));
             String ec = sr.readLine().trim();

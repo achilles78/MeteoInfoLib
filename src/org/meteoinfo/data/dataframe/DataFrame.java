@@ -23,7 +23,6 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.joda.time.Period;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
@@ -54,8 +53,6 @@ public class DataFrame implements Iterable{
     private ColumnIndex columns;
     private Object data;    //Two dimension array or array list
     private boolean array2D = false;
-    private int rowNum;
-    private int colNum;
     private Grouping groups;
     //private Range rowRange;
     //private Range colRange;
@@ -65,8 +62,25 @@ public class DataFrame implements Iterable{
     /**
      * Constructor
      */
-    public DataFrame() {
-        this.groups = new Grouping();
+    public DataFrame() {      
+        this.columns = new ColumnIndex();
+    }
+    
+    /**
+     * Constructor
+     * @param index Index 
+     */
+    public DataFrame(Index index) {
+        this();
+        this.index = index;
+    }
+    
+    /**
+     * Constructor
+     * @param index Index 
+     */
+    public DataFrame(List index) {
+        this(Index.factory(index));
     }
     
     /**
@@ -77,7 +91,7 @@ public class DataFrame implements Iterable{
      * @param index Index
      */
     public DataFrame(Array data, Index index, ColumnIndex columns) {
-        this(index, columns, data, new Grouping());
+        this(index, columns, data, null);
     }
 
     /**
@@ -88,7 +102,7 @@ public class DataFrame implements Iterable{
      * @param index Index
      */
     public DataFrame(Array data, Index index, List<String> columns) {
-        this(index, columns, data, new Grouping());
+        this(index, columns, data, null);
     }
     
     /**
@@ -120,9 +134,7 @@ public class DataFrame implements Iterable{
         
         this.columns = columns;
         this.index = index;
-        this.rowNum = this.index.size();
-        this.colNum = this.columns.size();
-        this.groups = groups == null ? new Grouping() : groups;
+        this.groups = groups;
     }
     
     /**
@@ -175,8 +187,6 @@ public class DataFrame implements Iterable{
         }
 
         this.index = index;
-        this.rowNum = this.index.size();
-        this.colNum = this.columns.size();
         this.groups = groups == null ? new Grouping() : groups;
     }
 
@@ -188,7 +198,7 @@ public class DataFrame implements Iterable{
      * @param index Index
      */
     public DataFrame(Array data, List index, List<String> columns) {
-        this(data, new Index(index), columns);
+        this(data, Index.factory(index), columns);
     }
 
     /**
@@ -199,7 +209,7 @@ public class DataFrame implements Iterable{
      * @param index Index
      */
     public DataFrame(List<Array> data, Index index, ColumnIndex columns) {
-        this(index, columns, data, new Grouping());
+        this(index, columns, data, null);
     }
 
     /**
@@ -210,7 +220,7 @@ public class DataFrame implements Iterable{
      * @param index Index
      */
     public DataFrame(List<Array> data, Index index, List<String> columns) {
-        this(index, columns, data, new Grouping());
+        this(index, columns, data, null);
     }
 
     /**
@@ -276,7 +286,6 @@ public class DataFrame implements Iterable{
      */
     public void setIndex(Index value) {
         this.index = value;
-        this.rowNum = this.index.size();
     }
 
     /**
@@ -322,7 +331,6 @@ public class DataFrame implements Iterable{
      */
     public void setColumns(ColumnIndex value) {
         this.columns = value;
-        this.colNum = this.columns.size();
     }
 
     /**
@@ -381,7 +389,7 @@ public class DataFrame implements Iterable{
      * @return The number of columns
      */
     public int size() {
-        return this.colNum;
+        return this.columns.size();
     }
     
     /**
@@ -389,7 +397,7 @@ public class DataFrame implements Iterable{
      * @return The number of rows
      */
     public int length() {
-        return this.rowNum;
+        return this.index.size();
     }
     
     /**
@@ -459,7 +467,7 @@ public class DataFrame implements Iterable{
      */
     public Object getValue(int row, int col) {
         if (this.array2D) {
-            return ((Array) this.data).getObject(row * this.colNum + col);
+            return ((Array) this.data).getObject(row * this.size() + col);
         } else {
             return ((Array) ((List) this.data).get(col)).getObject(row);
         }
@@ -503,7 +511,7 @@ public class DataFrame implements Iterable{
      */
     public void setValue(int row, int col, Object v) {
         if (this.array2D) {
-            ((Array) this.data).setObject(row * this.colNum + col, v);
+            ((Array) this.data).setObject(row * this.size() + col, v);
         } else {
             ((Array) ((List) this.data).get(col)).setObject(row, v);
         }
@@ -551,7 +559,7 @@ public class DataFrame implements Iterable{
     public Array getColumnData(int col) throws InvalidRangeException {
         Array r;
         if (this.array2D) {
-            Range rowRange = new Range(0, this.rowNum - 1, 1);
+            Range rowRange = new Range(0, this.length() - 1, 1);
             Range colRange = new Range(col, col, 1);
             List<Range> ranges = new ArrayList<>();
             ranges.add(rowRange);
@@ -585,7 +593,7 @@ public class DataFrame implements Iterable{
      * @param column Column
      */
     public void addColumn(Column column) {
-        Array array = Array.factory(column.getDataType(), new int[]{this.rowNum});
+        Array array = Array.factory(column.getDataType(), new int[]{this.length()});
         try {
             this.addColumn(column, array);
         } catch (InvalidRangeException ex) {
@@ -616,21 +624,25 @@ public class DataFrame implements Iterable{
                 }
             }
             if (dt1 == dt) {
-                Array ra = Array.factory(dt, new int[]{this.rowNum, this.colNum + 1});
-                Range rowRange = new Range(0, this.rowNum - 1, 1);
-                Range colRange = new Range(0, this.colNum - 1, 1);
+                Array ra = Array.factory(dt, new int[]{this.length(), this.size() + 1});
+                Range rowRange = new Range(0, this.length() - 1, 1);
+                Range colRange = new Range(0, this.size() - 1, 1);
                 List<Range> ranges = Arrays.asList(rowRange, colRange);
                 ArrayMath.setSection(ra, ranges, (Array) this.data);
-                colRange = new Range(this.colNum, this.colNum, 1);
+                colRange = new Range(this.size(), this.size(), 1);
                 ranges = Arrays.asList(rowRange, colRange);
                 ArrayMath.setSection(ra, ranges, a);
                 this.data = ra;
             } else {
-
+                this.dataToList();
+                ((List<Array>)data).add(a);
             }
+        } else {
+            if (this.data == null)
+                this.data = new ArrayList<>();
+            ((List<Array>)data).add(a);
         }
         this.columns.add(column);
-        this.colNum += 1;
     }
 
     /**
@@ -640,38 +652,9 @@ public class DataFrame implements Iterable{
      * @param a Column data array
      * @throws InvalidRangeException
      */
-    public void addColumn(String colName, Array a) throws InvalidRangeException {
-        DataType dt = a.getDataType();
-        if (this.array2D) {
-            DataType dt1 = this.columns.get(0).getDataType();
-            if (dt1 != dt) {
-                if (dt1.isNumeric() && dt.isNumeric()) {
-                    if (dt1 == DataType.DOUBLE) {
-                        a = ArrayUtil.toDouble(a);
-                        dt = a.getDataType();
-                    } else if (dt1 == DataType.FLOAT) {
-                        a = ArrayUtil.toFloat(a);
-                        dt = a.getDataType();
-                    }
-                }
-            }
-            if (dt1 == dt) {
-                Array ra = Array.factory(dt, new int[]{this.rowNum, this.colNum + 1});
-                Range rowRange = new Range(0, this.rowNum - 1, 1);
-                Range colRange = new Range(0, this.colNum - 1, 1);
-                List<Range> ranges = Arrays.asList(rowRange, colRange);
-                ArrayMath.setSection(ra, ranges, (Array) this.data);
-                colRange = new Range(this.colNum, this.colNum, 1);
-                ranges = Arrays.asList(rowRange, colRange);
-                ArrayMath.setSection(ra, ranges, a);
-                this.data = ra;
-            } else {
-
-            }
-        }
-        Column column = new Column(colName, dt);
-        this.columns.add(column);
-        this.colNum += 1;
+    public void addColumn(String colName, Array a) throws InvalidRangeException {        
+        Column column = new Column(colName, a.getDataType());
+        addColumn(column, a);
     }
 
     /**
@@ -693,10 +676,10 @@ public class DataFrame implements Iterable{
     private void dataToList() {
         if (this.array2D) {
             List<Array> r = new ArrayList<>();
-            for (int i = 0; i < this.colNum; i++) {
-                Array ra = Array.factory(((Array)this.data).getDataType(), new int[]{this.rowNum});
-                for (int j = 0; j < this.rowNum; j++) {
-                    ra.setObject(i, ((Array)data).getObject(j * this.colNum + i));
+            for (int i = 0; i < this.size(); i++) {
+                Array ra = Array.factory(((Array)this.data).getDataType(), new int[]{this.length()});
+                for (int j = 0; j < this.length(); j++) {
+                    ra.setObject(i, ((Array)data).getObject(j * this.size() + i));
                 }
                 r.add(ra);
             }
@@ -714,8 +697,8 @@ public class DataFrame implements Iterable{
     public void dataReshape(int nrow, int ncol) throws InvalidRangeException {
         if (this.array2D) {
             Array r = Array.factory(((Array)this.data).getDataType(), new int[]{nrow, ncol});
-            Range rowRange = new Range(0, Math.min(nrow - 1, this.rowNum - 1), 1);
-            Range colRange = new Range(0, Math.min(ncol - 1, this.colNum - 1), 1);
+            Range rowRange = new Range(0, Math.min(nrow - 1, this.length() - 1), 1);
+            Range colRange = new Range(0, Math.min(ncol - 1, this.size() - 1), 1);
             List<Range> ranges = Arrays.asList(rowRange, colRange);
             ArrayMath.setSection(r, ranges, (Array) this.data);
             this.data = r;
@@ -740,20 +723,19 @@ public class DataFrame implements Iterable{
     public void append(Object name, List row) {
         this.index.add(name);
         try {
-            this.dataReshape(rowNum + 1, colNum);
+            this.dataReshape(this.length() + 1, this.size());
         } catch (InvalidRangeException ex) {
             Logger.getLogger(DataFrame.class.getName()).log(Level.SEVERE, null, ex);
         }        
         if (this.array2D) {
-            for (int i = 0; i < this.colNum; i++){
-                ((Array)this.data).setObject(rowNum * colNum  + i, row.get(i));
+            for (int i = 0; i < this.size(); i++){
+                ((Array)this.data).setObject(this.length() * this.size()+ i, row.get(i));
             }
         } else {
-            for (int i = 0; i < this.colNum; i++){
-                ((List<Array>)this.data).get(i).setObject(rowNum, i < row.size() ? row.get(i) : null);
+            for (int i = 0; i < this.size(); i++){
+                ((List<Array>)this.data).get(i).setObject(this.length(), i < row.size() ? row.get(i) : null);
             }
         }
-        this.rowNum += 1;
     }
     
     /**
@@ -1115,7 +1097,7 @@ public class DataFrame implements Iterable{
         List<String> formats = this.columns.getFormats();
         for (int r = start; r < end; r++) {
             sb.append(this.index.toString(r));
-            for (int i = 0; i < this.colNum; i++) {
+            for (int i = 0; i < this.size(); i++) {
                 sb.append(" ");
                 if (formats.get(i) == null) {
                     sb.append(this.getValue(r, i).toString());
@@ -1400,15 +1382,15 @@ public class DataFrame implements Iterable{
         String str = "";
         String format = this.index.getNameFormat();
         if (index) {
-            str = String.format(format, this.index.getName());
+            str = this.index.getName();
         }
-        for (int i = 0; i < this.colNum; i++) {
+        for (int i = 0; i < this.size(); i++) {
             if (str.isEmpty()) {
                 str = this.columns.get(i).getName();
             } else {
                 str = str + delimiter + this.columns.get(i).getName();
             }
-        };
+        }
         sw.write(str);
 
         String line, vstr;
@@ -1420,12 +1402,12 @@ public class DataFrame implements Iterable{
                 formats.add(col.getFormat());
             }
         }
-        for (int j = 0; j < this.rowNum; j++) {
+        for (int j = 0; j < this.length(); j++) {
             line = "";
             if (index) {
                 line = this.index.toString(j);
             }
-            for (int i = 0; i < this.colNum; i++) {
+            for (int i = 0; i < this.size(); i++) {
                 if (formats.get(i) == null) {
                     vstr = this.getValue(j, i).toString();
                 } else {

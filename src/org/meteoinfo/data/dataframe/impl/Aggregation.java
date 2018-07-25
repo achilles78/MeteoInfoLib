@@ -97,15 +97,21 @@ public class Aggregation {
         @Override
         public Number apply(final List<V> values) {
             stat.clear();
+            double v;
             for (Object value : values) {
                 if (value != null) {
                     if (value instanceof Boolean) {
                         value = Boolean.class.cast(value) ? 1 : 0;
                     }
-                    stat.increment(Number.class.cast(value).doubleValue());
+                    v = Number.class.cast(value).doubleValue();
+                    if (!Double.isNaN(v))
+                        stat.increment(Number.class.cast(value).doubleValue());
                 }
             }
-            return stat.getResult();
+            if (stat.getN() == 0)
+                return Double.NaN;
+            else
+                return stat.getResult();
         }
     }
 

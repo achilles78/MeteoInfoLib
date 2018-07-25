@@ -9,13 +9,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import org.joda.time.ReadablePeriod;
+import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.data.dataframe.impl.Aggregation;
 import org.meteoinfo.data.dataframe.impl.Grouping;
 import org.meteoinfo.data.dataframe.impl.KeyFunction;
+import org.meteoinfo.data.dataframe.impl.TimeFunction;
+import org.meteoinfo.data.dataframe.impl.TimeFunctions;
 import org.meteoinfo.data.dataframe.impl.Views;
 import org.meteoinfo.data.dataframe.impl.WindowFunction;
 import org.meteoinfo.global.util.DateUtil;
 import ucar.ma2.Array;
+import ucar.ma2.Range;
 
 /**
  *
@@ -53,7 +57,6 @@ public class Series implements Iterable{
         this.data = data;
         this.index = index;
         this.name = name;
-        this.groups = new Grouping();
     }
     
     /**
@@ -151,6 +154,90 @@ public class Series implements Iterable{
     }
     
     /**
+     * Get value by index
+     * @param idxValue Index value
+     * @return Data value
+     */
+    public Object getValueByIndex(Object idxValue) {
+        int i = this.index.indexOf(idxValue);
+        return this.data.getObject(i);
+    }
+    
+    /**
+     * Set a data value
+     * @param i Index
+     * @param v Data value
+     */
+    public void setValue(int i, Object v) {
+        this.data.setObject(i, v);
+    }
+    
+    /**
+     * Set data values by another boolean series
+     * @param s Boolean series
+     * @param v Data value
+     */
+    public void setValue(Series s, Object v) {
+        for (int i = 0; i < this.size(); i++){
+            if ((boolean)s.getValue(i)){
+                this.data.setObject(i, v);
+            }
+        }
+    }
+    
+    /**
+     * Get values
+     * @param ii index values
+     * @return Result series
+     */
+    public Series getValues(List<Integer> ii) {
+        Array ra = Array.factory(this.data.getDataType(), new int[]{ii.size()});
+        for (int i = 0; i < ii.size(); i++){
+            ra.setObject(i, this.data.getObject(ii.get(i)));
+        }
+        Index idx = this.index.subIndex(ii);
+        return new Series(ra, idx, this.name);
+    }
+    
+    /**
+     * Get values
+     * @param range Range
+     * @return Result series
+     */
+    public Series getValues(Range range) {
+        Array ra = Array.factory(this.data.getDataType(), new int[]{range.length()});
+        int i = 0;
+        for (int ii = range.first(); ii < range.last(); ii+=range.stride()){
+            ra.setObject(i, this.data.getObject(ii));
+            i += 1;
+        }
+        Index idx = this.index.subIndex(range.first(), range.last(), range.stride());
+        return new Series(ra, idx, this.name);
+    }
+    
+    /**
+     * Get values by index
+     * @param idxValues index values
+     * @return Result series
+     */
+    public Series getValuesByIndex(List idxValues) {
+        List<Integer> ii = this.index.indexOf(idxValues);
+        Array ra = Array.factory(this.data.getDataType(), new int[]{ii.size()});
+        for (int i = 0; i < ii.size(); i++){
+            if (ii.get(i) < 0) {
+                if (ra.getDataType().isNumeric())
+                    ra.setObject(i, Double.NaN);
+            } else
+                ra.setObject(i, this.data.getObject(ii.get(i)));
+        }
+        Index idx = Index.factory(idxValues);
+        if (idx instanceof DateTimeIndex){
+            ((DateTimeIndex)idx).setDateTimeFormatter(((DateTimeIndex)this.index).getDateTimeFormatter());
+        }
+        return new Series(ra, idx, this.name);
+    }
+    
+    /**
      * Get a index value
      * @param i Index
      * @return Index value
@@ -206,12 +293,40 @@ public class Series implements Iterable{
     }
     
     /**
+     * Group the series rows using the specified time function.
+     *
+     * @param function the function to reduce rows to grouping keys
+     * @return the grouping
+     */
+    public Series groupBy(final TimeFunction function) {
+        return new Series(                
+                data,
+                index,
+                name,
+                new Grouping(this, function)
+            );
+    }
+    
+    /**
+     * Group by time string - DateTimeIndex
+     * @param tStr Time string
+     * @return The grouping
+     */
+    public Series groupBy(String tStr) {
+        TimeFunction function = TimeFunctions.factory(tStr);
+        if (function == null)
+            return null;
+        else
+            return groupBy(function);
+    }
+    
+    /**
      * Group the data frame rows using the specified key function.
      *
      * @param function the function to reduce rows to grouping keys
      * @return the grouping
      */
-    public Series groupByIndex(final WindowFunction function) {
+    public Series resample(final WindowFunction function) {
         ((DateTimeIndex)index).setResamplPeriod(function.getPeriod());
         return new Series(
                 data,
@@ -227,22 +342,37 @@ public class Series implements Iterable{
      * @param pStr Period string
      * @return the grouping
      */
-    public Series groupByIndex(final String pStr) {
+    public Series resample(final String pStr) {
         ReadablePeriod period = DateUtil.getPeriod(pStr);
         WindowFunction function = new WindowFunction(period);
-        return groupByIndex(function);
+        return resample(function);
     }
     
      /**
      * Compute the mean of the numeric columns for each group
      * or the entire data frame if the data is not grouped.
      *
-     * @return the new series
+     * @return Mean object
      */
-    public Series mean() {
-        Series r = groups.apply(this, new Aggregation.Mean());
-        if (this.index instanceof DateTimeIndex)
-            ((DateTimeIndex)r.getIndex()).setPeriod(((DateTimeIndex)this.index).getResamplePeriod());
+    public Object mean() {
+        if (groups == null){
+            return ArrayMath.mean(data);
+        } else {
+            Series r = groups.apply(this, new Aggregation.Mean());
+            if (r.getIndex() instanceof DateTimeIndex)
+                ((DateTimeIndex)r.getIndex()).setPeriod(((DateTimeIndex)this.index).getResamplePeriod());
+            return r;
+        }
+    }
+    
+    /**
+     * Less then
+     * @param v Value
+     * @return Result series
+     */
+    public Series lessThan(Number v) {
+        Array rdata = ArrayMath.lessThan(data, v);
+        Series r = new Series(rdata, index, name, this.groups);
         return r;
     }
     

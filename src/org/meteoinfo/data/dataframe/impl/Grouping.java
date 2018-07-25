@@ -55,6 +55,20 @@ public class Grouping
             group.set(r);
         }
     }
+    
+    public <V> Grouping(final Series series, final TimeFunction<DateTime, String> function) {
+        final Iterator iter = series.getIndex().iterator();
+        for (int r = 0; iter.hasNext(); r++) {
+            final Object row = iter.next();
+            final String key = function.apply((DateTime)row);
+            SparseBitSet group = groups.get(key);
+            if (group == null) {
+                group = new SparseBitSet();
+                groups.put(key, group);
+            }
+            group.set(r);
+        }
+    }
 
     public <V> Grouping(final Series series) {
         this(series, new KeyFunction<V>() {
