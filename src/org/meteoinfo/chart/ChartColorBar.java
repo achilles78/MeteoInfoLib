@@ -816,7 +816,7 @@ public class ChartColorBar extends ChartLegend {
                         switch (this.labelLocation) {
                             case "top":
                             case "bottom":
-                                this.height += dim.height + 10;
+                                //this.height += dim.height + 10;
                                 this.width = Math.max(this.width, dim.width);
                                 break;
                             default:
@@ -839,7 +839,7 @@ public class ChartColorBar extends ChartLegend {
                         switch (this.labelLocation) {
                             case "right":
                             case "left":
-                                this.width += dim.width + 10;
+                                //this.width += dim.width + 10;
                                 break;
                             default:
                                 this.height += dim.height + 5;
