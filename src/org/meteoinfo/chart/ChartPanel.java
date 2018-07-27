@@ -423,7 +423,9 @@ public class ChartPanel extends JPanel {
 
         //this.setBackground(Color.white);
         Graphics2D g2 = (Graphics2D) g;
-        g2.drawImage(mapBitmap, null, 0, 0);
+        AffineTransform mx = new AffineTransform();
+        AffineTransformOp aop = new AffineTransformOp(mx, AffineTransformOp.TYPE_BICUBIC);
+        g2.drawImage(mapBitmap, aop, 0, 0);
 
         //Draw dynamic graphics
         if (this.dragMode) {
