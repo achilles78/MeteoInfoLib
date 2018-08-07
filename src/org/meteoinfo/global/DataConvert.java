@@ -336,6 +336,21 @@ public class DataConvert {
             return s;
         }
     }
+    
+    /**
+     * Remove last zero chars
+     * @param str String
+     * @return Result string
+     */
+    public static String removeTail0(String str){  
+        // Return string if the last char is not 0  
+        if(!str.substring(str.length() -1).equals("0")){  
+            return str;  
+        }else{  
+             // Or remove last char and recursion  
+            return removeTail0(str.substring(0, str.length() -1 ));  
+        }  
+    }  
 
     // Returns a byte array of at least length 1.
 // The most significant bit in the result is guaranteed not to be a 1

@@ -25,16 +25,19 @@ import ucar.ma2.Range;
  *
  * @author Yaqiang Wang
  */
-public class Series implements Iterable{
+public class Series implements Iterable {
+
     // <editor-fold desc="Variables">
-    private Index index; 
+    private Index index;
     private Array data;    //One dimension array
     private String name;
     private Grouping groups;
+
     // </editor-fold>
     // <editor-fold desc="Constructor">
     /**
      * Constructor
+     *
      * @param data Data array
      * @param index Index
      * @param name Name
@@ -46,9 +49,10 @@ public class Series implements Iterable{
         this.name = name;
         this.groups = groups;
     }
-    
+
     /**
      * Constructor
+     *
      * @param data Data array
      * @param index Index
      * @param name Name
@@ -58,9 +62,10 @@ public class Series implements Iterable{
         this.index = index;
         this.name = name;
     }
-    
+
     /**
      * Constructor
+     *
      * @param data Data array
      * @param idxValue Index value
      * @param name Name
@@ -68,93 +73,106 @@ public class Series implements Iterable{
     public Series(Array data, List idxValue, String name) {
         this(data, Index.factory(idxValue), name);
     }
-    
+
     /**
      * Constructor
+     *
      * @param data Data array
      * @param name name
      */
-    public Series(Array data, String name) {        
-        this(data, new Index((int)data.getSize()), name);
+    public Series(Array data, String name) {
+        this(data, new Index((int) data.getSize()), name);
     }
+
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
     /**
      * Get data array
+     *
      * @return Data array
      */
-    public Array getData(){
+    public Array getData() {
         return this.data;
     }
-    
+
     /**
      * Set data array
+     *
      * @param value Data array
      */
-    public void setData(Array value){
+    public void setData(Array value) {
         this.data = value;
     }
-    
+
     /**
      * Get index
+     *
      * @return Index
      */
-    public Index getIndex(){
+    public Index getIndex() {
         return this.index;
     }
-    
+
     /**
      * Set index
+     *
      * @param value Index
      */
-    public void setIndex(Index value){
+    public void setIndex(Index value) {
         this.index = value;
     }
-    
+
     /**
      * Set index
+     *
      * @param value Index value
      */
     public void setIndex(List value) {
         this.index = new Index(value);
     }
-    
+
     /**
      * Get name
+     *
      * @return Name
      */
-    public String getName(){
+    public String getName() {
         return this.name;
     }
-    
+
     /**
      * Set name
+     *
      * @param value Name
      */
-    public void setName(String value){
+    public void setName(String value) {
         this.name = value;
     }
+
     // </editor-fold>
     // <editor-fold desc="Methods">
     /**
      * Get if the series contains no data
+     *
      * @return Boolean
      */
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return this.size() == 0;
     }
-    
+
     /**
      * Get a data value
+     *
      * @param i Index
      * @return Data value
      */
     public Object getValue(int i) {
         return this.data.getObject(i);
     }
-    
+
     /**
      * Get value by index
+     *
      * @param idxValue Index value
      * @return Data value
      */
@@ -162,107 +180,116 @@ public class Series implements Iterable{
         int i = this.index.indexOf(idxValue);
         return this.data.getObject(i);
     }
-    
+
     /**
      * Set a data value
+     *
      * @param i Index
      * @param v Data value
      */
     public void setValue(int i, Object v) {
         this.data.setObject(i, v);
     }
-    
+
     /**
      * Set data values by another boolean series
+     *
      * @param s Boolean series
      * @param v Data value
      */
     public void setValue(Series s, Object v) {
-        for (int i = 0; i < this.size(); i++){
-            if ((boolean)s.getValue(i)){
+        for (int i = 0; i < this.size(); i++) {
+            if ((boolean) s.getValue(i)) {
                 this.data.setObject(i, v);
             }
         }
     }
-    
+
     /**
      * Get values
+     *
      * @param ii index values
      * @return Result series
      */
     public Series getValues(List<Integer> ii) {
         Array ra = Array.factory(this.data.getDataType(), new int[]{ii.size()});
-        for (int i = 0; i < ii.size(); i++){
+        for (int i = 0; i < ii.size(); i++) {
             ra.setObject(i, this.data.getObject(ii.get(i)));
         }
         Index idx = this.index.subIndex(ii);
         return new Series(ra, idx, this.name);
     }
-    
+
     /**
      * Get values
+     *
      * @param range Range
      * @return Result series
      */
     public Series getValues(Range range) {
         Array ra = Array.factory(this.data.getDataType(), new int[]{range.length()});
         int i = 0;
-        for (int ii = range.first(); ii < range.last(); ii+=range.stride()){
+        for (int ii = range.first(); ii < range.last(); ii += range.stride()) {
             ra.setObject(i, this.data.getObject(ii));
             i += 1;
         }
         Index idx = this.index.subIndex(range.first(), range.last(), range.stride());
         return new Series(ra, idx, this.name);
     }
-    
+
     /**
      * Get values by index
+     *
      * @param idxValues index values
      * @return Result series
      */
     public Series getValuesByIndex(List idxValues) {
         List<Integer> ii = this.index.indexOf(idxValues);
         Array ra = Array.factory(this.data.getDataType(), new int[]{ii.size()});
-        for (int i = 0; i < ii.size(); i++){
+        for (int i = 0; i < ii.size(); i++) {
             if (ii.get(i) < 0) {
-                if (ra.getDataType().isNumeric())
+                if (ra.getDataType().isNumeric()) {
                     ra.setObject(i, Double.NaN);
-            } else
+                }
+            } else {
                 ra.setObject(i, this.data.getObject(ii.get(i)));
+            }
         }
         Index idx = Index.factory(idxValues);
-        if (idx instanceof DateTimeIndex){
-            ((DateTimeIndex)idx).setDateTimeFormatter(((DateTimeIndex)this.index).getDateTimeFormatter());
+        if (idx instanceof DateTimeIndex) {
+            ((DateTimeIndex) idx).setDateTimeFormatter(((DateTimeIndex) this.index).getDateTimeFormatter());
         }
         return new Series(ra, idx, this.name);
     }
-    
+
     /**
      * Get a index value
+     *
      * @param i Index
      * @return Index value
      */
     public Object getIndexValue(int i) {
         return this.index.get(i);
     }
-    
+
     @Override
     public Iterator iterator() {
         return iterrows();
     }
-    
+
     public ListIterator<List<Object>> iterrows() {
         return new Views.ListView<>(this).listIterator();
     }
-    
+
     /**
      * Get size
+     *
      * @return Size
      */
-    public int size(){
+    public int size() {
         return this.index.size();
     }
-    
+
     /**
      * Group the series rows using the specified key function.
      *
@@ -270,14 +297,14 @@ public class Series implements Iterable{
      * @return the grouping
      */
     public Series groupBy(final KeyFunction function) {
-        return new Series(                
+        return new Series(
                 data,
                 index,
                 name,
                 new Grouping(this, function)
-            );
+        );
     }
-    
+
     /**
      * Group the series rows using the specified key function.
      *
@@ -285,13 +312,13 @@ public class Series implements Iterable{
      */
     public Series groupBy() {
         return new Series(
-            data,
-            index,
-            name,
-            new Grouping(this)
+                data,
+                index,
+                name,
+                new Grouping(this)
         );
     }
-    
+
     /**
      * Group the series rows using the specified time function.
      *
@@ -299,27 +326,29 @@ public class Series implements Iterable{
      * @return the grouping
      */
     public Series groupBy(final TimeFunction function) {
-        return new Series(                
+        return new Series(
                 data,
                 index,
                 name,
                 new Grouping(this, function)
-            );
+        );
     }
-    
+
     /**
      * Group by time string - DateTimeIndex
+     *
      * @param tStr Time string
      * @return The grouping
      */
     public Series groupBy(String tStr) {
         TimeFunction function = TimeFunctions.factory(tStr);
-        if (function == null)
+        if (function == null) {
             return null;
-        else
+        } else {
             return groupBy(function);
+        }
     }
-    
+
     /**
      * Group the data frame rows using the specified key function.
      *
@@ -327,15 +356,15 @@ public class Series implements Iterable{
      * @return the grouping
      */
     public Series resample(final WindowFunction function) {
-        ((DateTimeIndex)index).setResamplPeriod(function.getPeriod());
+        ((DateTimeIndex) index).setResamplPeriod(function.getPeriod());
         return new Series(
                 data,
                 index,
                 name,
                 new Grouping(this, function)
-            );
+        );
     }
-    
+
     /**
      * Group the data frame rows using the specified key function.
      *
@@ -347,26 +376,76 @@ public class Series implements Iterable{
         WindowFunction function = new WindowFunction(period);
         return resample(function);
     }
-    
-     /**
-     * Compute the mean of the numeric columns for each group
-     * or the entire data frame if the data is not grouped.
+
+    /**
+     * Compute the mean of the numeric columns for each group or the entire data
+     * frame if the data is not grouped.
      *
      * @return Mean object
      */
     public Object mean() {
-        if (groups == null){
+        if (groups == null) {
             return ArrayMath.mean(data);
         } else {
             Series r = groups.apply(this, new Aggregation.Mean());
-            if (r.getIndex() instanceof DateTimeIndex)
-                ((DateTimeIndex)r.getIndex()).setPeriod(((DateTimeIndex)this.index).getResamplePeriod());
+            if (r.getIndex() instanceof DateTimeIndex) {
+                ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+            }
+            return r;
+        }
+    }
+
+    /**
+     * Compute the maximum of the numeric columns for each group or the entire
+     * data frame if the data is not grouped.
+     *
+     * @return Maximum object
+     */
+    public Object max() {
+        if (groups == null) {
+            return ArrayMath.max(data);
+        } else {
+            Series r = groups.apply(this, new Aggregation.Max());
+            if (r.getIndex() instanceof DateTimeIndex) {
+                ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+            }
             return r;
         }
     }
     
     /**
+     * Compute the minimum of the numeric columns for each group or the entire
+     * data frame if the data is not grouped.
+     *
+     * @return Minimum object
+     */
+    public Object min() {
+        if (groups == null) {
+            return ArrayMath.min(data);
+        } else {
+            Series r = groups.apply(this, new Aggregation.Min());
+            if (r.getIndex() instanceof DateTimeIndex) {
+                ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+            }
+            return r;
+        }
+    }
+
+    /**
+     * Equal
+     *
+     * @param v Value
+     * @return Result series
+     */
+    public Series equal(Number v) {
+        Array rdata = ArrayMath.equal(data, v);
+        Series r = new Series(rdata, index, name, this.groups);
+        return r;
+    }
+
+    /**
      * Less then
+     *
      * @param v Value
      * @return Result series
      */
@@ -375,7 +454,43 @@ public class Series implements Iterable{
         Series r = new Series(rdata, index, name, this.groups);
         return r;
     }
-    
+
+    /**
+     * Less then or equal
+     *
+     * @param v Value
+     * @return Result series
+     */
+    public Series lessThanOrEqual(Number v) {
+        Array rdata = ArrayMath.lessThanOrEqual(data, v);
+        Series r = new Series(rdata, index, name, this.groups);
+        return r;
+    }
+
+    /**
+     * Greater then
+     *
+     * @param v Value
+     * @return Result series
+     */
+    public Series greaterThan(Number v) {
+        Array rdata = ArrayMath.greaterThan(data, v);
+        Series r = new Series(rdata, index, name, this.groups);
+        return r;
+    }
+
+    /**
+     * Greater then or equal
+     *
+     * @param v Value
+     * @return Result series
+     */
+    public Series greaterThanOrEqual(Number v) {
+        Array rdata = ArrayMath.greaterThanOrEqual(data, v);
+        Series r = new Series(rdata, index, name, this.groups);
+        return r;
+    }
+
     /**
      * Convert to string - head
      *
@@ -400,7 +515,7 @@ public class Series implements Iterable{
 
         return sb.toString();
     }
-    
+
     /**
      * Convert to string - tail
      *
@@ -422,9 +537,9 @@ public class Series implements Iterable{
 
         return sb.toString();
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return head(100);
     }
     // </editor-fold>

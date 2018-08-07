@@ -38,8 +38,15 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.meteoinfo.data.ArrayMath;
+import org.meteoinfo.data.DataTypes;
+import org.meteoinfo.data.dataframe.Column;
+import org.meteoinfo.data.dataframe.ColumnIndex;
+import org.meteoinfo.data.dataframe.DataFrame;
+import org.meteoinfo.data.dataframe.Index;
 import org.meteoinfo.data.meteodata.MeteoDataType;
 import org.meteoinfo.global.util.DateUtil;
+import org.meteoinfo.table.DataTable;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -125,7 +132,7 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
             Dimension stdim = new Dimension(DimensionType.Other);
             stdim.setShortName("station");
             values = new double[_stNum];
-            for (int i = 0; i < _stNum; i++){
+            for (int i = 0; i < _stNum; i++) {
                 values[i] = i;
             }
             stdim.setValues(values);
@@ -166,9 +173,10 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
                     break;
                 }
                 aLine = aLine.trim();
-                if (aLine.isEmpty())
+                if (aLine.isEmpty()) {
                     continue;
-                
+                }
+
                 dataArray = aLine.split("\\s+");
                 aList = new ArrayList<>();
                 aList.addAll(Arrays.asList(dataArray));
@@ -250,9 +258,10 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
                     break;
                 }
                 aLine = aLine.trim();
-                if (aLine.isEmpty())
+                if (aLine.isEmpty()) {
                     continue;
-                
+                }
+
                 dataArray = aLine.split("\\s+");
                 aList = new ArrayList<>();
                 aList.addAll(Arrays.asList(dataArray));
@@ -323,7 +332,7 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
 
         return dataInfo;
     }
-    
+
     /**
      * Read array data of a variable
      *
@@ -420,6 +429,124 @@ public class MICAPS1DataInfo extends DataInfo implements IStationDataInfo {
         }
 
         return r;
+    }
+
+    /**
+     * Read data frame
+     *
+     * @return Data frame
+     */
+    public DataFrame readDataFrame() {
+        List<List<String>> allDataList = this.readData();
+        List<Array> data = new ArrayList<>();
+        ColumnIndex columns = new ColumnIndex();
+        DataType dtype;
+        for (String vName : this._fieldList) {
+            switch (vName) {
+                case "Stid":
+                    continue;
+                case "Grade":
+                case "CloudCover":
+                case "WeatherPast1":
+                case "WeatherPast2":
+                case "WeatherNow":
+                case "MiddleCloudShape":
+                case "HighCloudShape":
+                    dtype = DataType.INT;
+                    break;
+                default:
+                    dtype = DataType.FLOAT;
+                    break;
+            }
+            columns.add(new Column(vName, dtype));
+            data.add(Array.factory(dtype, new int[]{allDataList.size()}));
+        }
+        List<String> idxList = new ArrayList<>();
+        Array dd;
+        float v;
+        for (int i = 0; i < allDataList.size(); i++) {
+            List<String> dataList = allDataList.get(i);
+            idxList.add(dataList.get(0));
+            for (int j = 0; j < data.size(); j++) {
+                dd = (Array) data.get(j);
+                switch (dd.getDataType()) {
+                    case INT:
+                        dd.setObject(i, Integer.parseInt(dataList.get(j + 1)));
+                        break;
+                    case FLOAT:
+                        v = Float.parseFloat(dataList.get(j + 1));
+                        if (j + 1 == 8) //Pressure
+                        {
+                            if (!MIMath.doubleEquals(v, this.getMissingValue())) {
+                                if (v > 800) {
+                                    v = v / 10 + 900;
+                                } else {
+                                    v = v / 10 + 1000;
+                                }
+                            }
+                        }
+                        dd.setObject(i, v);
+                        break;
+                }
+            }
+        }
+        
+        for (Array a : data){
+            ArrayMath.missingToNaN(a, 9999);
+        }
+
+        Index index = new Index(idxList);
+        DataFrame df = new DataFrame(data, index, columns);
+        return df;
+    }
+
+    /**
+     * Read data table
+     *
+     * @return Data table
+     */
+    public DataTable readTable() {
+        List<List<String>> allDataList = this.readData();
+        DataTable dTable = new DataTable();
+        DataTypes dtype;
+        for (String vName : this._fieldList) {
+            switch (vName) {
+                case "Stid":
+                    dtype = DataTypes.String;
+                    break;
+                case "Grade":
+                case "CloudCover":
+                case "WeatherPast1":
+                case "WeatherPast2":
+                case "WeatherNow":
+                case "MiddleCloudShape":
+                case "HighCloudShape":
+                    dtype = DataTypes.Integer;
+                    break;
+                default:
+                    dtype = DataTypes.Float;
+                    break;
+            }
+            try {
+                dTable.addColumn(vName, dtype);
+            } catch (Exception ex) {
+                Logger.getLogger(MICAPS1DataInfo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        int nCol = dTable.getColumnCount();
+        for (int i = 0; i < allDataList.size(); i++) {
+            List<String> dataList = allDataList.get(i);
+            try {
+                dTable.addRow();
+                for (int j = 0; j < nCol; j++) {
+                    dTable.setValue(i, j, dataList.get(j));
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(MICAPS1DataInfo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return dTable;
     }
 
     @Override

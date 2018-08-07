@@ -231,6 +231,19 @@ public class Index<V> implements Iterable<V>{
     }
     
     /**
+     * Append another index
+     * @param idx Index
+     * @return Appended index
+     */
+    public Index append(Index idx) {
+        Index index = new Index(new ArrayList<>(this.data));
+        index.setFormat(this.format);
+        index.setName(this.name);
+        index.data.addAll(idx.data);
+        return index;
+    }
+    
+    /**
      * Get a value
      * @param i Index
      * @return Value

@@ -6,8 +6,8 @@
 package org.meteoinfo.data.dataframe;
 
 import java.text.DecimalFormat;
+import org.joda.time.DateTime;
 import org.meteoinfo.data.ArrayMath;
-import org.meteoinfo.ma.ObjectDataType;
 import org.meteoinfo.global.DataConvert;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -18,13 +18,27 @@ import ucar.ma2.DataType;
  */
 public class Column {
     // <editor-fold desc="Variables">
-    private String name;
-    private DataType dataType;
-    private String format;
-    private int formatLen;
-    private ObjectDataType objDataType = ObjectDataType.NULL;
+    protected String name;
+    protected DataType dataType;
+    protected String format;
+    protected int formatLen;
     // </editor-fold>
     // <editor-fold desc="Constructor">
+    /**
+     * Constructor
+     */
+    public Column(){
+        this("Column", DataType.OBJECT);
+    }
+    
+    /**
+     * Constructor
+     * @param name Name
+     */
+    public Column(String name){
+        this(name, DataType.OBJECT);
+    }
+    
     /**
      * Constructor
      * @param name Name
@@ -108,24 +122,35 @@ public class Column {
     public void setFormatLen(int value) {
         this.formatLen = value;
     }
-    
-    /**
-     * Get object data type
-     * @return Object data type
-     */
-    public ObjectDataType getObjectDataType(){
-        return this.objDataType;
-    }
-    
-    /**
-     * Set object data type
-     * @param value Object data type
-     */
-    public void setObjectDataType(ObjectDataType value){
-        this.objDataType = value;
-    }
+
     // </editor-fold>
     // <editor-fold desc="Methods">
+    /**
+     * Factory method
+     * @param name Name
+     * @param dtype Data type
+     * @return Column
+     */
+    public static Column factory(String name, DataType dtype){
+        return new Column(name, dtype);
+    }
+    
+    /**
+     * Factory method
+     * @param name Name
+     * @param array Data array
+     * @return Column
+     */
+    public static Column factory(String name, Array array){
+        DataType dtype = array.getDataType();
+        if (dtype == DataType.OBJECT && (array.getObject(0) instanceof DateTime)){
+            DateTimeColumn col = new DateTimeColumn(name);
+            col.updateFormat(array);
+            return col;
+        }
+        return new Column(name, dtype);
+    }
+    
     /**
      * Update format
      */
@@ -210,6 +235,18 @@ public class Column {
     @Override
     public String toString(){
         return this.name;
+    }
+    
+    /**
+     * Convert an object (same datatype with this column) to string
+     * @param o
+     * @return String
+     */
+    public String toString(Object o){
+        if (format == null)
+            return o.toString();
+        else
+            return String.format(format, o);
     }
     
     /**
