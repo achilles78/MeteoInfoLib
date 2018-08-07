@@ -908,14 +908,18 @@ public class DataFrame implements Iterable {
             }
         }
     }
+    
+    /**
+     * Create a new data frame by leaving out the specified columns.
+     * @param colNames Column names
+     * @return a shallow copy of the data frame with the columns removed
+     */
+    public DataFrame drop(List<String> colNames){
+        return drop(columns.indexOfName(colNames).toArray(new Integer[colNames.size()]));
+    }
 
     /**
      * Create a new data frame by leaving out the specified columns.
-     *
-     * <pre> {@code
-     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
-     * > df.drop("category").columns();
-     * [name, value] }</pre>
      *
      * @param cols the names of columns to be removed
      * @return a shallow copy of the data frame with the columns removed
@@ -926,11 +930,6 @@ public class DataFrame implements Iterable {
 
     /**
      * Create a new data frame by leaving out the specified columns.
-     *
-     * <pre> {@code
-     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
-     * > df.drop(2).columns();
-     * [name, value] }</pre>
      *
      * @param cols the indices of the columns to be removed
      * @return a shallow copy of the data frame with the columns removed
@@ -1021,24 +1020,24 @@ public class DataFrame implements Iterable {
      */
     public Object select(Range rowRange, Range colRange) throws InvalidRangeException {
         ColumnIndex cols = new ColumnIndex();
-        for (int i = colRange.first(); i < colRange.last(); i += colRange.stride()) {
+        for (int i = colRange.first(); i <= colRange.last(); i += colRange.stride()) {
             cols.add((Column) this.columns.get(i).clone());
         }
 
         Object r;
         if (this.array2D) {
             List ranges = new ArrayList<>();
-            ranges.add(new Range(rowRange.first(), rowRange.last() - 1, rowRange.stride()));
-            ranges.add(new Range(colRange.first(), colRange.last() - 1, colRange.stride()));
+            ranges.add(new Range(rowRange.first(), rowRange.last(), rowRange.stride()));
+            ranges.add(new Range(colRange.first(), colRange.last(), colRange.stride()));
             r = ArrayMath.section((Array) this.data, ranges);
         } else {
             r = new ArrayList<>();
-            int rn = rowRange.length() - 1;
-            for (int j = colRange.first(); j < colRange.last(); j++) {
+            int rn = rowRange.length();
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) {
                 Array rr = Array.factory(this.columns.get(j).getDataType(), new int[]{rn});
                 Array mr = ((List<Array>) this.data).get(j);
                 int idx = 0;
-                for (int i = rowRange.first(); i < rowRange.last(); i += rowRange.stride()) {
+                for (int i = rowRange.first(); i <= rowRange.last(); i += rowRange.stride()) {
                     rr.setObject(idx, mr.getObject(i));
                     idx += 1;
                 }
@@ -1052,7 +1051,7 @@ public class DataFrame implements Iterable {
         if (r == null) {
             return null;
         } else {
-            Index rIndex = this.index.subIndex(rowRange.first(), rowRange.last(), rowRange.stride());
+            Index rIndex = this.index.subIndex(rowRange.first(), rowRange.last() + 1, rowRange.stride());
             if (cols.size() == 1) {
                 Series s = new Series((Array) r, rIndex, cols.get(0).getName());
                 return s;
@@ -1085,17 +1084,17 @@ public class DataFrame implements Iterable {
         Object r;
         if (this.array2D) {
             List ranges = new ArrayList<>();
-            ranges.add(new Range(rowRange.first(), rowRange.last() - 1, rowRange.stride()));
+            ranges.add(new Range(rowRange.first(), rowRange.last(), rowRange.stride()));
             ranges.add(colRange);
             r = ArrayMath.take((Array) this.data, ranges);
         } else {
             r = new ArrayList<>();
-            int rn = rowRange.length() - 1;
+            int rn = rowRange.length();
             for (int j : colRange) {
                 Array rr = Array.factory(this.columns.get(j).getDataType(), new int[]{rn});
                 Array mr = ((List<Array>) this.data).get(j);
                 int idx = 0;
-                for (int i = rowRange.first(); i < rowRange.last(); i += rowRange.stride()) {
+                for (int i = rowRange.first(); i <= rowRange.last(); i += rowRange.stride()) {
                     rr.setObject(idx, mr.getObject(i));
                     idx += 1;
                 }
@@ -1109,7 +1108,7 @@ public class DataFrame implements Iterable {
         if (r == null) {
             return null;
         } else {
-            Index rIndex = this.index.subIndex(rowRange.first(), rowRange.last(), rowRange.stride());
+            Index rIndex = this.index.subIndex(rowRange.first(), rowRange.last() + 1, rowRange.stride());
             if (cols.size() == 1) {
                 Series s = new Series((Array) r, rIndex, cols.get(0).getName());
                 return s;
@@ -1143,12 +1142,12 @@ public class DataFrame implements Iterable {
         if (this.array2D) {
             List ranges = new ArrayList<>();
             ranges.add(rowRange);
-            ranges.add(new Range(colRange.first(), colRange.last() - 1, colRange.stride()));
+            ranges.add(new Range(colRange.first(), colRange.last(), colRange.stride()));
             r = ArrayMath.take((Array) this.data, ranges);
         } else {
             r = new ArrayList<>();
             int rn = rowRange.size();
-            for (int j = colRange.first(); j < colRange.last(); j++) {
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) {
                 Array rr = Array.factory(this.columns.get(j).getDataType(), new int[]{rn});
                 Array mr = ((List<Array>) this.data).get(j);
                 int idx = 0;

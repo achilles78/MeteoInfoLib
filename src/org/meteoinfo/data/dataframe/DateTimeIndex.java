@@ -32,7 +32,7 @@ public class DateTimeIndex extends Index<DateTime> {
      * Constructor
      */
     public DateTimeIndex(){
-        this.setFormat("yyyy-MM-dd");
+        this.format = "yyyy-MM-dd";
     }
     
     /**
@@ -57,6 +57,7 @@ public class DateTimeIndex extends Index<DateTime> {
         } else {
             this.data = data;
         }
+        this.updateFormat();
     }
     
     /**

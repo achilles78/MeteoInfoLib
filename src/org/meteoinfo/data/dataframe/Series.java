@@ -229,11 +229,11 @@ public class Series implements Iterable {
     public Series getValues(Range range) {
         Array ra = Array.factory(this.data.getDataType(), new int[]{range.length()});
         int i = 0;
-        for (int ii = range.first(); ii < range.last(); ii += range.stride()) {
+        for (int ii = range.first(); ii <= range.last(); ii += range.stride()) {
             ra.setObject(i, this.data.getObject(ii));
             i += 1;
         }
-        Index idx = this.index.subIndex(range.first(), range.last(), range.stride());
+        Index idx = this.index.subIndex(range.first(), range.last() + 1, range.stride());
         return new Series(ra, idx, this.name);
     }
 
