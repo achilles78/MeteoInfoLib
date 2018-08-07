@@ -13,6 +13,7 @@ import org.joda.time.ReadablePeriod;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.meteoinfo.data.ArrayMath;
+import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.util.DateUtil;
 import ucar.ma2.Array;
 
@@ -24,7 +25,7 @@ public class DateTimeIndex extends Index<DateTime> {
     // <editor-fold desc="Variables">
     ReadablePeriod period;
     ReadablePeriod resamplePeriod;
-    DateTimeFormatter dtFormatter;
+    //DateTimeFormatter dtFormatter;
     // </editor-fold>
     // <editor-fold desc="Constructor">
     /**
@@ -138,7 +139,7 @@ public class DateTimeIndex extends Index<DateTime> {
     @Override
     public void setFormat(String value){
         super.setFormat(value);
-        this.dtFormatter = DateTimeFormat.forPattern(format);
+        //this.dtFormatter = DateTimeFormat.forPattern(format);
     }
     
     /**
@@ -151,21 +152,21 @@ public class DateTimeIndex extends Index<DateTime> {
         return "%" + String.valueOf(str.length()) + "s";
     }
     
-    /**
-     * Get date time formatter
-     * @return Date time formatter
-     */
-    public DateTimeFormatter getDateTimeFormatter(){
-        return this.dtFormatter;
-    }
-    
-    /**
-     * Set date time formatter
-     * @param value Date time formatter
-     */
-    public void setDateTimeFormatter(DateTimeFormatter value){
-        this.dtFormatter = value;
-    }
+//    /**
+//     * Get date time formatter
+//     * @return Date time formatter
+//     */
+//    public DateTimeFormatter getDateTimeFormatter(){
+//        return this.dtFormatter;
+//    }
+//    
+//    /**
+//     * Set date time formatter
+//     * @param value Date time formatter
+//     */
+//    public void setDateTimeFormatter(DateTimeFormatter value){
+//        this.dtFormatter = value;
+//    }
     // </editor-fold>
     // <editor-fold desc="Methods">
     /**
@@ -229,7 +230,8 @@ public class DateTimeIndex extends Index<DateTime> {
     @Override
     public DateTimeIndex subIndex(){
         DateTimeIndex r = new DateTimeIndex(this.data);
-        r.setDateTimeFormatter(dtFormatter);
+        r.format = this.format;
+        //r.setDateTimeFormatter(dtFormatter);
         return r;
     }
     
@@ -243,7 +245,8 @@ public class DateTimeIndex extends Index<DateTime> {
         DateTimeIndex r = new DateTimeIndex();
         for (int i : idx)
             r.add(this.data.get(i));
-        r.setDateTimeFormatter(dtFormatter);
+        //r.setDateTimeFormatter(dtFormatter);
+        r.format = this.format;
         return r;
     }
     
@@ -261,7 +264,8 @@ public class DateTimeIndex extends Index<DateTime> {
             rv.add(this.data.get(i));
         }
         DateTimeIndex r = new DateTimeIndex(rv);
-        r.setDateTimeFormatter(dtFormatter);
+        //r.setDateTimeFormatter(dtFormatter);
+        r.format = this.format;
         return r;
     }
     
@@ -275,6 +279,40 @@ public class DateTimeIndex extends Index<DateTime> {
             vs.add(dt.toDate());
         }
         return vs;
+    }
+    
+    /**
+     * Update format
+     */
+    @Override
+    public void updateFormat(){
+        int n = Math.min(10, data.size());
+        String ff = "yyyyMMddHHmmSS";
+        String str;
+        int idx = 8;
+        for (int i = 0; i < n; i++) {
+            str = ((DateTime) data.get(i)).toString(ff);
+            str = DataConvert.removeTail0(str);
+            idx = Math.max(idx, str.length());
+        }
+        switch (idx) {
+            case 8:
+                ff = "yyyy-MM-dd";
+                break;
+            case 9:
+            case 10:
+                ff = "yyyy-MM-dd HH";
+                break;
+            case 11:
+            case 12:
+                ff = "yyyy-MM-dd HH:mm";
+                break;
+            case 13:
+            case 14:
+                ff = "yyyy-MM-dd HH:mm:SS";
+                break;
+        }
+        this.setFormat(ff);
     }
     
     @Override
@@ -302,8 +340,8 @@ public class DateTimeIndex extends Index<DateTime> {
      */
     @Override
     public String toString(int idx) {
-        //return ((DateTime)this.data.get(idx)).toString(this.format);
-        return this.dtFormatter.print((DateTime)this.data.get(idx));
+        return ((DateTime)this.data.get(idx)).toString(this.format);
+        //return this.dtFormatter.print((DateTime)this.data.get(idx));
     }
     // </editor-fold>
 }

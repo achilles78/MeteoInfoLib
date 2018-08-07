@@ -256,9 +256,10 @@ public class Series implements Iterable {
             }
         }
         Index idx = Index.factory(idxValues);
-        if (idx instanceof DateTimeIndex) {
-            ((DateTimeIndex) idx).setDateTimeFormatter(((DateTimeIndex) this.index).getDateTimeFormatter());
-        }
+        idx.format = this.index.format;
+//        if (idx instanceof DateTimeIndex) {
+//            ((DateTimeIndex) idx).setDateTimeFormatter(((DateTimeIndex) this.index).getDateTimeFormatter());
+//        }
         return new Series(ra, idx, this.name);
     }
 

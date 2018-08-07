@@ -1492,8 +1492,8 @@ public class DataFrame implements Iterable {
                 }
                 idxDT = DataConvert.getDataType(indexFormat);
                 if (idxDT == DataType.OBJECT) {
-                    String idxDateFormat = DataConvert.getDateFormat(indexFormat);
-                    dtFormatter = DateTimeFormat.forPattern(idxDateFormat);
+                    indexFormat = DataConvert.getDateFormat(indexFormat);
+                    dtFormatter = DateTimeFormat.forPattern(indexFormat);
                 }
             } else {
                 idxDT = DataConvert.detectDataType(indexValues, 10, null);
@@ -1508,16 +1508,22 @@ public class DataFrame implements Iterable {
                     indexData.add(dtFormatter.parseDateTime(s));
                 }
                 index = new DateTimeIndex(indexData);
-                ((DateTimeIndex) index).setDateTimeFormatter(dtFormatter);
+                //((DateTimeIndex) index).setDateTimeFormatter(dtFormatter);
             } else {
                 for (String s : indexValues) {
                     indexData.add(DataConvert.convertStringTo(s, idxDT, null));
                 }
                 index = new Index(indexData);
             }
+            if (indexFormat != null){
+                index.format = indexFormat;
+            } else {
+                index.updateFormat();
+            }
         } else {
             index = new Index(rn);
-        }
+            index.updateFormat();
+        }        
 
         List<Array> data = new ArrayList<>();
         Array a;
@@ -1554,7 +1560,7 @@ public class DataFrame implements Iterable {
             boolean index) throws IOException {
         BufferedWriter sw = new BufferedWriter(new FileWriter(new File(fileName)));
         String str = "";
-        String format = this.index.getNameFormat();
+        //String format = this.index.getNameFormat();
         if (index) {
             str = this.index.getName();
         }
