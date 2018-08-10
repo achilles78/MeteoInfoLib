@@ -174,7 +174,7 @@ public class Index<V> implements Iterable<V>{
      * @param data Values
      * @return Index object
      */
-    public static Index factory(List<Object> data) {
+    public static Index factory(List data) {
         if (data.get(0) instanceof DateTime) {
             return new DateTimeIndex(data);
         } else {

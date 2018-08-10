@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.util.DateUtil;

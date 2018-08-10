@@ -5,9 +5,11 @@
  */
 package org.meteoinfo.data.dataframe;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.data.dataframe.impl.Aggregation;
@@ -255,7 +257,15 @@ public class Series implements Iterable {
                 ra.setObject(i, this.data.getObject(ii.get(i)));
             }
         }
-        Index idx = Index.factory(idxValues);
+        Index idx;
+        if (this.index instanceof DateTimeIndex && !(idxValues.get(0) instanceof DateTime)){
+            List<DateTime> values = new ArrayList<>();
+            for (String v : (List<String>)idxValues){
+                values.add(DateUtil.getDateTime(v));
+            }
+            idx = Index.factory(values);
+        } else
+            idx = Index.factory(idxValues);
         idx.format = this.index.format;
 //        if (idx instanceof DateTimeIndex) {
 //            ((DateTimeIndex) idx).setDateTimeFormatter(((DateTimeIndex) this.index).getDateTimeFormatter());
