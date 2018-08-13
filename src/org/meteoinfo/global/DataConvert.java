@@ -28,6 +28,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -723,11 +724,14 @@ public class DataConvert {
      * @return Data type
      */
     public static DataType detectDataType(List<String> valuesList, DateTimeFormatter dtFormatter) {
-        List<DataType> dts = Arrays.asList(DataType.OBJECT, DataType.BOOLEAN, DataType.INT, DataType.FLOAT, 
-                DataType.DOUBLE, DataType.STRING);
+        List<DataType> dts = new LinkedList<>(Arrays.asList(DataType.OBJECT, DataType.BOOLEAN, DataType.INT, DataType.FLOAT, 
+                DataType.DOUBLE, DataType.STRING));
+        if (dtFormatter == null)
+            dts.remove(DataType.OBJECT);
         for (String s : valuesList) {
-            if (dts.contains(DataType.OBJECT) && !isLocalDateTime(s, dtFormatter)) {
-                dts.remove(DataType.OBJECT);
+            if (dts.contains(DataType.OBJECT) ) {
+                if (dtFormatter != null && !isLocalDateTime(s, dtFormatter))
+                    dts.remove(DataType.OBJECT);
             }
             if (dts.contains(DataType.BOOLEAN) && !isBoolean(s)) {
                 dts.remove(DataType.BOOLEAN);

@@ -109,5 +109,22 @@ public class ColumnIndex extends Index<Column> {
         }
         return indices;
     }
+    
+    /**
+     * Check if the data types of all columns are same
+     * @return Boolean
+     */
+    public boolean isSameDataType() {
+        if (this.data.size() == 1)
+            return true;
+        
+        DataType dt = this.data.get(0).dataType;
+        for (int i = 1; i < this.data.size(); i++){
+            if (dt != this.data.get(i).dataType){
+                return false;
+            }
+        }
+        return true;
+    }
     // </editor-fold>
 }

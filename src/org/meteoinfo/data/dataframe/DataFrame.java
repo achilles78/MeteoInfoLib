@@ -1524,23 +1524,39 @@ public class DataFrame implements Iterable {
             index.updateFormat();
         }        
 
-        List<Array> data = new ArrayList<>();
-        Array a;
-        List vv;
-        for (int i = 0; i < colNum; i++) {
-            vv = values.get(i);
-            col = cols.get(i);
-            DataType dt = col.getDataType();
-            a = Array.factory(dt, new int[]{rn});
-            String v;
-            for (int j = 0; j < vv.size(); j++) {
-                v = (String) vv.get(j);
-                a.setObject(j, col.convertStringTo(v));
+        DataFrame df;
+        if (cols.isSameDataType()){
+            Array data = Array.factory(cols.get(0).dataType, new int[]{rn, colNum});
+            List vv;
+            col = cols.get(0);
+            for (int i = 0; i < colNum; i++){
+                vv = values.get(i);
+                String v;
+                for (int j = 0; j < vv.size(); j++) {
+                    v = (String) vv.get(j);
+                    data.setObject(j * colNum + i, col.convertStringTo(v));
+                }
             }
-            data.add(a);
-        }
+            df = new DataFrame(data, index, cols);
+        } else {
+            List<Array> data = new ArrayList<>();
+            Array a;
+            List vv;
+            for (int i = 0; i < colNum; i++) {
+                vv = values.get(i);
+                col = cols.get(i);
+                DataType dt = col.getDataType();
+                a = Array.factory(dt, new int[]{rn});
+                String v;
+                for (int j = 0; j < vv.size(); j++) {
+                    v = (String) vv.get(j);
+                    a.setObject(j, col.convertStringTo(v));
+                }
+                data.add(a);
+            }
 
-        DataFrame df = new DataFrame(data, index, cols);
+            df = new DataFrame(data, index, cols);
+        }
 
         return df;
     }
