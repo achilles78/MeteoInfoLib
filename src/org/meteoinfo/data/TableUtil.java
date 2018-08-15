@@ -36,10 +36,12 @@ public class TableUtil {
      * @param headerLines Number of lines to skip at begining of the file
      * @param formatSpec Format specifiers string
      * @param encoding Fle encoding
+     * @param readVarNames Read variable names or not
      * @return TableData object
      * @throws java.io.FileNotFoundException
      */
-    public static TableData readASCIIFile(String fileName, String delimiter, int headerLines, String formatSpec, String encoding) throws FileNotFoundException, IOException, Exception {
+    public static TableData readASCIIFile(String fileName, String delimiter, int headerLines, String formatSpec, String encoding,
+        boolean readVarNames) throws FileNotFoundException, IOException, Exception {
         TableData tableData = new TableData();
 
         BufferedReader sr = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), encoding));
@@ -57,7 +59,7 @@ public class TableUtil {
         }
         String[] titleArray = GlobalUtil.split(title, delimiter);
         int colNum = titleArray.length;
-        if (headerLines == -1) {
+        if (headerLines == -1 || !readVarNames) {
             for (int i = 0; i < colNum; i++) {
                 titleArray[i] = "Col_" + String.valueOf(i);
             }
@@ -143,7 +145,7 @@ public class TableUtil {
             String[] dataArray;
             int rn = 0;
             String line;
-            if (headerLines == -1) {
+            if (headerLines == -1 || !readVarNames) {
                 line = title;
             } else {
                 line = sr.readLine();

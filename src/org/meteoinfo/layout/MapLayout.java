@@ -85,6 +85,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
@@ -668,7 +670,7 @@ public class MapLayout extends JPanel implements IWebMapPanel {
         //Rectangle rect = new Rectangle();
         _vScrollBar.setCursor(Cursor.getDefaultCursor());
         _hScrollBar.setCursor(Cursor.getDefaultCursor());
-        this.setCursor(Cursor.getDefaultCursor());
+        //this.setCursor(Cursor.getDefaultCursor());
 
         switch (_mouseMode) {
             case Map_ZoomIn:
@@ -723,7 +725,9 @@ public class MapLayout extends JPanel implements IWebMapPanel {
                     }
                     int startX = mapRect.x + aX;
                     int startY = mapRect.y + aY;
-                    g.drawImage(_tempImage, startX, startY, this);
+                    AffineTransformOp aop = new AffineTransformOp(new AffineTransform(), AffineTransformOp.TYPE_BILINEAR);
+                    g.drawImage(_tempImage, aop, startX, startY);
+                    //g.drawImage(_tempImage, startX, startY, this);
                     g.setColor(this.getForeground());
                     g.draw(mapRect);
                 }
@@ -832,7 +836,7 @@ public class MapLayout extends JPanel implements IWebMapPanel {
         //Rectangle rect = new Rectangle();
         _vScrollBar.setCursor(Cursor.getDefaultCursor());
         _hScrollBar.setCursor(Cursor.getDefaultCursor());
-        this.setCursor(Cursor.getDefaultCursor());
+        //this.setCursor(Cursor.getDefaultCursor());
 
         switch (_mouseMode) {
             case Map_ZoomIn:
@@ -2433,7 +2437,11 @@ public class MapLayout extends JPanel implements IWebMapPanel {
         g2.setColor(this.getBackground());
         g2.clearRect(0, 0, this.getWidth(), this.getHeight());
         g2.fillRect(0, 0, this.getWidth(), this.getHeight());
-        g2.drawImage(this._layoutBitmap, _xShift, _yShift, this.getBackground(), this);
+        //g2.drawImage(this._layoutBitmap, _xShift, _yShift, this.getBackground(), this);
+        AffineTransform mx = new AffineTransform();
+        mx.translate((float) _xShift, (float) _yShift);
+        AffineTransformOp aop = new AffineTransformOp(mx, AffineTransformOp.TYPE_BILINEAR);
+        g2.drawImage(this._layoutBitmap, aop, 0, 0);
 
         if (this._dragMode) {
             Rectangle rect = new Rectangle();

@@ -1325,19 +1325,22 @@ public class DataFrame implements Iterable {
      *
      * @param fileName File name
      * @param delimiter Delimiter
-     * @param headerLines Number of lines to skip at begining of the file
+     * @param skipRows Number of lines to skip at begining of the file
      * @param formatSpec Format specifiers string
      * @param encoding Fle encoding
      * @param indexCol Column to be used as index
      * @param indexFormat Index format
+     * @param names Column names
+     * @param header Row number to use as the column names
+     * @param skipFooter Number of lines at bottom of file to skip
      * @return DataFrame object
      * @throws java.io.FileNotFoundException
      */
-    public static DataFrame readTable(String fileName, String delimiter, int headerLines, String formatSpec, String encoding,
-            int indexCol, String indexFormat) throws FileNotFoundException, IOException, Exception {
+    public static DataFrame readTable(String fileName, String delimiter, int skipRows, String formatSpec, String encoding,
+            int indexCol, String indexFormat, List<String> names, Integer header, int skipFooter) throws FileNotFoundException, IOException, Exception {
         BufferedReader sr = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), encoding));
-        if (headerLines > 0) {
-            for (int i = 0; i < headerLines; i++) {
+        if (skipRows > 0) {
+            for (int i = 0; i < skipRows; i++) {
                 sr.readLine();
             }
         }
@@ -1361,7 +1364,7 @@ public class DataFrame implements Iterable {
         }
 
         int colNum = titleArray.size();
-        if (headerLines == -1) {
+        if (header == null) {
             for (int i = 0; i < colNum; i++) {
                 titleArray.set(i, "Col_" + String.valueOf(i));
             }
@@ -1445,7 +1448,7 @@ public class DataFrame implements Iterable {
         String[] dataArray;
         List<String> indexValues = new ArrayList<>();
         String line;
-        if (headerLines == -1) {
+        if (header == null) {
             line = title;
         } else {
             line = sr.readLine();
@@ -1481,6 +1484,14 @@ public class DataFrame implements Iterable {
         sr.close();
 
         int rn = values.get(0).size();
+        if (skipFooter > 0){
+            if (indexCol >= 0)
+                indexValues = indexValues.subList(0, rn - skipFooter);
+            for (int i = 0; i < colNum; i++){
+                values.set(i, values.get(i).subList(0, rn - skipFooter));
+            }
+        }
+        rn = values.get(0).size();
         Index index;
         if (indexCol >= 0) {
             DataType idxDT;
@@ -1556,6 +1567,9 @@ public class DataFrame implements Iterable {
             }
 
             df = new DataFrame(data, index, cols);
+        }
+        if (names != null){
+            df.setColumns(names);
         }
 
         return df;
