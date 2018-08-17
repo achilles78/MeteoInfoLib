@@ -507,13 +507,24 @@ public class DataConvert {
                 case INT:
                     if (vStr.isEmpty()) {
                         return Integer.MIN_VALUE;
+                    } else {
+                        try {
+                            int v = Integer.valueOf(vStr);
+                            return v;
+                        } catch (NumberFormatException e) {
+                            return Integer.MIN_VALUE;
+                        }
                     }
-                    return Integer.valueOf(vStr);
                 case DOUBLE:
                     if (vStr.isEmpty() || vStr.equalsIgnoreCase("nan")) {
                         return Double.NaN;
                     } else {
-                        return Double.valueOf(vStr);
+                        try {
+                            double v = Double.valueOf(vStr);
+                            return v;
+                        } catch (NumberFormatException e) {
+                            return Double.NaN;
+                        }
                     }
                 case FLOAT:
                     if (vStr.isEmpty() || vStr.equalsIgnoreCase("nan")) {
