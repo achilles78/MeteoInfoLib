@@ -400,8 +400,13 @@ public class Index<V> implements Iterable<V>{
         for (int i = 0; i < data.size(); i++){
             if (data.get(i).equals(label)){
                 r.add(i);
-                rIndex.add(data.get(i));
+                rIndex.add(label);
             }
+        }
+        
+        if (r.isEmpty()){
+            r.add(-1);
+            rIndex.add(label);
         }
         
         return new Object[]{r, rIndex};

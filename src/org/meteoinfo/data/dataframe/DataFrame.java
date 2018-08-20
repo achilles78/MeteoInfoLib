@@ -1134,7 +1134,7 @@ public class DataFrame implements Iterable {
      */
     public Object select(List<Integer> rowRange, Range colRange) throws InvalidRangeException {
         ColumnIndex cols = new ColumnIndex();
-        for (int i = colRange.first(); i < colRange.last(); i += colRange.stride()) {
+        for (int i = colRange.first(); i <= colRange.last(); i += colRange.stride()) {
             cols.add(this.columns.get(i));
         }
 
@@ -1166,6 +1166,166 @@ public class DataFrame implements Iterable {
             return null;
         } else {
             Index rIndex = this.index.subIndex(rowRange);
+            if (cols.size() == 1) {
+                Series s = new Series((Array) r, rIndex, cols.get(0).getName());
+                return s;
+            } else {
+                DataFrame df;
+                if (r instanceof Array) {
+                    df = new DataFrame((Array) r, rIndex, cols);
+                } else {
+                    df = new DataFrame((ArrayList) r, rIndex, cols);
+                }
+                return df;
+            }
+        }
+    }
+    
+    /**
+     * Select by row and column ranges
+     *
+     * @param rowKeys Row keys
+     * @param rowRange Row range
+     * @param colRange Column range
+     * @return Selected data frame or series
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public Object select(List rowKeys, List<Integer> rowRange, Range colRange) throws InvalidRangeException {
+        ColumnIndex cols = new ColumnIndex();
+        for (int i = colRange.first(); i <= colRange.last(); i += colRange.stride()) {
+            cols.add(this.columns.get(i));
+        }
+
+        Object r;
+        if (this.array2D) {
+            int n = ((Array)data).getShape()[1];
+            int rn = rowRange.size();
+            int cn = colRange.length();
+            DataType dtype = ((Array)data).getDataType();
+            r = Array.factory(dtype, new int[]{rn, cn});
+            String format = this.columns.get(0).getFormat();
+            int idx, jj = 0;
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) { 
+                int ii = 0;
+                for (int i : rowRange) {
+                    idx = ii * cn + jj;
+                    if (i < 0){
+                        ((Array)r).setObject(idx, DataConvert.convertTo(null, dtype, format));
+                    } else {
+                        ((Array)r).setObject(idx, ((Array)data).getObject(i * n + j));
+                    }
+                    ii += 1;
+                }
+                jj += 1;
+            }
+        } else {
+            r = new ArrayList<>();
+            int rn = rowRange.size();
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) {
+                DataType dtype = this.columns.get(j).getDataType();
+                String format = this.columns.get(j).getFormat();
+                Array rr = Array.factory(dtype, new int[]{rn});
+                Array mr = ((List<Array>) this.data).get(j);
+                int idx = 0;
+                for (int i : rowRange) {
+                    if (i < 0){
+                        rr.setObject(idx, DataConvert.convertTo(null, dtype, format));
+                    } else {
+                        rr.setObject(idx, mr.getObject(i));
+                    }
+                    idx += 1;
+                }
+                ((ArrayList) r).add(rr);
+            }
+            if (cols.size() == 1) {
+                r = ((ArrayList) r).get(0);
+            }
+        }
+
+        if (r == null) {
+            return null;
+        } else {
+            Index rIndex = Index.factory(rowKeys);
+            if (cols.size() == 1) {
+                Series s = new Series((Array) r, rIndex, cols.get(0).getName());
+                return s;
+            } else {
+                DataFrame df;
+                if (r instanceof Array) {
+                    df = new DataFrame((Array) r, rIndex, cols);
+                } else {
+                    df = new DataFrame((ArrayList) r, rIndex, cols);
+                }
+                return df;
+            }
+        }
+    }
+    
+    /**
+     * Select by row and column ranges
+     *
+     * @param rowKeys Row keys
+     * @param rowRange Row range
+     * @param colRange Column range
+     * @return Selected data frame or series
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public Object select(List rowKeys, List<Integer> rowRange, List<Integer> colRange) throws InvalidRangeException {
+        ColumnIndex cols = new ColumnIndex();
+        for (int i : colRange) {
+            cols.add(this.columns.get(i));
+        }
+
+        Object r;
+        if (this.array2D) {
+            int n = ((Array)data).getShape()[1];
+            int rn = rowRange.size();
+            int cn = colRange.size();
+            DataType dtype = ((Array)data).getDataType();
+            r = Array.factory(dtype, new int[]{rn, cn});
+            String format = this.columns.get(0).getFormat();
+            int idx, jj = 0;
+            for (int j : colRange) {
+                int ii = 0;
+                for (int i : rowRange) {
+                    idx = ii * cn + jj;
+                    if (i < 0){
+                        ((Array)r).setObject(idx, DataConvert.convertTo(null, dtype, format));
+                    } else {
+                        ((Array)r).setObject(idx, ((Array)data).getObject(i * n + j));
+                    }
+                    ii += 1;
+                }
+                jj += 1;
+            }
+        } else {
+            r = new ArrayList<>();
+            int rn = rowRange.size();
+            for (int j : colRange) {
+                DataType dtype = this.columns.get(j).getDataType();
+                String format = this.columns.get(j).getFormat();
+                Array rr = Array.factory(dtype, new int[]{rn});
+                Array mr = ((List<Array>) this.data).get(j);
+                int idx = 0;
+                for (int i : rowRange) {
+                    if (i < 0){
+                        rr.setObject(idx, DataConvert.convertTo(null, dtype, format));
+                    } else {
+                        rr.setObject(idx, mr.getObject(i));
+                    }
+                    idx += 1;
+                }
+                ((ArrayList) r).add(rr);
+            }
+            if (cols.size() == 1) {
+                r = ((ArrayList) r).get(0);
+            }
+        }
+
+        if (r == null) {
+            return null;
+        } else {
+            Index rIndex = Index.factory(rowKeys);
             if (cols.size() == 1) {
                 Series s = new Series((Array) r, rIndex, cols.get(0).getName());
                 return s;

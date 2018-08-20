@@ -179,8 +179,39 @@ public class Series implements Iterable {
      * @return Data value
      */
     public Object getValueByIndex(Object idxValue) {
-        int i = this.index.indexOf(idxValue);
-        return this.data.getObject(i);
+        Object[] rii = this.index.getIndices(idxValue);
+        List<Integer> ii = (List<Integer>) rii[0];
+        List rIndex = (List) rii[1];
+        if (ii.size() == 1) {
+            if (ii.get(0) >= 0) {
+                return this.data.getObject(ii.get(0));
+            } else {
+                return Double.NaN;
+            }
+        } else {
+            Array ra = Array.factory(this.data.getDataType(), new int[]{ii.size()});
+            for (int i = 0; i < ii.size(); i++) {
+                if (ii.get(i) < 0) {
+                    if (ra.getDataType().isNumeric()) {
+                        ra.setObject(i, Double.NaN);
+                    }
+                } else {
+                    ra.setObject(i, this.data.getObject(ii.get(i)));
+                }
+            }
+            Index idx;
+            if (this.index instanceof DateTimeIndex && !(idxValue instanceof DateTime)) {
+                List<DateTime> values = new ArrayList<>();
+                for (String v : (List<String>) rIndex) {
+                    values.add(DateUtil.getDateTime(v));
+                }
+                idx = Index.factory(values);
+            } else {
+                idx = Index.factory(rIndex);
+            }
+            idx.format = this.index.format;
+            return new Series(ra, idx, this.name);
+        }
     }
 
     /**
@@ -246,7 +277,9 @@ public class Series implements Iterable {
      * @return Result series
      */
     public Series getValuesByIndex(List idxValues) {
-        List<Integer> ii = this.index.indexOf(idxValues);
+        Object[] rii = this.index.getIndices(idxValues);
+        List<Integer> ii = (List<Integer>) rii[0];
+        List rIndex = (List) rii[1];
         Array ra = Array.factory(this.data.getDataType(), new int[]{ii.size()});
         for (int i = 0; i < ii.size(); i++) {
             if (ii.get(i) < 0) {
@@ -258,14 +291,15 @@ public class Series implements Iterable {
             }
         }
         Index idx;
-        if (this.index instanceof DateTimeIndex && !(idxValues.get(0) instanceof DateTime)){
+        if (this.index instanceof DateTimeIndex && !(idxValues.get(0) instanceof DateTime)) {
             List<DateTime> values = new ArrayList<>();
-            for (String v : (List<String>)idxValues){
+            for (String v : (List<String>) rIndex) {
                 values.add(DateUtil.getDateTime(v));
             }
             idx = Index.factory(values);
-        } else
-            idx = Index.factory(idxValues);
+        } else {
+            idx = Index.factory(rIndex);
+        }
         idx.format = this.index.format;
 //        if (idx instanceof DateTimeIndex) {
 //            ((DateTimeIndex) idx).setDateTimeFormatter(((DateTimeIndex) this.index).getDateTimeFormatter());
@@ -423,7 +457,7 @@ public class Series implements Iterable {
             return r;
         }
     }
-    
+
     /**
      * Compute the minimum of the numeric columns for each group or the entire
      * data frame if the data is not grouped.
