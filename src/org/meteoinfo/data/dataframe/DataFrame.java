@@ -16,10 +16,13 @@ import java.io.InputStreamReader;
 import org.joda.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +34,8 @@ import org.meteoinfo.data.ArrayUtil;
 import org.meteoinfo.data.dataframe.impl.Aggregation;
 import org.meteoinfo.data.dataframe.impl.Grouping;
 import org.meteoinfo.data.dataframe.impl.KeyFunction;
+import org.meteoinfo.data.dataframe.impl.SortDirection;
+import org.meteoinfo.data.dataframe.impl.Sorting;
 import org.meteoinfo.data.dataframe.impl.Views;
 import org.meteoinfo.data.dataframe.impl.WindowFunction;
 import org.meteoinfo.global.DataConvert;
@@ -64,6 +69,15 @@ public class DataFrame implements Iterable {
      */
     public DataFrame() {
         this.columns = new ColumnIndex();
+    }
+
+    /**
+     * Constructor
+     *
+     * @param columns Columns
+     */
+    public DataFrame(ColumnIndex columns) {
+        this.columns = columns;
     }
 
     /**
@@ -444,6 +458,28 @@ public class DataFrame implements Iterable {
     }
 
     /**
+     * Return a data frame row as a list.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.emptyList(),
+     * >         Collections.emptyList(),
+     * >         Arrays.asList(
+     * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >             Arrays.<Object>asList(1, 2, 3)
+     * >         )
+     * >     );
+     * > df.row(1);
+     * [bravo, 2] }</pre>
+     *
+     * @param row the row index
+     * @return the list of values
+     */
+    public List row(final Integer row) {
+        return new Views.SeriesListView<>(this, row, false);
+    }
+
+    /**
      * Get shape
      *
      * @return Shape
@@ -653,8 +689,8 @@ public class DataFrame implements Iterable {
             ((List<Array>) data).add(a);
         }
         this.columns.add(column);
-    }        
-    
+    }
+
     /**
      * Add column data
      *
@@ -682,8 +718,8 @@ public class DataFrame implements Iterable {
                 Array ra = Array.factory(dt, new int[]{this.length(), this.size() + 1});
                 Range rowRange = new Range(0, this.length() - 1, 1);
                 List<Integer> colList = new ArrayList<>();
-                for (int i = 0; i < this.size(); i++){
-                    if (i != loc){
+                for (int i = 0; i < this.size(); i++) {
+                    if (i != loc) {
                         colList.add(i);
                     }
                 }
@@ -717,7 +753,7 @@ public class DataFrame implements Iterable {
         Column column = Column.factory(colName, a);
         addColumn(column, a);
     }
-    
+
     /**
      * Add column data
      *
@@ -730,7 +766,7 @@ public class DataFrame implements Iterable {
         Column column = Column.factory(colName, a);
         addColumn(loc, column, a);
     }
-    
+
     /**
      * Add column data
      *
@@ -908,13 +944,14 @@ public class DataFrame implements Iterable {
             }
         }
     }
-    
+
     /**
      * Create a new data frame by leaving out the specified columns.
+     *
      * @param colNames Column names
      * @return a shallow copy of the data frame with the columns removed
      */
-    public DataFrame drop(List<String> colNames){
+    public DataFrame drop(List<String> colNames) {
         return drop(columns.indexOfName(colNames).toArray(new Integer[colNames.size()]));
     }
 
@@ -1180,7 +1217,7 @@ public class DataFrame implements Iterable {
             }
         }
     }
-    
+
     /**
      * Select by row and column ranges
      *
@@ -1198,21 +1235,21 @@ public class DataFrame implements Iterable {
 
         Object r;
         if (this.array2D) {
-            int n = ((Array)data).getShape()[1];
+            int n = ((Array) data).getShape()[1];
             int rn = rowRange.size();
             int cn = colRange.length();
-            DataType dtype = ((Array)data).getDataType();
+            DataType dtype = ((Array) data).getDataType();
             r = Array.factory(dtype, new int[]{rn, cn});
             String format = this.columns.get(0).getFormat();
             int idx, jj = 0;
-            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) { 
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) {
                 int ii = 0;
                 for (int i : rowRange) {
                     idx = ii * cn + jj;
-                    if (i < 0){
-                        ((Array)r).setObject(idx, DataConvert.convertTo(null, dtype, format));
+                    if (i < 0) {
+                        ((Array) r).setObject(idx, DataConvert.convertTo(null, dtype, format));
                     } else {
-                        ((Array)r).setObject(idx, ((Array)data).getObject(i * n + j));
+                        ((Array) r).setObject(idx, ((Array) data).getObject(i * n + j));
                     }
                     ii += 1;
                 }
@@ -1228,7 +1265,7 @@ public class DataFrame implements Iterable {
                 Array mr = ((List<Array>) this.data).get(j);
                 int idx = 0;
                 for (int i : rowRange) {
-                    if (i < 0){
+                    if (i < 0) {
                         rr.setObject(idx, DataConvert.convertTo(null, dtype, format));
                     } else {
                         rr.setObject(idx, mr.getObject(i));
@@ -1260,7 +1297,7 @@ public class DataFrame implements Iterable {
             }
         }
     }
-    
+
     /**
      * Select by row and column ranges
      *
@@ -1278,10 +1315,10 @@ public class DataFrame implements Iterable {
 
         Object r;
         if (this.array2D) {
-            int n = ((Array)data).getShape()[1];
+            int n = ((Array) data).getShape()[1];
             int rn = rowRange.size();
             int cn = colRange.size();
-            DataType dtype = ((Array)data).getDataType();
+            DataType dtype = ((Array) data).getDataType();
             r = Array.factory(dtype, new int[]{rn, cn});
             String format = this.columns.get(0).getFormat();
             int idx, jj = 0;
@@ -1289,10 +1326,10 @@ public class DataFrame implements Iterable {
                 int ii = 0;
                 for (int i : rowRange) {
                     idx = ii * cn + jj;
-                    if (i < 0){
-                        ((Array)r).setObject(idx, DataConvert.convertTo(null, dtype, format));
+                    if (i < 0) {
+                        ((Array) r).setObject(idx, DataConvert.convertTo(null, dtype, format));
                     } else {
-                        ((Array)r).setObject(idx, ((Array)data).getObject(i * n + j));
+                        ((Array) r).setObject(idx, ((Array) data).getObject(i * n + j));
                     }
                     ii += 1;
                 }
@@ -1308,7 +1345,7 @@ public class DataFrame implements Iterable {
                 Array mr = ((List<Array>) this.data).get(j);
                 int idx = 0;
                 for (int i : rowRange) {
-                    if (i < 0){
+                    if (i < 0) {
                         rr.setObject(idx, DataConvert.convertTo(null, dtype, format));
                     } else {
                         rr.setObject(idx, mr.getObject(i));
@@ -1644,10 +1681,11 @@ public class DataFrame implements Iterable {
         sr.close();
 
         int rn = values.get(0).size();
-        if (skipFooter > 0){
-            if (indexCol >= 0)
+        if (skipFooter > 0) {
+            if (indexCol >= 0) {
                 indexValues = indexValues.subList(0, rn - skipFooter);
-            for (int i = 0; i < colNum; i++){
+            }
+            for (int i = 0; i < colNum; i++) {
                 values.set(i, values.get(i).subList(0, rn - skipFooter));
             }
         }
@@ -1685,7 +1723,7 @@ public class DataFrame implements Iterable {
                 }
                 index = new Index(indexData);
             }
-            if (indexFormat != null){
+            if (indexFormat != null) {
                 index.format = indexFormat;
             } else {
                 index.updateFormat();
@@ -1693,14 +1731,14 @@ public class DataFrame implements Iterable {
         } else {
             index = new Index(rn);
             index.updateFormat();
-        }        
+        }
 
         DataFrame df;
-        if (cols.isSameDataType()){
+        if (cols.isSameDataType()) {
             Array data = Array.factory(cols.get(0).dataType, new int[]{rn, colNum});
             List vv;
             col = cols.get(0);
-            for (int i = 0; i < colNum; i++){
+            for (int i = 0; i < colNum; i++) {
                 vv = values.get(i);
                 String v;
                 for (int j = 0; j < vv.size(); j++) {
@@ -1728,7 +1766,7 @@ public class DataFrame implements Iterable {
 
             df = new DataFrame(data, index, cols);
         }
-        if (names != null){
+        if (names != null) {
             df.setColumns(names);
         }
 
@@ -1793,6 +1831,51 @@ public class DataFrame implements Iterable {
         }
         sw.flush();
         sw.close();
+    }
+
+    public DataFrame sortBy(final List<String> cols, final List<Boolean> ascendings) {
+        final Map<Integer, SortDirection> sortCols = new LinkedHashMap<>();
+        for (int i = 0; i < cols.size(); i++) {
+            String col = cols.get(i);
+            boolean ascending = ascendings.get(i);
+            final SortDirection dir = ascending
+                    ? SortDirection.ASCENDING : SortDirection.DESCENDING;
+            final int c = columns.indexOfName(col);
+            sortCols.put(c, dir);
+        }
+        return Sorting.sort(this, sortCols);
+    }
+
+    public DataFrame sortByIndex(boolean ascending) {
+        final SortDirection dir = ascending
+                ? SortDirection.ASCENDING : SortDirection.DESCENDING;
+        return Sorting.sortIndex(this, dir);
+    }
+
+    public DataFrame sortBy(final Object... cols) {
+        final Map<Integer, SortDirection> sortCols = new LinkedHashMap<>();
+        for (final Object col : cols) {
+            final String str = col instanceof String ? String.class.cast(col) : "";
+            final SortDirection dir = str.startsWith("-")
+                    ? SortDirection.DESCENDING : SortDirection.ASCENDING;
+            final int c = columns.indexOf(str.startsWith("-") ? str.substring(1) : col);
+            sortCols.put(c, dir);
+        }
+        return Sorting.sort(this, sortCols);
+    }
+
+    public DataFrame sortBy(boolean ascending, final Integer... cols) {
+        final Map<Integer, SortDirection> sortCols = new LinkedHashMap<>();
+        for (final int c : cols) {
+            final SortDirection dir = ascending
+                    ? SortDirection.ASCENDING : SortDirection.DESCENDING;
+            sortCols.put(Math.abs(c), dir);
+        }
+        return Sorting.sort(this, sortCols);
+    }
+
+    public <V> DataFrame sortBy(final Comparator<List<V>> comparator) {
+        return Sorting.sort(this, comparator);
     }
 
     /**
@@ -1901,6 +1984,28 @@ public class DataFrame implements Iterable {
             ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
         }
         return r;
+    }
+
+    @Override
+    public Object clone() {
+        Object rdata;
+        if (this.array2D) {
+            rdata = ((Array) this.data).copy();
+        } else {
+            rdata = new ArrayList<Array>();
+            for (Array a : (List<Array>) this.data) {
+                ((ArrayList<Array>) rdata).add(a.copy());
+            }
+        }
+        Index rIndex = (Index) this.index.clone();
+        ColumnIndex cols = (ColumnIndex) this.columns.clone();
+        DataFrame df;
+        if (rdata instanceof Array) {
+            df = new DataFrame((Array) rdata, rIndex, cols);
+        } else {
+            df = new DataFrame((ArrayList) rdata, rIndex, cols);
+        };
+        return df;
     }
     // </editor-fold>
 }

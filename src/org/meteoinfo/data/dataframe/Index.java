@@ -253,6 +253,15 @@ public class Index<V> implements Iterable<V>{
     }
     
     /**
+     * Set a value
+     * @param i Index
+     * @param value Value
+     */
+    public void set(int i, V value) {
+        this.data.set(i, value);
+    }
+    
+    /**
      * Get indices
      * @param names Names
      * @return Indices
@@ -507,6 +516,14 @@ public class Index<V> implements Iterable<V>{
      */
     public String toString(int idx) {
         return String.format(this.format, this.data.get(idx));
+    }
+    
+    @Override
+    public Object clone() {
+        List ndata = new ArrayList<>(this.data);
+        Index r = new Index(ndata, this.name);
+        r.format = this.format;
+        return r;
     }
     // </editor-fold>    
 }

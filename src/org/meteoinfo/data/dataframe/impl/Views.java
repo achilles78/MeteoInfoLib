@@ -73,24 +73,25 @@ public class Views {
     }
     
     public static class SeriesListView<V>
-            extends AbstractList<V> {
-
-        private final Series series;
+    extends AbstractList<V> {
+        private final DataFrame df;
         private final int index;
+        private final boolean transpose;
 
-        public SeriesListView(final Series series, final int index) {
-            this.series = series;
+        public SeriesListView(final DataFrame df, final int index, final boolean transpose) {
+            this.df = df;
             this.index = index;
+            this.transpose = transpose;
         }
 
         @Override
-        public V get(final int i) {
-            return i == 0 ? (V) series.getIndexValue(index) : (V) series.getValue(index);
+        public V get(final int index) {
+            return transpose ? (V)df.getValue(index, this.index) : (V)df.getValue(this.index, index);
         }
 
         @Override
         public int size() {
-            return 2;
+            return transpose ? df.length() : df.size();
         }
     }
 

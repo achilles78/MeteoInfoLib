@@ -126,5 +126,15 @@ public class ColumnIndex extends Index<Column> {
         }
         return true;
     }
+    
+    @Override
+    public Object clone() {        
+        ColumnIndex r = new ColumnIndex();
+        for (Column col : this.data){
+            r.add((Column)col.clone());
+        }
+        r.format = this.format;
+        return r;
+    }
     // </editor-fold>
 }
