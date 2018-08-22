@@ -537,6 +537,46 @@ public class VectorLayer extends MapLayer {
         }
         _chartSet.setDrawCharts(true);
     }
+    
+    /**
+     * Update chart set with minimum and maximum values
+     */
+    public void updateChartSet() {
+        List<Double> minList = new ArrayList<>();
+        List<Double> maxList = new ArrayList<>();
+        List<Double> sumList = new ArrayList<>();
+        double[] minMax;
+        List<String> fieldNames = this._chartSet.getFieldNames();
+        for (int i = 0; i < this.getShapeNum(); i++) {
+            List<Double> vList = new ArrayList<>();
+            double sum = 0;
+            double v;
+            for (int j = 0; j < fieldNames.size(); j++) {
+                v = Double.parseDouble(this.getCellValue(fieldNames.get(j), i).toString());
+                vList.add(v);
+                sum += v;
+            }
+            //values.add(vList);
+            minMax = MIMath.getMinMaxValue(vList, -9999.0);
+            minList.add(minMax[0]);
+            maxList.add(minMax[1]);
+            sumList.add(sum);
+        }
+
+        switch (_chartSet.getChartType()) {
+            case BarChart:
+                minMax = MIMath.getMinMaxValue(minList, -9999.0);
+                _chartSet.setMinValue((float) minMax[0]);
+                minMax = MIMath.getMinMaxValue(maxList, -9999.0);
+                _chartSet.setMaxValue((float) minMax[1]);
+                break;
+            case PieChart:
+                minMax = MIMath.getMinMaxValue(sumList, -9999.0);
+                _chartSet.setMinValue((float) minMax[0]);
+                _chartSet.setMaxValue((float) minMax[1]);
+                break;
+        }
+    }
 
     /**
      * Update charts

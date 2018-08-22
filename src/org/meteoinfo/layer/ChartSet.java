@@ -94,6 +94,21 @@ public class ChartSet {
     public void setChartType(ChartTypes type) {
         _chartType = type;
     }
+    
+    /**
+     * Set chart type
+     * @param tstr Chart type string
+     */
+    public void setChartType(String tstr) {
+        switch(tstr.toLowerCase()) {
+            case "bar":
+                this._chartType = ChartTypes.BarChart;
+                break;
+            case "pie":
+                this._chartType = ChartTypes.PieChart;
+                break;
+        }
+    }
 
     /**
      * Set if draw charts
@@ -305,6 +320,24 @@ public class ChartSet {
     public void setAlignType(AlignType type) {
         _alignType = type;
     }
+    
+    /**
+     * Set align type
+     * @param tstr Align type string
+     */
+    public void setAlignType(String tstr) {
+        switch(tstr.toLowerCase()) {
+            case "center":
+                this._alignType = AlignType.Center;
+                break;
+            case "left":
+                this._alignType = AlignType.Left;
+                break;
+            case "right":
+                this._alignType = AlignType.Right;
+                break;
+        }
+    } 
 
     /**
      * Get if view 3D

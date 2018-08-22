@@ -7167,6 +7167,15 @@ public class MapView extends JPanel implements IWebMapPanel {
 
         return new float[]{projX, projY};
     }
+    
+    private double[] getProjXYShift(PointD p, double x, double y) {
+        double[] xy = projToScreen(p.X, p.Y);
+        double[] pxy = screenToProj(xy[0] + x, xy[1] - y);
+        double xShift = pxy[0] - p.X;
+        double yShift = pxy[1] - p.Y;
+
+        return new double[]{xShift, yShift};
+    }
 
     private double[] getProjXYShift(Point point1, Point point2) {
         double[] pXY1 = screenToProj((double) point1.x, (double) point1.y);
@@ -7175,6 +7184,35 @@ public class MapView extends JPanel implements IWebMapPanel {
         double yShift = pXY2[1] - pXY1[1];
 
         return new double[]{xShift, yShift};
+    }
+    
+    /**
+     * Move shape by screen coordinates
+     *
+     * @param aShape The shape
+     * @param x X shift
+     * @param y Y shift
+     */
+    public void moveShapeOnScreen(Shape aShape, double x, double y) {
+        double[] sXY = getProjXYShift(aShape.getPoints().get(0), x, y);
+        moveShape(aShape, sXY[0], sXY[1]);
+    }
+    
+    /**
+     * Move a graphic
+     *
+     * @param graphic The graphic
+     * @param x X shift
+     * @param y Y shift
+     * @param screen Is screen coordinate or not.
+     */
+    public void moveGraphic(Graphic graphic, double x, double y, boolean screen) {
+        Shape shape = graphic.getShape();
+        if (screen) {
+            moveShapeOnScreen(shape, x, y);
+        } else {
+            moveShape(shape, x, y);
+        }
     }
 
     /**
