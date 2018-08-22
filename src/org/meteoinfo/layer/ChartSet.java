@@ -336,6 +336,9 @@ public class ChartSet {
             case "right":
                 this._alignType = AlignType.Right;
                 break;
+            case "none":
+                this._alignType = AlignType.None;
+                break;
         }
     } 
 
