@@ -35,8 +35,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.meteoinfo.data.ArrayMath;
+import org.meteoinfo.data.dataframe.Column;
+import org.meteoinfo.data.dataframe.ColumnIndex;
+import org.meteoinfo.data.dataframe.DataFrame;
+import org.meteoinfo.data.dataframe.Index;
 import org.meteoinfo.data.meteodata.MeteoDataType;
 import org.meteoinfo.global.Extent;
+import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.util.DateUtil;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -263,6 +269,59 @@ public class MICAPS120DataInfo extends DataInfo implements IStationDataInfo {
         }
         
         return r;
+    }
+    
+    /**
+     * Read data frame
+     *
+     * @return Data frame
+     */
+    public DataFrame readDataFrame() {
+        List<Array> data = new ArrayList<>();
+        ColumnIndex columns = new ColumnIndex();
+        DataType dtype;
+        for (String vName : this._fieldList) {
+            switch (vName) {
+                case "Stid":
+                    continue;
+                case "AQI":
+                case "Grade":
+                    dtype = DataType.INT;
+                    break;
+                default:
+                    dtype = DataType.FLOAT;
+                    break;
+            }
+            columns.add(new Column(vName, dtype));
+            data.add(Array.factory(dtype, new int[]{this._dataList.size()}));
+        }
+        List<String> idxList = new ArrayList<>();
+        Array dd;
+        float v;
+        for (int i = 0; i < this._dataList.size(); i++) {
+            List<String> dataList = this._dataList.get(i);
+            idxList.add(dataList.get(0));
+            for (int j = 0; j < data.size(); j++) {
+                dd = (Array) data.get(j);
+                switch (dd.getDataType()) {
+                    case INT:
+                        dd.setObject(i, Integer.parseInt(dataList.get(j + 1)));
+                        break;
+                    case FLOAT:
+                        v = Float.parseFloat(dataList.get(j + 1));
+                        dd.setObject(i, v);
+                        break;
+                }
+            }
+        }
+        
+        for (Array a : data){
+            ArrayMath.missingToNaN(a, 9999);
+        }
+
+        Index index = new Index(idxList);
+        DataFrame df = new DataFrame(data, index, columns);
+        return df;
     }
 
     @Override
