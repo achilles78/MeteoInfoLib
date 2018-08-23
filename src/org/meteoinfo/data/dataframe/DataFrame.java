@@ -1717,15 +1717,16 @@ public class DataFrame implements Iterable {
                 }
                 index = new DateTimeIndex(indexData);
                 //((DateTimeIndex) index).setDateTimeFormatter(dtFormatter);
+                if (indexFormat != null) {
+                    index.format = indexFormat;
+                } else {
+                    index.updateFormat();
+                }
             } else {
                 for (String s : indexValues) {
                     indexData.add(DataConvert.convertStringTo(s, idxDT, null));
                 }
                 index = new Index(indexData);
-            }
-            if (indexFormat != null) {
-                index.format = indexFormat;
-            } else {
                 index.updateFormat();
             }
         } else {
