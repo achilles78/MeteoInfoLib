@@ -1930,14 +1930,15 @@ public class Plot3D extends Plot {
                 }
             }
             String label = this.zAxis.getLabel().getText();
-            if (label != null) {
-                g.setFont(this.zAxis.getLabelFont());
+            if (label != null) {                
                 Dimension dim = Draw.getStringDimension(label, g);
                 tickpos = projector.project(factor_x * 10 * lf, -factor_y * 10 * lf, 0);
                 tickpos.x = tickpos.x - this.xAxis.getTickLength() - 15 - strWidth - dim.height;
-                Draw.drawLabelPoint_270(tickpos.x, tickpos.y, this.zAxis.getLabelFont(), label,
-                        this.zAxis.getLabelColor(), g, null, this.zAxis.getLabel().isUseExternalFont());
-                //outString(g, tickpos.x, tickpos.y, label, Label.RIGHT, CENTER);
+                g.setFont(this.zAxis.getLabelFont());
+                g.setColor(this.zAxis.getLabelColor());
+                //Draw.drawLabelPoint_270(tickpos.x, tickpos.y, this.zAxis.getLabelFont(), label,
+                //        this.zAxis.getLabelColor(), g, null, this.zAxis.getLabel().isUseExternalFont());              
+                Draw.drawString(g, tickpos.x, tickpos.y, label, XAlign.LEFT, YAlign.CENTER, 90, this.zAxis.getLabel().isUseExternalFont());
             }
         }
     }

@@ -1151,8 +1151,12 @@ public class ChartLegend {
                 default:
                     x = this.width - dim.height * 0.5f - 2;
                     y = this.height * 0.5f;
-                    Draw.drawLabelPoint_270((float) x, (float) y, this.getLabelFont(), this.label.getText(),
-                            this.getLabelColor(), g, null, this.label.isUseExternalFont());
+                    //Draw.drawLabelPoint_270((float) x, (float) y, this.getLabelFont(), this.label.getText(),
+                    //        this.getLabelColor(), g, null, this.label.isUseExternalFont());
+                    g.setFont(this.getLabelFont());
+                    g.setColor(this.getLabelColor());
+                    Draw.drawString(g, (float)x, (float)y, this.label.getText(), XAlign.LEFT, 
+                        YAlign.CENTER, 90, this.label.isUseExternalFont());
                     break;
             }
         }
