@@ -33,6 +33,7 @@ import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;
 import org.meteoinfo.global.PointF;
+import org.meteoinfo.layer.LayerCollection;
 import org.meteoinfo.layer.MapLayer;
 import org.meteoinfo.legend.LabelBreak;
 import org.meteoinfo.legend.LegendScheme;
@@ -961,6 +962,32 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
     }
     
     /**
+     * Get layers
+     * @return Layers
+     */
+    public LayerCollection getLayers() {
+        return this.mapView.getLayers();
+    }
+    
+    /**
+     * Get layer by index
+     * @param i The layer index
+     * @return The layer
+     */
+    public MapLayer getLayer(int i){
+        return this.mapView.getLayers().get(i);
+    }
+    
+    /**
+     * Get layer by name
+     * @param name The layer name
+     * @return The layer
+     */
+    public MapLayer getLayer(String name) {
+        return this.mapView.getLayer(name);
+    }
+    
+    /**
      * Get legend scheme
      *
      * @return Legend scheme
@@ -978,6 +1005,9 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
      * @throws javax.xml.parsers.ParserConfigurationException
      */
     public void loadMIProjectFile(String fn, int mfidx) throws SAXException, IOException, ParserConfigurationException{
+        File file = new File(fn);
+        String userDir = System.getProperty("user.dir");
+        System.setProperty("user.dir", file.getParent());
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document doc = db.parse(new File(fn));
@@ -994,6 +1024,7 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         }
         this.setDrawExtent(this.mapView.getViewExtent());
         this.setExtent(this.mapView.getViewExtent());
+        System.setProperty("user.dir", userDir);
     }
     
     /**
