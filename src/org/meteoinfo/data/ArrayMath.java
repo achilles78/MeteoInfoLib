@@ -2952,14 +2952,23 @@ public class ArrayMath {
         int n = (int) y.getSize() - 1;
         double a = 1;
         double b = n * dx + a;
-        double r = 0;
+        double r = 0, v;
+        int nn = 0;
         for (int i = 0; i < y.getSize(); i++) {
-            r += y.getDouble(i);
+            v = y.getDouble(i);
+            if (Double.isNaN(v)){
+                continue;
+            }
+            r += y.getDouble(i);            
             if (i > 0 && i < n) {
                 r += y.getDouble(i);
             }
+            nn += 1;
         }
-        r = r * ((b - a) / (2 * n));
+        if (nn >= 2)
+            r = r * ((b - a) / (2 * n));
+        else
+            r = Double.NaN;
         return r;
     }
 
@@ -2986,13 +2995,19 @@ public class ArrayMath {
         int i = 0;
         while (ii.hasNext()) {
             v = ii.getDoubleNext();
+            if (Double.isNaN(v)){
+                continue;
+            }
             r += v;
             if (i > 0 && i < n) {
                 r += v;
             }
             i += 1;
         }
-        r = r * ((b - a) / (2 * n));
+        if (i >= 2)
+            r = r * ((b - a) / (2 * n));
+        else
+            r = Double.NaN;
         return r;
     }
 
@@ -3006,10 +3021,20 @@ public class ArrayMath {
     public static double trapz(Array y, Array x) {
         int n = (int) y.getSize() - 1;
         double r = 0;
+        double v;
+        int nn = 0;
         for (int i = 0; i < n; i++) {
-            r += (x.getDouble(i + 1) - x.getDouble(i)) * (y.getDouble(i + 1) + y.getDouble(i));
+            v = y.getDouble(i);
+            if (Double.isNaN(v)){
+                continue;
+            }
+            r += (x.getDouble(i + 1) - x.getDouble(i)) * (y.getDouble(i + 1) + v);
+            nn += 1;
         }
-        r = r / 2;
+        if (nn >= 2)
+            r = r / 2;
+        else
+            r = Double.NaN;
         return r;
     }
 
@@ -3025,20 +3050,28 @@ public class ArrayMath {
     public static double trapz(Array y, Array x, List<Range> ranges) throws InvalidRangeException {
         double r = 0;
         double v;
-        double v0 = Double.NaN;
+        double v0 = Double.NEGATIVE_INFINITY;
         IndexIterator ii = y.getRangeIterator(ranges);
-        int i = 0;
+        int i = 0, n = 0;
         while (ii.hasNext()) {
             v = ii.getDoubleNext();
-            if (Double.isNaN(v0)) {
+            if (Double.isNaN(v)) {
+                i += 1;
+                continue;
+            }
+            if (Double.isInfinite(v0)) {
                 v0 = v;
-                v = ii.getDoubleNext();
+                continue;
             }
             r += (x.getDouble(i + 1) - x.getDouble(i)) * (v + v0);
             v0 = v;
             i += 1;
+            n += 1;
         }
-        r = r / 2;
+        if (n >= 2)
+            r = r / 2;
+        else
+            r = Double.NaN;
         return r;
     }
 
