@@ -432,7 +432,7 @@ public class DataFrame implements Iterable {
      * @return the number of columns
      */
     public boolean isEmpty() {
-        return length() == 0;
+        return this.data == null ? true : length() == 0;
     }
 
     /**
@@ -638,11 +638,15 @@ public class DataFrame implements Iterable {
      * @param column Column
      */
     public void addColumn(Column column) {
-        Array array = Array.factory(column.getDataType(), new int[]{this.length()});
-        try {
-            this.addColumn(column, array);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(DataFrame.class.getName()).log(Level.SEVERE, null, ex);
+        if (this.data == null) 
+            this.columns.add(column);
+        else {
+            Array array = Array.factory(column.getDataType(), new int[]{this.length()});
+            try {
+                this.addColumn(column, array);
+            } catch (InvalidRangeException ex) {
+                Logger.getLogger(DataFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -928,19 +932,44 @@ public class DataFrame implements Iterable {
      * @param row Row data list
      */
     public void append(Object name, List row) {
-        this.index.add(name);
-        try {
-            this.dataReshape(this.length() + 1, this.size());
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(DataFrame.class.getName()).log(Level.SEVERE, null, ex);
+        if (this.index == null){
+            List idx = new ArrayList<>();
+            idx.add(name);
+            this.index = Index.factory(idx);
+        } else {
+            this.index.add(name);
         }
-        if (this.array2D) {
-            for (int i = 0; i < this.size(); i++) {
-                ((Array) this.data).setObject(this.length() * this.size() + i, row.get(i));
+        if (this.data == null) {
+            this.data = new ArrayList<Array>();
+            if (row.isEmpty()) {
+                for (Column col : this.columns) {
+                    ((ArrayList<Array>)this.data).add(Array.factory(col.dataType, new int[]{1}));
+                }
+            } else {
+                int i = 0;
+                for (Column col : this.columns) {
+                    Array a = Array.factory(col.dataType, new int[]{1});
+                    a.setObject(0, row.get(i));
+                    ((ArrayList<Array>)this.data).add(a);
+                    i += 1;
+                }
             }
         } else {
-            for (int i = 0; i < this.size(); i++) {
-                ((List<Array>) this.data).get(i).setObject(this.length(), i < row.size() ? row.get(i) : null);
+            try {
+                this.dataReshape(this.length() + 1, this.size());
+            } catch (InvalidRangeException ex) {
+                Logger.getLogger(DataFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (!row.isEmpty()) {
+                if (this.array2D) {
+                    for (int i = 0; i < this.size(); i++) {
+                        ((Array) this.data).setObject(this.length() * this.size() + i, row.get(i));
+                    }
+                } else {
+                    for (int i = 0; i < this.size(); i++) {
+                        ((List<Array>) this.data).get(i).setObject(this.length(), i < row.size() ? row.get(i) : null);
+                    }
+                }
             }
         }
     }
@@ -1832,6 +1861,11 @@ public class DataFrame implements Iterable {
         }
         sw.flush();
         sw.close();
+    }
+    
+    public <V> DataFrame describe() {
+        return Aggregation.describe(
+            groups.apply(this, new Aggregation.Describe<V>()));
     }
 
     public DataFrame sortBy(final List<String> cols, final List<Boolean> ascendings) {

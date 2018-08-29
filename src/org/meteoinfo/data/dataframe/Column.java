@@ -204,7 +204,10 @@ public class Column {
             default:                
                 String v;
                 for (int i = 0; i < data.getSize(); i++){
-                    v = data.getObject(i).toString();
+                    if (data.getObject(i) == null)
+                        v = "null";
+                    else
+                        v = data.getObject(i).toString();
                     if (formatLen < v.length())
                         formatLen = v.length();
                 }

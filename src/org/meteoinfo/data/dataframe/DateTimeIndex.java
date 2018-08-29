@@ -14,6 +14,7 @@ import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.util.DateUtil;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 
 /**
  *
@@ -31,6 +32,7 @@ public class DateTimeIndex extends Index<DateTime> {
      */
     public DateTimeIndex(){
         this.format = "yyyy-MM-dd";
+        this.dataType = DataType.OBJECT;
     }
     
     /**
@@ -319,10 +321,15 @@ public class DateTimeIndex extends Index<DateTime> {
         StringBuilder sb = new StringBuilder();
         sb.append("DateTimeIndex([");
         for (int i = 0; i < this.size(); i++){
+            sb.append("'");
             sb.append(toString(i));
-            if (i < 100 && i < this.size() - 1) {
-                sb.append(", ");
-            } else {
+            sb.append("'");
+            if (i < 100) {
+                if (i < this.size() - 1)
+                    sb.append(", ");
+                else 
+                    break;
+            } else {                
                 sb.append(", ...");
                 break;
             }

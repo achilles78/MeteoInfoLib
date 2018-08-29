@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.global.MIMath;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 
 /**
  *
@@ -24,6 +25,7 @@ public class Index<V> implements Iterable<V>{
     protected List<V> data;
     protected String format = "%4s";
     protected String name = "Index";
+    protected DataType dataType = DataType.STRING;
     // </editor-fold>
     // <editor-fold desc="Constructor">
     /**
@@ -203,6 +205,7 @@ public class Index<V> implements Iterable<V>{
             int max = MIMath.getMinMaxInt(data)[1];
             int len = String.valueOf(max).length();
             this.format = "%" + String.valueOf(len) + "s";
+            this.dataType = DataType.INT;
         } else if (data.get(0) instanceof String) {    //String
             int len = 0;
             for (String s : (List<String>)this.data){
@@ -210,6 +213,7 @@ public class Index<V> implements Iterable<V>{
                     len = s.length();
             }
             this.format = "%" + String.valueOf(len) + "s";
+            this.dataType = DataType.STRING;
         }
     }
     
@@ -496,10 +500,13 @@ public class Index<V> implements Iterable<V>{
         StringBuilder sb = new StringBuilder();
         sb.append("Index([");
         for (int i = 0; i < this.size(); i++){
-            sb.append(toString(i));
-            if (i < 100 && i < this.size() - 1) {
-                sb.append(", ");
-            } else {
+            sb.append(this.toString_Index(i));
+            if (i < 100) {
+                if (i < this.size() - 1)
+                    sb.append(", ");
+                else 
+                    break;
+            } else {                
                 sb.append(", ...");
                 break;
             }
@@ -507,6 +514,21 @@ public class Index<V> implements Iterable<V>{
         sb.append("])");
         
         return sb.toString();
+    }
+    
+    /**
+     * Convert i_th index to string
+     * @param idx Index i
+     * @return String
+     */
+    public String toString_Index(int idx) {
+        String s = String.valueOf(this.data.get(idx));
+        switch (this.dataType) {
+            case STRING:
+                s = "'" + s + "'";
+                break;
+        }
+        return s;
     }
     
     /**

@@ -30,6 +30,7 @@ import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
 import org.meteoinfo.data.dataframe.Column;
 
 import org.meteoinfo.data.dataframe.DataFrame;
+import ucar.ma2.DataType;
 
 public class Aggregation {
 
@@ -104,14 +105,16 @@ public class Aggregation {
                         value = Boolean.class.cast(value) ? 1 : 0;
                     }
                     v = Number.class.cast(value).doubleValue();
-                    if (!Double.isNaN(v))
+                    if (!Double.isNaN(v)) {
                         stat.increment(Number.class.cast(value).doubleValue());
+                    }
                 }
             }
-            if (stat.getN() == 0)
+            if (stat.getN() == 0) {
                 return Double.NaN;
-            else
+            } else {
                 return stat.getResult();
+            }
         }
     }
 
@@ -252,14 +255,15 @@ public class Aggregation {
     }
 
     @SuppressWarnings("unchecked")
-    public static <V> DataFrame describe(final DataFrame df) {
+    public static DataFrame describe(final DataFrame df) {
         final DataFrame desc = new DataFrame();
         for (final Column col : df.getColumns()) {
+             Column ncol = new Column(col.getName(), DataType.DOUBLE);
             for (final Object row : df.getIndex()) {
-                final V value = (V) df.getValue(row, col);
+                final Object value = df.getValue(row, col);
                 if (value instanceof StatisticalSummary) {
-                    if (!desc.getColumns().contains(col)) {
-                        desc.addColumn(col);
+                    if (!desc.getColumns().contains(ncol)) {                       
+                        desc.addColumn(ncol);
                         if (desc.isEmpty()) {
                             for (final Object r : df.getIndex()) {
                                 for (final Object stat : Arrays.asList("count", "mean", "std", "var", "max", "min")) {
@@ -271,12 +275,12 @@ public class Aggregation {
                     }
 
                     final StatisticalSummary summary = StatisticalSummary.class.cast(value);
-                    desc.setValue(name(df, row, "count"), col, (V) new Double(summary.getN()));
-                    desc.setValue(name(df, row, "mean"), col, (V) new Double(summary.getMean()));
-                    desc.setValue(name(df, row, "std"), col, (V) new Double(summary.getStandardDeviation()));
-                    desc.setValue(name(df, row, "var"), col, (V) new Double(summary.getVariance()));
-                    desc.setValue(name(df, row, "max"), col, (V) new Double(summary.getMax()));
-                    desc.setValue(name(df, row, "min"), col, (V) new Double(summary.getMin()));
+                    desc.setValue(name(df, row, "count"), ncol,  summary.getN());
+                    desc.setValue(name(df, row, "mean"), ncol, summary.getMean());
+                    desc.setValue(name(df, row, "std"), ncol, summary.getStandardDeviation());
+                    desc.setValue(name(df, row, "var"), ncol, summary.getVariance());
+                    desc.setValue(name(df, row, "max"), ncol, summary.getMax());
+                    desc.setValue(name(df, row, "min"), ncol, summary.getMin());
                 }
             }
         }
