@@ -31,15 +31,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.data.ArrayUtil;
-import org.meteoinfo.data.dataframe.impl.Aggregate;
 import org.meteoinfo.data.dataframe.impl.Aggregation;
 import org.meteoinfo.data.dataframe.impl.Function;
 import org.meteoinfo.data.dataframe.impl.Grouping;
 import org.meteoinfo.data.dataframe.impl.KeyFunction;
 import org.meteoinfo.data.dataframe.impl.SortDirection;
 import org.meteoinfo.data.dataframe.impl.Sorting;
-import org.meteoinfo.data.dataframe.impl.SparseBitSet;
-import org.meteoinfo.data.dataframe.impl.Transforms;
 import org.meteoinfo.data.dataframe.impl.Views;
 import org.meteoinfo.data.dataframe.impl.WindowFunction;
 import org.meteoinfo.global.DataConvert;
@@ -62,7 +59,6 @@ public class DataFrame implements Iterable {
     private ColumnIndex columns;
     private Object data;    //Two dimension array or array list
     private boolean array2D = false;
-    private Grouping groups;
     //private Range rowRange;
     //private Range colRange;
 
@@ -111,7 +107,7 @@ public class DataFrame implements Iterable {
      * @param index Index
      */
     public DataFrame(Array data, Index index, ColumnIndex columns) {
-        this(index, columns, data, null);
+        this(index, columns, data);
     }
 
     /**
@@ -122,7 +118,7 @@ public class DataFrame implements Iterable {
      * @param index Index
      */
     public DataFrame(Array data, Index index, List<String> columns) {
-        this(index, columns, data, null);
+        this(index, columns, data);
     }
 
     /**
@@ -131,9 +127,8 @@ public class DataFrame implements Iterable {
      * @param index Index
      * @param columns Columns
      * @param data Data
-     * @param groups Grouping
      */
-    public DataFrame(Index index, ColumnIndex columns, Object data, Grouping groups) {
+    public DataFrame(Index index, ColumnIndex columns, Object data) {
         if (data instanceof Array) {
             if (((Array) data).getRank() == 1) {    //One dimension array
                 if (columns.size() == 1) {
@@ -155,7 +150,6 @@ public class DataFrame implements Iterable {
 
         this.columns = columns;
         this.index = index;
-        this.groups = groups;
     }
 
     /**
@@ -164,9 +158,8 @@ public class DataFrame implements Iterable {
      * @param index Index
      * @param columns Columns
      * @param data Data
-     * @param groups Grouping
      */
-    public DataFrame(Index index, List<String> columns, Object data, Grouping groups) {
+    public DataFrame(Index index, List<String> columns, Object data) {
         this.columns = new ColumnIndex();
         if (data instanceof Array) {
             List<DataType> dtypes = new ArrayList<>();
@@ -210,7 +203,6 @@ public class DataFrame implements Iterable {
         }
 
         this.index = index;
-        this.groups = groups == null ? new Grouping() : groups;
     }
 
     /**
@@ -232,7 +224,7 @@ public class DataFrame implements Iterable {
      * @param index Index
      */
     public DataFrame(List<Array> data, Index index, ColumnIndex columns) {
-        this(index, columns, data, null);
+        this(index, columns, data);
     }
 
     /**
@@ -243,7 +235,7 @@ public class DataFrame implements Iterable {
      * @param index Index
      */
     public DataFrame(List<Array> data, Index index, List<String> columns) {
-        this(index, columns, data, null);
+        this(index, columns, data);
     }
 
     /**
@@ -1868,8 +1860,7 @@ public class DataFrame implements Iterable {
     }
     
     public <V> DataFrame describe() {
-        return Aggregation.describe(
-            groups.apply(this, new Aggregation.Describe<V>()));
+        return Aggregation.describe(new Grouping().apply(this, new Aggregation.Describe<V>()));
     }
 
     public DataFrame sortBy(final List<String> cols, final List<Boolean> ascendings) {
