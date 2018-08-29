@@ -127,6 +127,14 @@ public class ColumnIndex extends Index<Column> {
         return true;
     }
     
+    /**
+     * Convert to string index
+     * @return String index
+     */
+    public Index asIndex() {
+        return Index.factory(this.getNames());
+    }
+    
     @Override
     public Object clone() {        
         ColumnIndex r = new ColumnIndex();

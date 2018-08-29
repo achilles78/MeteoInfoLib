@@ -1992,6 +1992,20 @@ public class DataFrame implements Iterable {
         WindowFunction function = new WindowFunction(period);
         return groupByIndex(function);
     }
+    
+    /**
+     * Compute the sum of the numeric columns for each group or the entire data
+     * frame if the data is not grouped.
+     *
+     * @return the new data frame
+     */
+    public DataFrame count() {
+        DataFrame r = groups.apply(this, new Aggregation.Sum());
+        if (this.index instanceof DateTimeIndex) {
+            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+        }
+        return r;
+    }
 
     /**
      * Compute the sum of the numeric columns for each group or the entire data
@@ -2015,6 +2029,48 @@ public class DataFrame implements Iterable {
      */
     public DataFrame mean() {
         DataFrame r = groups.apply(this, new Aggregation.Mean());
+        if (this.index instanceof DateTimeIndex) {
+            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+        }
+        return r;
+    }
+    
+    /**
+     * Compute the minimum of the numeric columns for each group or the entire data
+     * frame if the data is not grouped.
+     *
+     * @return the new data frame
+     */
+    public DataFrame min() {
+        DataFrame r = groups.apply(this, new Aggregation.Min());
+        if (this.index instanceof DateTimeIndex) {
+            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+        }
+        return r;
+    }
+    
+    /**
+     * Compute the Maximum of the numeric columns for each group or the entire data
+     * frame if the data is not grouped.
+     *
+     * @return the new data frame
+     */
+    public DataFrame max() {
+        DataFrame r = groups.apply(this, new Aggregation.Max());
+        if (this.index instanceof DateTimeIndex) {
+            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+        }
+        return r;
+    }
+    
+    /**
+     * Compute the median of the numeric columns for each group or the entire data
+     * frame if the data is not grouped.
+     *
+     * @return the new data frame
+     */
+    public DataFrame median() {
+        DataFrame r = groups.apply(this, new Aggregation.Median());
         if (this.index instanceof DateTimeIndex) {
             ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
         }
