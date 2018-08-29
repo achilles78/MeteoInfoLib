@@ -31,11 +31,15 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
 import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.data.ArrayUtil;
+import org.meteoinfo.data.dataframe.impl.Aggregate;
 import org.meteoinfo.data.dataframe.impl.Aggregation;
+import org.meteoinfo.data.dataframe.impl.Function;
 import org.meteoinfo.data.dataframe.impl.Grouping;
 import org.meteoinfo.data.dataframe.impl.KeyFunction;
 import org.meteoinfo.data.dataframe.impl.SortDirection;
 import org.meteoinfo.data.dataframe.impl.Sorting;
+import org.meteoinfo.data.dataframe.impl.SparseBitSet;
+import org.meteoinfo.data.dataframe.impl.Transforms;
 import org.meteoinfo.data.dataframe.impl.Views;
 import org.meteoinfo.data.dataframe.impl.WindowFunction;
 import org.meteoinfo.global.DataConvert;
@@ -1919,13 +1923,8 @@ public class DataFrame implements Iterable {
      * @param function the function to reduce rows to grouping keys
      * @return the grouping
      */
-    public DataFrame groupBy(final KeyFunction function) {
-        return new DataFrame(
-                index,
-                columns,
-                data,
-                new Grouping(this, function)
-        );
+    public DataFrameGroupBy groupBy(final KeyFunction function) {
+        return new DataFrameGroupBy(new Grouping(this, function), this);
     }
 
     /**
@@ -1934,13 +1933,8 @@ public class DataFrame implements Iterable {
      * @param columns The columns
      * @return The grouping
      */
-    public DataFrame groupBy(final Integer... columns) {
-        return new DataFrame(
-                index,
-                this.columns,
-                data,
-                new Grouping(this, columns)
-        );
+    public DataFrameGroupBy groupBy(final Integer... columns) {
+        return new DataFrameGroupBy(new Grouping(this, columns), this);
     }
 
     /**
@@ -1949,7 +1943,7 @@ public class DataFrame implements Iterable {
      * @param columns The columns
      * @return The grouping
      */
-    public DataFrame groupBy(final Object... columns) {
+    public DataFrameGroupBy groupBy(final Object... columns) {
         Integer[] icols = this.columns.indices(columns);
         return groupBy(icols);
     }
@@ -1960,7 +1954,7 @@ public class DataFrame implements Iterable {
      * @param columns The columns
      * @return The grouping
      */
-    public DataFrame groupBy(final List<Object> columns) {
+    public DataFrameGroupBy groupBy(final List<Object> columns) {
         Integer[] icols = this.columns.indices(columns);
         return groupBy(icols);
     }
@@ -1971,14 +1965,9 @@ public class DataFrame implements Iterable {
      * @param function the function to reduce rows to grouping keys
      * @return the grouping
      */
-    public DataFrame groupByIndex(final WindowFunction function) {
+    public DataFrameGroupBy groupByIndex(final WindowFunction function) {
         ((DateTimeIndex) index).setResamplPeriod(function.getPeriod());
-        return new DataFrame(
-                index,
-                columns,
-                data,
-                new Grouping(this, function)
-        );
+        return new DataFrameGroupBy(new Grouping(this, function), this);
     }
 
     /**
@@ -1987,93 +1976,83 @@ public class DataFrame implements Iterable {
      * @param pStr Period string
      * @return the grouping
      */
-    public DataFrame groupByIndex(final String pStr) {
+    public DataFrameGroupBy groupByIndex(final String pStr) {
         ReadablePeriod period = DateUtil.getPeriod(pStr);
         WindowFunction function = new WindowFunction(period);
         return groupByIndex(function);
     }
     
     /**
-     * Compute the sum of the numeric columns for each group or the entire data
-     * frame if the data is not grouped.
+     * Apply a function
+     * @param <V>
+     * @param function The function
+     * @return Result data frame
+     */
+    public <V> DataFrame apply(final Function<?, ?> function) {
+        DataFrame r = new Grouping().apply(this, function);
+        if (this.index instanceof DateTimeIndex) {
+            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
+        }
+        return r;
+    }
+    
+    /**
+     * Compute the sum of the numeric columns.
      *
      * @return the new data frame
      */
     public DataFrame count() {
-        DataFrame r = groups.apply(this, new Aggregation.Sum());
-        if (this.index instanceof DateTimeIndex) {
-            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-        }
+        DataFrame r = this.apply(new Aggregation.Count());        
         return r;
     }
 
     /**
-     * Compute the sum of the numeric columns for each group or the entire data
-     * frame if the data is not grouped.
+     * Compute the sum of the numeric columns.
      *
      * @return the new data frame
      */
     public DataFrame sum() {
-        DataFrame r = groups.apply(this, new Aggregation.Sum());
-        if (this.index instanceof DateTimeIndex) {
-            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-        }
+        DataFrame r = this.apply(new Aggregation.Sum());
         return r;
     }
 
     /**
-     * Compute the mean of the numeric columns for each group or the entire data
-     * frame if the data is not grouped.
+     * Compute the mean of the numeric columns.
      *
      * @return the new data frame
      */
     public DataFrame mean() {
-        DataFrame r = groups.apply(this, new Aggregation.Mean());
-        if (this.index instanceof DateTimeIndex) {
-            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-        }
+        DataFrame r = this.apply(new Aggregation.Mean());
         return r;
     }
     
     /**
-     * Compute the minimum of the numeric columns for each group or the entire data
-     * frame if the data is not grouped.
+     * Compute the minimum of the numeric columns.
      *
      * @return the new data frame
      */
     public DataFrame min() {
-        DataFrame r = groups.apply(this, new Aggregation.Min());
-        if (this.index instanceof DateTimeIndex) {
-            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-        }
+        DataFrame r = this.apply(new Aggregation.Min());
         return r;
     }
     
     /**
-     * Compute the Maximum of the numeric columns for each group or the entire data
-     * frame if the data is not grouped.
+     * Compute the Maximum of the numeric columns.
      *
      * @return the new data frame
      */
     public DataFrame max() {
-        DataFrame r = groups.apply(this, new Aggregation.Max());
-        if (this.index instanceof DateTimeIndex) {
-            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-        }
+        DataFrame r = this.apply(new Aggregation.Max());
         return r;
     }
     
     /**
-     * Compute the median of the numeric columns for each group or the entire data
-     * frame if the data is not grouped.
+     * Compute the median of the numeric columns.
      *
      * @return the new data frame
      */
     public DataFrame median() {
-        DataFrame r = groups.apply(this, new Aggregation.Median());
-        if (this.index instanceof DateTimeIndex) {
-            ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-        }
+        DataFrame r = this.apply(new Aggregation.Median());
         return r;
     }
 

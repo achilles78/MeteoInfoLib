@@ -276,7 +276,7 @@ public class Series implements Iterable {
      * @param idxValues index values
      * @return Result series
      */
-    public Series getValuesByIndex(List idxValues) {
+    public Series getValueByIndex(List idxValues) {
         Object[] rii = this.index.getIndices(idxValues);
         List<Integer> ii = (List<Integer>) rii[0];
         List rIndex = (List) rii[1];
@@ -341,13 +341,8 @@ public class Series implements Iterable {
      * @param function the function to reduce rows to grouping keys
      * @return the grouping
      */
-    public Series groupBy(final KeyFunction function) {
-        return new Series(
-                data,
-                index,
-                name,
-                new Grouping(this, function)
-        );
+    public SeriesGroupBy groupBy(final KeyFunction function) {
+        return new SeriesGroupBy(new Grouping(this, function), this);
     }
 
     /**
@@ -355,13 +350,8 @@ public class Series implements Iterable {
      *
      * @return the grouping
      */
-    public Series groupBy() {
-        return new Series(
-                data,
-                index,
-                name,
-                new Grouping(this)
-        );
+    public SeriesGroupBy groupBy() {
+        return new SeriesGroupBy(new Grouping(this), this);
     }
 
     /**
@@ -370,13 +360,8 @@ public class Series implements Iterable {
      * @param function the function to reduce rows to grouping keys
      * @return the grouping
      */
-    public Series groupBy(final TimeFunction function) {
-        return new Series(
-                data,
-                index,
-                name,
-                new Grouping(this, function)
-        );
+    public SeriesGroupBy groupBy(final TimeFunction function) {
+        return new SeriesGroupBy(new Grouping(this, function), this);
     }
 
     /**
@@ -385,7 +370,7 @@ public class Series implements Iterable {
      * @param tStr Time string
      * @return The grouping
      */
-    public Series groupBy(String tStr) {
+    public SeriesGroupBy groupBy(String tStr) {
         TimeFunction function = TimeFunctions.factory(tStr);
         if (function == null) {
             return null;
@@ -400,14 +385,9 @@ public class Series implements Iterable {
      * @param function the function to reduce rows to grouping keys
      * @return the grouping
      */
-    public Series resample(final WindowFunction function) {
+    public SeriesGroupBy resample(final WindowFunction function) {
         ((DateTimeIndex) index).setResamplPeriod(function.getPeriod());
-        return new Series(
-                data,
-                index,
-                name,
-                new Grouping(this, function)
-        );
+        return new SeriesGroupBy(new Grouping(this, function), this);
     }
 
     /**
@@ -416,7 +396,7 @@ public class Series implements Iterable {
      * @param pStr Period string
      * @return the grouping
      */
-    public Series resample(final String pStr) {
+    public SeriesGroupBy resample(final String pStr) {
         ReadablePeriod period = DateUtil.getPeriod(pStr);
         WindowFunction function = new WindowFunction(period);
         return resample(function);
