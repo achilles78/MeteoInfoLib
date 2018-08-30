@@ -33,25 +33,9 @@ public class Series implements Iterable {
     private Index index;
     private Array data;    //One dimension array
     private String name;
-    private Grouping groups;
 
     // </editor-fold>
     // <editor-fold desc="Constructor">
-    /**
-     * Constructor
-     *
-     * @param data Data array
-     * @param index Index
-     * @param name Name
-     * @param groups Groups
-     */
-    public Series(Array data, Index index, String name, Grouping groups) {
-        this.data = data;
-        this.index = index;
-        this.name = name;
-        this.groups = groups;
-    }
-
     /**
      * Constructor
      *
@@ -409,15 +393,7 @@ public class Series implements Iterable {
      * @return Mean object
      */
     public Object mean() {
-        if (groups == null) {
-            return ArrayMath.mean(data);
-        } else {
-            Series r = groups.apply(this, new Aggregation.Mean());
-            if (r.getIndex() instanceof DateTimeIndex) {
-                ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-            }
-            return r;
-        }
+        return ArrayMath.mean(data);
     }
 
     /**
@@ -427,15 +403,7 @@ public class Series implements Iterable {
      * @return Maximum object
      */
     public Object max() {
-        if (groups == null) {
-            return ArrayMath.max(data);
-        } else {
-            Series r = groups.apply(this, new Aggregation.Max());
-            if (r.getIndex() instanceof DateTimeIndex) {
-                ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-            }
-            return r;
-        }
+        return ArrayMath.max(data);
     }
 
     /**
@@ -445,15 +413,7 @@ public class Series implements Iterable {
      * @return Minimum object
      */
     public Object min() {
-        if (groups == null) {
-            return ArrayMath.min(data);
-        } else {
-            Series r = groups.apply(this, new Aggregation.Min());
-            if (r.getIndex() instanceof DateTimeIndex) {
-                ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
-            }
-            return r;
-        }
+        return ArrayMath.min(data);
     }
 
     /**
@@ -464,7 +424,7 @@ public class Series implements Iterable {
      */
     public Series equal(Number v) {
         Array rdata = ArrayMath.equal(data, v);
-        Series r = new Series(rdata, index, name, this.groups);
+        Series r = new Series(rdata, index, name);
         return r;
     }
 
@@ -476,7 +436,7 @@ public class Series implements Iterable {
      */
     public Series lessThan(Number v) {
         Array rdata = ArrayMath.lessThan(data, v);
-        Series r = new Series(rdata, index, name, this.groups);
+        Series r = new Series(rdata, index, name);
         return r;
     }
 
@@ -488,7 +448,7 @@ public class Series implements Iterable {
      */
     public Series lessThanOrEqual(Number v) {
         Array rdata = ArrayMath.lessThanOrEqual(data, v);
-        Series r = new Series(rdata, index, name, this.groups);
+        Series r = new Series(rdata, index, name);
         return r;
     }
 
@@ -500,7 +460,7 @@ public class Series implements Iterable {
      */
     public Series greaterThan(Number v) {
         Array rdata = ArrayMath.greaterThan(data, v);
-        Series r = new Series(rdata, index, name, this.groups);
+        Series r = new Series(rdata, index, name);
         return r;
     }
 
@@ -512,7 +472,7 @@ public class Series implements Iterable {
      */
     public Series greaterThanOrEqual(Number v) {
         Array rdata = ArrayMath.greaterThanOrEqual(data, v);
-        Series r = new Series(rdata, index, name, this.groups);
+        Series r = new Series(rdata, index, name);
         return r;
     }
 
