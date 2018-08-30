@@ -82,7 +82,7 @@ public class MapDataManage {
         MapDataType mdt = null;
         if (new File(fileName).isFile()) {
             String ext = GlobalUtil.getFileExtension(fileName);
-            switch (ext) {
+            switch (ext.toLowerCase()) {
                 case "shp":
                     mdt = MapDataType.SHAPE;
                     break;

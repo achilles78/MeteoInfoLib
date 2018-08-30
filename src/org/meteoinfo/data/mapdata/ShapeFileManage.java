@@ -76,8 +76,6 @@ public class ShapeFileManage {
         String cpgfilepath = shpfilepath.replaceFirst(shpfilepath.substring(shpfilepath.lastIndexOf(".")), ".cpg");
         File cpgFile = new File(cpgfilepath);
         String encoding = ENCODING;
-        if (Charset.defaultCharset() == Charset.forName("GBK"))
-            encoding = "GBK";
         if (cpgFile.exists()){
             BufferedReader sr = new BufferedReader(new FileReader(cpgFile));
             String ec = sr.readLine().trim();

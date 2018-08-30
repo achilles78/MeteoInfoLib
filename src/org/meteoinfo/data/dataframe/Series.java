@@ -12,7 +12,6 @@ import java.util.ListIterator;
 import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
 import org.meteoinfo.data.ArrayMath;
-import org.meteoinfo.data.dataframe.impl.Aggregation;
 import org.meteoinfo.data.dataframe.impl.Grouping;
 import org.meteoinfo.data.dataframe.impl.KeyFunction;
 import org.meteoinfo.data.dataframe.impl.TimeFunction;
@@ -490,7 +489,7 @@ public class Series implements Iterable {
         }
         for (int r = 0; r < n; r++) {
             sb.append(this.index.toString(r));
-            sb.append("\t");
+            sb.append("  ");
             sb.append(this.data.getObject(r).toString());
             sb.append("\n");
         }
@@ -515,7 +514,7 @@ public class Series implements Iterable {
         }
         for (int r = rn - n; r < rn; r++) {
             sb.append(this.index.toString(r));
-            sb.append("\t");
+            sb.append("  ");
             sb.append(this.data.getObject(r).toString());
             sb.append("\n");
         }

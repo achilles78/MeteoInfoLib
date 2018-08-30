@@ -7,6 +7,7 @@ package org.meteoinfo.data.dataframe;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
@@ -48,7 +49,17 @@ public class DateTimeIndex extends Index<DateTime> {
      * @param data Data list
      */
     public DateTimeIndex(List data){
+        this(data, "Index");
+    }
+    
+    /**
+     * Constructor
+     * @param data Data list
+     * @param name Name
+     */
+    public DateTimeIndex(List data, String name){
         this();
+        this.name = name;
         if (data.get(0) instanceof Date) {
             this.data = new ArrayList<>();
             for (Date d : (List<Date>)data) {
@@ -179,6 +190,21 @@ public class DateTimeIndex extends Index<DateTime> {
         return this.data.indexOf(d);
     }
     
+    private DateTime toDateTime(Object d){
+        DateTime dt = null;
+        if (d instanceof DateTime) {
+            dt = (DateTime)d;
+        } else if (d instanceof Date) {
+            dt = new DateTime(d);
+        } else if (d instanceof java.sql.Timestamp) {
+            dt = new DateTime(d);
+        } else if (d instanceof String) {
+            dt = DateUtil.getDateTime((String)d);
+        }
+        
+        return dt;
+    }
+    
     /**
      * Index of
      * @param d Date
@@ -222,6 +248,39 @@ public class DateTimeIndex extends Index<DateTime> {
         }
         
         return r;
+    }
+    
+    /**
+     * Get indices
+     * @param labels Labels
+     * @return Indices
+     */
+    @Override
+    public Object[] getIndices(List<Object> labels) {
+        if (labels.get(0) instanceof DateTime){
+            return super.getIndices(labels);
+        } else {
+            List<DateTime> dts = new ArrayList<>();
+            for (Object label : labels){
+                dts.add(toDateTime(label));
+            }
+            return super.getIndices(dts);
+        }        
+    }
+    
+    /**
+     * Get indices
+     * @param label Label
+     * @return Indices
+     */
+    @Override
+    public Object[] getIndices(Object label) {
+        if (label instanceof DateTime){
+            return super.getIndices(label);
+        } else {
+            DateTime dt = toDateTime(label);
+            return super.getIndices(dt);
+        }        
     }
     
     /**
@@ -348,6 +407,17 @@ public class DateTimeIndex extends Index<DateTime> {
     public String toString(int idx) {
         return ((DateTime)this.data.get(idx)).toString(this.format);
         //return this.dtFormatter.print((DateTime)this.data.get(idx));
+    }
+    
+    @Override
+    public Object clone() {
+        List ndata = new ArrayList<>(this.data);
+        DateTimeIndex r = new DateTimeIndex(ndata, this.name);
+        r.format = this.format;
+        r.period = this.period;
+        r.resamplePeriod = this.resamplePeriod;
+        
+        return r;
     }
     // </editor-fold>
 }

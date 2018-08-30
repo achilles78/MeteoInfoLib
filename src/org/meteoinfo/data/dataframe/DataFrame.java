@@ -474,6 +474,27 @@ public class DataFrame implements Iterable {
     public List row(final Integer row) {
         return new Views.SeriesListView<>(this, row, false);
     }
+    
+    /**
+     * Get row series
+     * @param row Row index
+     * @return Series
+     */
+    public Series rowSeries(int row) {
+        List rowData = new Views.SeriesListView<>(this, row, false);
+        Array a;
+        if (this.columns.isSameDataType()) {
+            a = Array.factory(this.columns.get(0).dataType, new int[]{rowData.size()});
+        } else {
+            a = Array.factory(DataType.OBJECT, new int[]{rowData.size()});
+        }
+        for (int i = 0; i < rowData.size(); i++){
+            a.setObject(i, rowData.get(i));
+        }
+        Index idx = this.columns.asIndex();
+        Series s = new Series(a, idx, "Index");
+        return s;
+    }
 
     /**
      * Get shape
@@ -1124,7 +1145,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df;
+                return df.length() == 1 ? df.rowSeries(0) : df;
             }
         }
     }
@@ -1181,7 +1202,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df;
+                return df.length() == 1 ? df.rowSeries(0) : df;
             }
         }
     }
@@ -1238,7 +1259,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df;
+                return df.length() == 1 ? df.rowSeries(0) : df;
             }
         }
     }
@@ -1318,7 +1339,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df;
+                return df.length() == 1 ? df.rowSeries(0) : df;
             }
         }
     }
@@ -1398,7 +1419,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df;
+                return df.length() == 1 ? df.rowSeries(0) : df;
             }
         }
     }
@@ -1418,10 +1439,26 @@ public class DataFrame implements Iterable {
 
         Object r;
         if (this.array2D) {
-            List ranges = new ArrayList<>();
-            ranges.add(rowRange);
-            ranges.add(colRange);
-            r = ArrayMath.takeValues((Array) this.data, ranges);
+            int n = ((Array) data).getShape()[1];
+            int rn = rowRange.size();
+            int cn = colRange.size();
+            DataType dtype = ((Array) data).getDataType();
+            r = Array.factory(dtype, new int[]{rn, cn});
+            String format = this.columns.get(0).getFormat();
+            int idx, jj = 0;
+            for (int j : colRange) {
+                int ii = 0;
+                for (int i : rowRange) {
+                    idx = ii * cn + jj;
+                    if (i < 0) {
+                        ((Array) r).setObject(idx, DataConvert.convertTo(null, dtype, format));
+                    } else {
+                        ((Array) r).setObject(idx, ((Array) data).getObject(i * n + j));
+                    }
+                    ii += 1;
+                }
+                jj += 1;
+            }
         } else {
             r = new ArrayList<>();
             int rn = rowRange.size();
@@ -1454,7 +1491,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df;
+                return df.length() == 1 ? df.rowSeries(0) : df;
             }
         }
     }
