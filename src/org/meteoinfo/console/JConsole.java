@@ -558,10 +558,13 @@ public class JConsole extends JScrollPane
 
     private String getCurrentText() {
         String part = text.getText().substring(cmdStart);
-
-        int idx = part.lastIndexOf(">>>");
-        if (idx >= 0) {
-            part = part.substring(idx + 2);
+        if (part.startsWith(">> "))
+            part = part.substring(3);
+        else {
+            int idx = part.lastIndexOf(">>>");
+            if (idx >= 0) {
+                part = part.substring(idx + 4);
+            }
         }
 
         return part;
