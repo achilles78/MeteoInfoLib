@@ -7,7 +7,6 @@ package org.meteoinfo.data.dataframe;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
@@ -260,7 +259,7 @@ public class DateTimeIndex extends Index<DateTime> {
         if (labels.get(0) instanceof DateTime){
             return super.getIndices(labels);
         } else {
-            List<DateTime> dts = new ArrayList<>();
+            List<Object> dts = new ArrayList<>();
             for (Object label : labels){
                 dts.add(toDateTime(label));
             }

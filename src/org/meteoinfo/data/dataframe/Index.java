@@ -410,14 +410,11 @@ public class Index<V> implements Iterable<V>{
     public Object[] getIndices(Object label) {
         List<Integer> r = new ArrayList<>();
         List<Object> rIndex = new ArrayList<>();
-        for (int i = 0; i < data.size(); i++){
-            if (data.get(i).equals(label)){
-                r.add(i);
-                rIndex.add(label);
-            }
-        }
-        
-        if (r.isEmpty()){
+        int idx = data.indexOf(label);
+        if (idx >= 0) {
+            r.add(idx);
+            rIndex.add(label);
+        } else {
             r.add(-1);
             rIndex.add(label);
         }

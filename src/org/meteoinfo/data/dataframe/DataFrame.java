@@ -1092,6 +1092,59 @@ public class DataFrame implements Iterable {
 //        return retain(keep.toArray(new Object[keep.size()]));
         return null;
     }
+    
+    /**
+     * Select by row and column ranges
+     *
+     * @param row Row index
+     * @param colRange Column range
+     * @return Selected data frame or series
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public Object select(int row, Range colRange) throws InvalidRangeException {
+        ColumnIndex cols = new ColumnIndex();
+        for (int i = colRange.first(); i <= colRange.last(); i += colRange.stride()) {
+            cols.add((Column) this.columns.get(i).clone());
+        }
+
+        Object r;
+        if (this.array2D) {
+            List ranges = new ArrayList<>();
+            ranges.add(new Range(row, row, 1));
+            ranges.add(new Range(colRange.first(), colRange.last(), colRange.stride()));
+            r = ArrayMath.section((Array) this.data, ranges);
+        } else {
+            r = new ArrayList<>();
+            int rn = 1;
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) {
+                Array rr = Array.factory(this.columns.get(j).getDataType(), new int[]{rn});
+                Array mr = ((List<Array>) this.data).get(j);
+                rr.setObject(0, mr.getObject(row));
+                ((ArrayList) r).add(rr);
+            }
+            if (cols.size() == 1) {
+                r = ((ArrayList) r).get(0);
+            }
+        }
+
+        if (r == null) {
+            return null;
+        } else {
+            Index rIndex = this.index.subIndex(row, row + 1, 1);
+            if (cols.size() == 1) {
+                Series s = new Series((Array) r, rIndex, cols.get(0).getName());
+                return s;
+            } else {
+                DataFrame df;
+                if (r instanceof Array) {
+                    df = new DataFrame((Array) r, rIndex, cols);
+                } else {
+                    df = new DataFrame((ArrayList) r, rIndex, cols);
+                }
+                return df.rowSeries(0);
+            }
+        }
+    }
 
     /**
      * Select by row and column ranges
@@ -1145,7 +1198,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df.length() == 1 ? df.rowSeries(0) : df;
+                return df;
             }
         }
     }
@@ -1202,7 +1255,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df.length() == 1 ? df.rowSeries(0) : df;
+                return df;
             }
         }
     }
@@ -1259,7 +1312,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df.length() == 1 ? df.rowSeries(0) : df;
+                return df;
             }
         }
     }
@@ -1339,7 +1392,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df.length() == 1 ? df.rowSeries(0) : df;
+                return df;
             }
         }
     }
@@ -1419,7 +1472,63 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df.length() == 1 ? df.rowSeries(0) : df;
+                return df;
+            }
+        }
+    }
+    
+    /**
+     * Select by row and column ranges
+     *
+     * @param row Row index
+     * @param colRange Column range
+     * @return Selected data frame or series
+     */
+    public Object select(int row, List<Integer> colRange) {
+        ColumnIndex cols = new ColumnIndex();
+        for (int i : colRange) {
+            cols.add(this.columns.get(i));
+        }
+
+        Object r;
+        if (this.array2D) {
+            int n = ((Array) data).getShape()[1];
+            int rn = 1;
+            int cn = colRange.size();
+            DataType dtype = ((Array) data).getDataType();
+            r = Array.factory(dtype, new int[]{rn, cn});
+            for (int j : colRange) {
+                ((Array) r).setObject(0, ((Array) data).getObject(row * n + j));
+            }
+        } else {
+            r = new ArrayList<>();
+            int rn = 1;
+            for (int j : colRange) {
+                Array rr = Array.factory(this.columns.get(j).getDataType(), new int[]{rn});
+                Array mr = ((List<Array>) this.data).get(j);
+                rr.setObject(0, mr.getObject(row));
+                ((ArrayList) r).add(rr);
+            }
+            if (cols.size() == 1) {
+                r = ((ArrayList) r).get(0);
+            }
+        }
+
+        if (r == null) {
+            return null;
+        } else {
+            Index rIndex = this.index.subIndex(row, row + 1, 1);
+            if (cols.size() == 1) {
+                Series s = new Series((Array) r, rIndex, cols.get(0).getName());
+                return s;
+            } else {
+                DataFrame df;
+                if (r instanceof Array) {
+                    df = new DataFrame((Array) r, rIndex, cols);
+                } else {
+                    df = new DataFrame((ArrayList) r, rIndex, cols);
+                }
+                return df.rowSeries(0);
             }
         }
     }
@@ -1491,7 +1600,7 @@ public class DataFrame implements Iterable {
                 } else {
                     df = new DataFrame((ArrayList) r, rIndex, cols);
                 }
-                return df.length() == 1 ? df.rowSeries(0) : df;
+                return df;
             }
         }
     }
