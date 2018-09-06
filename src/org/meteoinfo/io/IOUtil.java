@@ -6,9 +6,14 @@
 package org.meteoinfo.io;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -88,6 +93,28 @@ public class IOUtil {
      * @return Encoding
      */
     public static String encodingDetectShp(String shpfilepath){
+        String cpgfilepath = shpfilepath.replaceFirst(shpfilepath.substring(shpfilepath.lastIndexOf(".")), ".cpg");
+        File cpgFile = new File(cpgfilepath);
+        if (cpgFile.exists()){
+            BufferedReader sr = null;
+            try {
+                sr = new BufferedReader(new FileReader(cpgFile));
+                String ec = sr.readLine().trim();
+                sr.close();
+                return ec;
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(IOUtil.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(IOUtil.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if (sr != null)
+                        sr.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(IOUtil.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
         String dbffilepath = shpfilepath.replace(shpfilepath.substring(shpfilepath.lastIndexOf(".")), ".dbf");
         File dbfFile = new File(dbffilepath);
         if (!dbfFile.exists()) {
