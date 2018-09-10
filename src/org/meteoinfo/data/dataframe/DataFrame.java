@@ -1145,6 +1145,60 @@ public class DataFrame implements Iterable {
             }
         }
     }
+    
+    /**
+     * Set values by row and column ranges
+     *
+     * @param row Row index
+     * @param colRange Column range
+     * @param value The value
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public void setValues(int row, Range colRange, Number value) throws InvalidRangeException {
+        ColumnIndex cols = new ColumnIndex();
+        for (int i = colRange.first(); i <= colRange.last(); i += colRange.stride()) {
+            cols.add((Column) this.columns.get(i).clone());
+        }
+
+        if (this.array2D) {
+            List ranges = new ArrayList<>();
+            ranges.add(new Range(row, row, 1));
+            ranges.add(new Range(colRange.first(), colRange.last(), colRange.stride()));
+            ArrayMath.setSection((Array) this.data, ranges, value);
+        } else {
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) {
+                ((List<Array>) this.data).get(j).setObject(row, value);
+            }
+        }
+    }
+    
+    /**
+     * Set values by row and column ranges
+     *
+     * @param row Row index
+     * @param colRange Column range
+     * @param value The value array
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public void setValues(int row, Range colRange, Array value) throws InvalidRangeException {
+        ColumnIndex cols = new ColumnIndex();
+        for (int i = colRange.first(); i <= colRange.last(); i += colRange.stride()) {
+            cols.add((Column) this.columns.get(i).clone());
+        }
+
+        if (this.array2D) {
+            List ranges = new ArrayList<>();
+            ranges.add(new Range(row, row, 1));
+            ranges.add(new Range(colRange.first(), colRange.last(), colRange.stride()));
+            ArrayMath.setSection((Array) this.data, ranges, value);
+        } else {
+            int i = 0;
+            for (int j = colRange.first(); j <= colRange.last(); j += colRange.stride()) {
+                ((List<Array>) this.data).get(j).setObject(row, value.getObject(i));
+                i += 1;
+            }
+        }
+    }
 
     /**
      * Select by row and column ranges
