@@ -3747,12 +3747,12 @@ public class ArrayMath {
                         break;
                     }
                 }
-            }
-            aidx.set(current);
+            }            
             if (isIn) {
                 iter.setObjectCurrent(v.getObject(vidx));
                 vidx.incr();
             } else {
+                aidx.set(current);
                 iter.setObjectCurrent(a.getObject(aidx));
             }
         }

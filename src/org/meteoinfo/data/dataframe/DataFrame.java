@@ -474,9 +474,10 @@ public class DataFrame implements Iterable {
     public List row(final Integer row) {
         return new Views.SeriesListView<>(this, row, false);
     }
-    
+
     /**
      * Get row series
+     *
      * @param row Row index
      * @return Series
      */
@@ -488,7 +489,7 @@ public class DataFrame implements Iterable {
         } else {
             a = Array.factory(DataType.OBJECT, new int[]{rowData.size()});
         }
-        for (int i = 0; i < rowData.size(); i++){
+        for (int i = 0; i < rowData.size(); i++) {
             a.setObject(i, rowData.get(i));
         }
         Index idx = this.columns.asIndex();
@@ -655,9 +656,9 @@ public class DataFrame implements Iterable {
      * @param column Column
      */
     public void addColumn(Column column) {
-        if (this.data == null) 
+        if (this.data == null) {
             this.columns.add(column);
-        else {
+        } else {
             Array array = Array.factory(column.getDataType(), new int[]{this.length()});
             try {
                 this.addColumn(column, array);
@@ -739,16 +740,16 @@ public class DataFrame implements Iterable {
                 Array ra = Array.factory(dt, new int[]{this.length(), this.size() + 1});
                 Range rowRange = new Range(0, this.length() - 1, 1);
                 List<Integer> colList = new ArrayList<>();
-                for (int i = 0; i < this.size(); i++) {
+                for (int i = 0; i < this.size() + 1; i++) {
                     if (i != loc) {
                         colList.add(i);
                     }
                 }
                 List<Object> mranges = Arrays.asList(rowRange, colList);
-                ArrayMath.setSection_Mix(ra, mranges, (Array) this.data);
+                ra = ArrayMath.setSection_Mix(ra, mranges, (Array) this.data);
                 Range colRange = new Range(loc, loc, 1);
                 List<Range> ranges = Arrays.asList(rowRange, colRange);
-                ArrayMath.setSection(ra, ranges, a);
+                ra = ArrayMath.setSection(ra, ranges, a);
                 this.data = ra;
             } else {
                 this.dataToList();
@@ -817,20 +818,12 @@ public class DataFrame implements Iterable {
         int col = this.columns.getNames().indexOf(colName);
         if (col >= 0) {
             if (this.array2D) {
-                DataType dt1 = this.columns.get(0).getDataType();
-                DataType dt2 = a.getDataType();
-                if (dt1 == dt2) {
-                    Range rowRange = new Range(0, this.length() - 1, 1);
-                    Range colRange = new Range(col, col, 1);
-                    List<Range> ranges = new ArrayList<>();
-                    ranges.add(rowRange);
-                    ranges.add(colRange);
-                    ArrayMath.setSection((Array) this.data, ranges, a);
-                } else {
-                    this.dataToList();
-                    this.columns.get(col).setDataType(dt2);
-                    ((List<Array>) this.data).set(col, a);
-                }
+                Range rowRange = new Range(0, this.length() - 1, 1);
+                Range colRange = new Range(col, col, 1);
+                List<Range> ranges = new ArrayList<>();
+                ranges.add(rowRange);
+                ranges.add(colRange);
+                ArrayMath.setSection((Array) this.data, ranges, a);
             } else {
                 this.columns.get(col).setDataType(a.getDataType());
                 ((List<Array>) this.data).set(col, a);
@@ -848,7 +841,13 @@ public class DataFrame implements Iterable {
      * @throws InvalidRangeException
      */
     public void setColumn(String colName, Object a) throws InvalidRangeException {
-        DataType dt = ArrayMath.getDataType(a);
+        DataType dt;
+        int col = this.columns.getNames().indexOf(colName);
+        if (col >= 0) {
+            dt = this.columns.get(col).dataType;
+        } else {
+            dt = ArrayMath.getDataType(a);
+        }
         Array ra = Array.factory(dt, new int[]{this.length()});
         for (int i = 0; i < ra.getSize(); i++) {
             ra.setObject(i, a);
@@ -905,7 +904,7 @@ public class DataFrame implements Iterable {
             for (int i = 0; i < this.size(); i++) {
                 Array ra = Array.factory(((Array) this.data).getDataType(), new int[]{this.length()});
                 for (int j = 0; j < this.length(); j++) {
-                    ra.setObject(i, ((Array) data).getObject(j * this.size() + i));
+                    ra.setObject(j, ((Array) data).getObject(j * this.size() + i));
                 }
                 r.add(ra);
             }
@@ -949,7 +948,7 @@ public class DataFrame implements Iterable {
      * @param row Row data list
      */
     public void append(Object name, List row) {
-        if (this.index == null){
+        if (this.index == null) {
             List idx = new ArrayList<>();
             idx.add(name);
             this.index = Index.factory(idx);
@@ -960,14 +959,14 @@ public class DataFrame implements Iterable {
             this.data = new ArrayList<Array>();
             if (row.isEmpty()) {
                 for (Column col : this.columns) {
-                    ((ArrayList<Array>)this.data).add(Array.factory(col.dataType, new int[]{1}));
+                    ((ArrayList<Array>) this.data).add(Array.factory(col.dataType, new int[]{1}));
                 }
             } else {
                 int i = 0;
                 for (Column col : this.columns) {
                     Array a = Array.factory(col.dataType, new int[]{1});
                     a.setObject(0, row.get(i));
-                    ((ArrayList<Array>)this.data).add(a);
+                    ((ArrayList<Array>) this.data).add(a);
                     i += 1;
                 }
             }
@@ -1092,7 +1091,7 @@ public class DataFrame implements Iterable {
 //        return retain(keep.toArray(new Object[keep.size()]));
         return null;
     }
-    
+
     /**
      * Select by row and column ranges
      *
@@ -1145,7 +1144,7 @@ public class DataFrame implements Iterable {
             }
         }
     }
-    
+
     /**
      * Set values by row and column ranges
      *
@@ -1171,7 +1170,7 @@ public class DataFrame implements Iterable {
             }
         }
     }
-    
+
     /**
      * Set values by row and column ranges
      *
@@ -1530,7 +1529,7 @@ public class DataFrame implements Iterable {
             }
         }
     }
-    
+
     /**
      * Select by row and column ranges
      *
@@ -2058,7 +2057,7 @@ public class DataFrame implements Iterable {
         sw.flush();
         sw.close();
     }
-    
+
     public <V> DataFrame describe() {
         return Aggregation.describe(new Grouping().apply(this, new Aggregation.Describe<V>()));
     }
@@ -2172,9 +2171,10 @@ public class DataFrame implements Iterable {
         WindowFunction function = new WindowFunction(period);
         return groupByIndex(function);
     }
-    
+
     /**
      * Apply a function
+     *
      * @param <V>
      * @param function The function
      * @return Result data frame
@@ -2186,14 +2186,14 @@ public class DataFrame implements Iterable {
         }
         return r;
     }
-    
+
     /**
      * Compute the sum of the numeric columns.
      *
      * @return the new data frame
      */
     public DataFrame count() {
-        DataFrame r = this.apply(new Aggregation.Count());        
+        DataFrame r = this.apply(new Aggregation.Count());
         return r;
     }
 
@@ -2216,7 +2216,7 @@ public class DataFrame implements Iterable {
         DataFrame r = this.apply(new Aggregation.Mean());
         return r;
     }
-    
+
     /**
      * Compute the minimum of the numeric columns.
      *
@@ -2226,7 +2226,7 @@ public class DataFrame implements Iterable {
         DataFrame r = this.apply(new Aggregation.Min());
         return r;
     }
-    
+
     /**
      * Compute the Maximum of the numeric columns.
      *
@@ -2236,7 +2236,7 @@ public class DataFrame implements Iterable {
         DataFrame r = this.apply(new Aggregation.Max());
         return r;
     }
-    
+
     /**
      * Compute the median of the numeric columns.
      *
