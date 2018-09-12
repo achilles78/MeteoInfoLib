@@ -203,6 +203,9 @@ public class DataColumn {
      */
     public void setDataType(DataTypes dataType) {
         this.dataType = dataType;
+        if (dataType == DataTypes.Date){
+            this.format = "YYYYMMddHH";
+        }
     }
 
     /**
