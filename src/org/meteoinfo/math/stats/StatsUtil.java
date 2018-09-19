@@ -226,8 +226,21 @@ public class StatsUtil {
      * @param x X sample data - two dimension array
      * @return Estimated regression parameters and residuals
      */
-    public static Array[] mutipleLineRegress_OLS(Array y, Array x) {
+    public static Array[] multipleLineRegress_OLS(Array y, Array x) {
+        return multipleLineRegress_OLS(y, x, false);
+    }
+    
+    /**
+     * Implements ordinary least squares (OLS) to estimate the parameters of a 
+     * multiple linear regression model.
+     * @param y Y sample data - one dimension array
+     * @param x X sample data - two dimension array
+     * @param noIntercept No intercept
+     * @return Estimated regression parameters and residuals
+     */
+    public static Array[] multipleLineRegress_OLS(Array y, Array x, boolean noIntercept) {
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
+        regression.setNoIntercept(noIntercept);
         double[] yy = (double[])ArrayUtil.copyToNDJavaArray(y);
         double[][] xx = (double[][])ArrayUtil.copyToNDJavaArray(x);
         regression.newSampleData(yy, xx);

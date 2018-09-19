@@ -6,6 +6,11 @@
 package org.meteoinfo.math.linalg;
 
 import java.util.List;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunction;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.CholeskyDecomposition;
@@ -17,6 +22,7 @@ import org.apache.commons.math3.linear.QRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
+import org.apache.commons.math3.util.Pair;
 import org.ejml.data.Complex_F64;
 import org.ejml.simple.SimpleBase;
 import org.ejml.simple.SimpleEVD;
@@ -411,5 +417,50 @@ public class LinalgUtil {
         }
 
         return r;
+    }
+
+    /**
+     * Not correct at present !!!
+     * @param a
+     * @param b
+     * @return 
+     */
+    public static Array lstsq(Array a, Array b) {
+        final double[][] aa = (double[][]) ArrayUtil.copyToNDJavaArray(a);
+        final double[] bb = (double[]) ArrayUtil.copyToNDJavaArray(b);
+
+        // the model function 
+        MultivariateJacobianFunction function = new MultivariateJacobianFunction() {
+            @Override
+            public Pair<RealVector, RealMatrix> value(final RealVector point) {
+                RealVector value = new ArrayRealVector(bb.length);
+                RealMatrix jacobian = new Array2DRowRealMatrix(aa, false);
+                for (int i = 0; i < bb.length; ++i) {
+                    
+                }
+                return new Pair<>(value, jacobian);
+
+            }
+        };
+
+        // least squares problem to solve
+        LeastSquaresProblem problem = new LeastSquaresBuilder().
+                //start(new double[]{100.0, 50.0}).
+                model(function).
+                target(bb).
+                lazyEvaluation(false).
+                maxEvaluations(1000).
+                maxIterations(1000).
+                build();
+        LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
+        
+        RealVector r = optimum.getPoint();
+        int n = r.getDimension();
+        Array x = Array.factory(DataType.DOUBLE, new int[]{n});
+        for (int i = 0; i < n; i++) {
+            x.setDouble(i, r.getEntry(i));
+        }
+        
+        return x;
     }
 }
