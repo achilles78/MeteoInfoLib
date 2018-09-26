@@ -53,6 +53,7 @@ import org.meteoinfo.shape.Graphic;
 import org.meteoinfo.shape.PointShape;
 import org.meteoinfo.shape.PolygonShape;
 import org.meteoinfo.shape.PolylineShape;
+import org.meteoinfo.shape.ShapeUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -630,15 +631,8 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
      * @param pgb PolygonBreak
      * @return Graphic
      */
-    public Graphic addCircle(float x, float y, float radius, PolygonBreak pgb) {
-        List<PointD> points = new ArrayList<>();
-        points.add(new PointD(x - radius, y));
-        points.add(new PointD(x, y -  radius));
-        points.add(new PointD(x + radius, y));
-        points.add(new PointD(x, y + radius));
-        
-        CircleShape aPGS = new CircleShape();
-        aPGS.setPoints(points);
+    public Graphic addCircle(float x, float y, float radius, PolygonBreak pgb) {        
+        CircleShape aPGS = ShapeUtil.createCircleShape(x, y, radius);
         Graphic graphic = new Graphic(aPGS, pgb);
         this.mapView.addGraphic(graphic);
         

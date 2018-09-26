@@ -480,7 +480,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape contains aother one
+     * If this shape contains another one
      * @param other Other shape
      * @return Contains or not
      */
@@ -491,9 +491,9 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape covered by aother one
+     * If this shape covered by another one
      * @param other Other shape
-     * @return Coverd by or not
+     * @return Covered by or not
      */
     public boolean coveredBy(Shape other){
         Geometry g1 = this.toGeometry();
@@ -502,7 +502,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape covers aother one
+     * If this shape covers another one
      * @param other Other shape
      * @return Covers or not
      */
@@ -513,7 +513,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape disjoint aother one
+     * If this shape disjoint another one
      * @param other Other shape
      * @return Disjoint or not
      */
@@ -524,7 +524,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape equals aother one
+     * If this shape equals another one
      * @param other Other shape
      * @return Equals or not
      */
@@ -535,7 +535,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape intersects aother one
+     * If this shape intersects another one
      * @param other Other shape
      * @return Intersects or not
      */
@@ -546,7 +546,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape overlaps aother one
+     * If this shape overlaps another one
      * @param other Other shape
      * @return Overlaps or not
      */
@@ -557,7 +557,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape touches aother one
+     * If this shape touches another one
      * @param other Other shape
      * @return Touches or not
      */
@@ -568,7 +568,7 @@ public abstract class Shape implements Cloneable{
     }
     
     /**
-     * If this shape within aother one
+     * If this shape within another one
      * @param other Other shape
      * @return Within or not
      */

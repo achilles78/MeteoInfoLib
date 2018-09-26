@@ -47,6 +47,8 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.Icon;
@@ -212,6 +214,25 @@ public class JConsole extends JScrollPane
         new Thread(this).start();
 
         requestFocus();
+    }
+
+    /**
+     * Update out - test failed
+     */
+    public void updateOut() {
+//        outPipe = new PipedOutputStream();
+//        try {
+//            in = new PipedInputStream((PipedOutputStream) outPipe);
+//        } catch (IOException e) {
+//            print("Console internal error (1)...", Color.red);
+//        }
+        PipedOutputStream pout = new PipedOutputStream();
+        out = new PrintStream(pout);
+        try {
+            inPipe = new BlockingPipedInputStream(pout);
+        } catch (IOException e) {
+            print("Console internal error: " + e);
+        }
     }
 
     @Override
@@ -558,9 +579,9 @@ public class JConsole extends JScrollPane
 
     private String getCurrentText() {
         String part = text.getText().substring(cmdStart);
-        if (part.startsWith(">> "))
+        if (part.startsWith(">> ")) {
             part = part.substring(3);
-        else {
+        } else {
             int idx = part.lastIndexOf(">>>");
             if (idx >= 0) {
                 part = part.substring(idx + 4);

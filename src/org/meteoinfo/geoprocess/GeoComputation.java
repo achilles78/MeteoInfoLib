@@ -34,6 +34,7 @@ import org.meteoinfo.table.DataColumn;
 import org.meteoinfo.table.DataRow;
 import org.meteoinfo.table.DataTable;
 import org.meteoinfo.layer.VectorLayer;
+import org.meteoinfo.shape.CircleShape;
 import org.meteoinfo.shape.PointShape;
 import org.meteoinfo.shape.PointZ;
 import org.meteoinfo.shape.Shape;
@@ -156,6 +157,10 @@ public class GeoComputation {
     public static boolean pointInPolygon(PolygonShape aPolygon, PointD aPoint) {
         if (!MIMath.pointInExtent(aPoint, aPolygon.getExtent())) {
             return false;
+        }
+        
+        if (aPolygon instanceof CircleShape){
+            return ((CircleShape)aPolygon).contains(aPoint);
         }
 
         boolean isIn = false;

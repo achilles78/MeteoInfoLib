@@ -15,6 +15,7 @@ package org.meteoinfo.shape;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.PointD;
 
 /**
@@ -70,6 +71,40 @@ public class CircleShape extends PolygonShape {
      */
     public double getRadius() {
         return this.getExtent().getHeight() / 2;
+    }
+    
+    /**
+     * If this shape contains another one
+     * @param other Other shape
+     * @return Contains or not
+     */
+    @Override
+    public boolean contains(Shape other){
+        if (other instanceof PointShape) {
+            return this.contains(((PointShape)other).point);
+        } else {
+            PointD center = this.getCenter();
+            double radius = this.getRadius();
+            boolean isIn = true;
+            for (PointD p : other.getPoints()){
+                if (GeoComputation.distance(p, center) > radius) {
+                    isIn = false;
+                    break;
+                }
+            }
+            return isIn;
+        }
+    }
+    
+    /**
+     * If this shape contains a point
+     * @param p Point
+     * @return Contains a point or not
+     */
+    public boolean contains(PointD p){
+        PointD center = this.getCenter();
+        double radius = this.getRadius();
+        return GeoComputation.distance(p, center) <= radius;
     }
 
     /**

@@ -299,4 +299,25 @@ public class ShapeUtil {
 
         return ps;
     }
+    
+    /**
+     * Add a circle
+     *
+     * @param x Center x
+     * @param y Center y
+     * @param radius
+     * @return Graphic
+     */
+    public static CircleShape createCircleShape(float x, float y, float radius) {
+        List<PointD> points = new ArrayList<>();
+        points.add(new PointD(x - radius, y));
+        points.add(new PointD(x, y -  radius));
+        points.add(new PointD(x + radius, y));
+        points.add(new PointD(x, y + radius));
+        
+        CircleShape aPGS = new CircleShape();
+        aPGS.setPoints(points);
+        
+        return aPGS;
+    }
 }
