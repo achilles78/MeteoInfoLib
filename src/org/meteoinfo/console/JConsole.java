@@ -47,8 +47,6 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.Icon;
@@ -65,6 +63,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import org.meteoinfo.io.UnclosableOutputStream;
 
 /**
  * A JFC/Swing based console for the BeanShell desktop. This is a descendant of
@@ -86,7 +85,7 @@ public class JConsole extends JScrollPane
     private OutputStream outPipe;
     private InputStream inPipe;
     private InputStream in;
-    private PrintStream out;
+    private UnclosableOutputStream out;
 
     public InputStream getInputStream() {
         return in;
@@ -203,7 +202,7 @@ public class JConsole extends JScrollPane
         inPipe = cin;
         if (inPipe == null) {
             PipedOutputStream pout = new PipedOutputStream();
-            out = new PrintStream(pout);
+            out = new UnclosableOutputStream(pout);
             try {
                 inPipe = new BlockingPipedInputStream(pout);
             } catch (IOException e) {
@@ -227,7 +226,7 @@ public class JConsole extends JScrollPane
 //            print("Console internal error (1)...", Color.red);
 //        }
         PipedOutputStream pout = new PipedOutputStream();
-        out = new PrintStream(pout);
+        out = new UnclosableOutputStream(pout);
         try {
             inPipe = new BlockingPipedInputStream(pout);
         } catch (IOException e) {

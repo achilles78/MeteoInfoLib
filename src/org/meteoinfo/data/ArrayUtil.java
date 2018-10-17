@@ -492,7 +492,7 @@ public class ArrayUtil {
      * @param step Step value
      * @return Array
      */
-    public static Array arrayRange(Number start, Number stop, final Number step) {
+    public static Array arrayRange_bak(Number start, Number stop, final Number step) {
         if (stop == null) {
             stop = start;
             start = 0;
@@ -532,7 +532,7 @@ public class ArrayUtil {
      * @param step Step value
      * @return Array
      */
-    public static Array arrayRange_bak(Number start, Number stop, final Number step) {
+    public static Array arrayRange(Number start, Number stop, final Number step) {
         if (stop == null) {
             stop = start;
             start = 0;
@@ -596,6 +596,42 @@ public class ArrayUtil {
      * @return Array
      */
     public static Array lineSpace(Number start, Number stop, final int n, boolean endpoint) {
+        if (stop == null) {
+            stop = start;
+            start = 0;
+        }
+        double startv = start.doubleValue();
+        double stopv = stop.doubleValue();
+        double stepv = (stopv - startv) / (n - 1);
+        double endv = n * stepv + startv;
+        int nn = n;
+        if (endpoint) {
+            if (endv < stopv) {
+                nn += 1;
+            }
+        } else if (endv >= stopv) {
+            nn -= 1;
+        }
+        Array a = Array.factory(DataType.DOUBLE, new int[]{nn});
+        double v = startv;
+        for (int i = 0; i < nn; i++) {
+            a.setDouble(i, v);
+            v += stepv;
+        }
+
+        return a;
+    }
+    
+    /**
+     * Array line space
+     *
+     * @param start Start value
+     * @param stop Stop value
+     * @param n Number value
+     * @param endpoint If stop is included
+     * @return Array
+     */
+    public static Array lineSpace_bak(Number start, Number stop, final int n, boolean endpoint) {
         if (stop == null) {
             stop = start;
             start = 0;
