@@ -593,11 +593,14 @@ public class ChartBreak extends ColorBreak {
                 }
                 break;
             case PieChart:
-                float sum = (aCB.getMaxValue() - aCB.getMinValue()) * 2 / 3;
+                //float sum = (aCB.getMaxValue() - aCB.getMinValue()) * 2 / 3;
+                float sum = aCB.getMaxValue();
                 float data = sum / aCB.getItemNum();
                 for (i = 0; i < aCB.getItemNum(); i++) {
                     aCB.getChartData().set(i, data);
                 }
+                aCB.setMinSize(aCB._maxSize);
+                //aCB.setMaxSize(20);
                 break;
         }
 
