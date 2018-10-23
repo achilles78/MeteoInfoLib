@@ -189,7 +189,8 @@ public class Draw {
             return new Dimension(width, height);
         } else {
             FontMetrics metrics = g.getFontMetrics();
-            int height = (int) (metrics.getAscent() * 5.f / 6.f);
+            //int height = (int) (metrics.getAscent() * 5.f / 6.f);
+            int height = metrics.getAscent();
             //return new Dimension(metrics.stringWidth(str), metrics.getHeight());
             return new Dimension(metrics.stringWidth(str), height);
         }
@@ -332,7 +333,8 @@ public class Draw {
                 }
                 break;
             default:
-                g.drawString(str, x, y);
+                FontMetrics fm = g.getFontMetrics();
+                g.drawString(str, x, y - fm.getDescent());
                 break;
         }
     }

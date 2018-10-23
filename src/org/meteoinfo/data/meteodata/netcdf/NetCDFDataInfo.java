@@ -707,180 +707,190 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
             }
 
             if (pVar != null) {
-                ucar.nc2.Attribute pAtt = pVar.getAttributes().get(pvIdx);
-                String attStr = pAtt.getStringValue();
-                switch (attStr) {
-                    case "albers_conical_equal_area": {
-                        //Two standard parallels condition need to be considered
-                        Array values = pVar.findAttribute("standard_parallel").getValues();
-                        String sp1 = String.valueOf(values.getDouble(0));
-                        String sp2 = "";
-                        if (values.getSize() == 2) {
-                            sp2 = String.valueOf(values.getDouble(1));
+                if (pVar.findAttribute("proj4") != null) {
+                    projStr = pVar.findAttribute("proj4").getValue(0).toString();
+                } else {
+                    ucar.nc2.Attribute pAtt = pVar.getAttributes().get(pvIdx);
+                    String attStr = pAtt.getStringValue();
+                    switch (attStr) {
+                        case "albers_conical_equal_area": {
+                            //Two standard parallels condition need to be considered
+                            Array values = pVar.findAttribute("standard_parallel").getValues();
+                            String sp1 = String.valueOf(values.getDouble(0));
+                            String sp2 = "";
+                            if (values.getSize() == 2) {
+                                sp2 = String.valueOf(values.getDouble(1));
+                            }
+                            projStr = "+proj=aea"
+                                    + "+lat_1=" + sp1;
+                            if (!sp2.isEmpty()) {
+                                projStr += "+lat_2=" + sp2;
+                            }
+                            projStr += "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
                         }
-                        projStr = "+proj=aea"
-                                + "+lat_1=" + sp1;
-                        if (!sp2.isEmpty()) {
-                            projStr += "+lat_2=" + sp2;
+                        case "azimuthal_equidistant":
+                            projStr = "+proj=aeqd"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "lambert_azimuthal_equal_area":
+                            projStr = "+proj=laea"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "lambert_conformal_conic": {
+                            //Two standard parallels condition need to be considered
+                            Array values = pVar.findAttribute("standard_parallel").getValues();
+                            String sp1 = String.valueOf(values.getDouble(0));
+                            String sp2 = "";
+                            if (values.getSize() == 2) {
+                                sp2 = String.valueOf(values.getDouble(1));
+                            }
+                            projStr = "+proj=lcc"
+                                    + "+lat_1=" + sp1;
+                            if (!sp2.isEmpty()) {
+                                projStr += "+lat_2=" + sp2;
+                            }
+                            projStr += "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
                         }
-                        projStr += "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
+                        case "lambert_cylindrical_equal_area":
+                            projStr = "+proj=cea"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString();
+                            if (pVar.findAttribute("standard_parallel") != null) {
+                                projStr += "+lat_ts=" + pVar.findAttribute("standard_parallel").getValue(0).toString();
+                            } else if (pVar.findAttribute("scale_factor_at_projection_origin") != null) {
+                                projStr += "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "mercator":
+                            projStr = "+proj=merc"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString();
+                            if (pVar.findAttribute("standard_parallel") != null) {
+                                projStr += "+lat_ts=" + pVar.findAttribute("standard_parallel").getValue(0).toString();
+                            } else if (pVar.findAttribute("scale_factor_at_projection_origin") != null) {
+                                projStr += "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "orthographic":
+                            projStr = "+proj=ortho"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "polar_stereographic":
+                            projStr = "+proj=stere";
+                            if (pVar.findAttribute("longitude_of_projection_origin") != null) {
+                                projStr += "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString();
+                            } else if (pVar.findAttribute("straight_vertical_longitude_from_pole") != null) {
+                                projStr += "+lon_0=" + pVar.findAttribute("straight_vertical_longitude_from_pole").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("latitude_of_projection_origin") != null) {
+                                projStr += "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("standard_parallel") != null) {
+                                projStr += "+lat_ts=" + pVar.findAttribute("standard_parallel").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("scaling_factor") != null) {
+                                projStr += "+k=" + pVar.findAttribute("scaling_factor").getValue(0).toString();
+                            } else if (pVar.findAttribute("standard_parallel") != null) {
+                                String stPs = pVar.findAttribute("standard_parallel").getValue(0).toString();
+                                //projStr += "+lat_ts=" + stPs;
+                                double k0 = ProjectionInfo.calScaleFactorFromStandardParallel(Double.parseDouble(stPs));
+                                projStr += "+k=" + String.format("%1$.2f", k0);
+                            } else if (pVar.findAttribute("scale_factor_at_projection_origin") != null) {
+                                projStr += "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "rotated_latitude_longitude":
+                            break;
+                        case "stereographic":
+                            projStr = "+proj=stere"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString()
+                                    + "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "transverse_mercator":
+                            projStr = "+proj=tmerc"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString()
+                                    + "+k_0=" + pVar.findAttribute("scale_factor_at_central_meridian").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
+                        case "vertical_perspective":
+                            projStr = "+proj=geos"
+                                    + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
+                                    + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString()
+                                    + "+h=" + pVar.findAttribute("perspective_point_height").getValue(0).toString();
+                            if (pVar.findAttribute("false_easting") != null) {
+                                projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
+                            }
+                            if (pVar.findAttribute("false_northing") != null) {
+                                projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
+                            }
+                            break;
                     }
-                    case "azimuthal_equidistant":
-                        projStr = "+proj=aeqd"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "lambert_azimuthal_equal_area":
-                        projStr = "+proj=laea"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "lambert_conformal_conic": {
-                        //Two standard parallels condition need to be considered
-                        Array values = pVar.findAttribute("standard_parallel").getValues();
-                        String sp1 = String.valueOf(values.getDouble(0));
-                        String sp2 = "";
-                        if (values.getSize() == 2) {
-                            sp2 = String.valueOf(values.getDouble(1));
-                        }
-                        projStr = "+proj=lcc"
-                                + "+lat_1=" + sp1;
-                        if (!sp2.isEmpty()) {
-                            projStr += "+lat_2=" + sp2;
-                        }
-                        projStr += "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    }
-                    case "lambert_cylindrical_equal_area":
-                        projStr = "+proj=cea"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString();
-                        if (pVar.findAttribute("standard_parallel") != null) {
-                            projStr += "+lat_ts=" + pVar.findAttribute("standard_parallel").getValue(0).toString();
-                        } else if (pVar.findAttribute("scale_factor_at_projection_origin") != null) {
-                            projStr += "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "mercator":
-                        projStr = "+proj=merc"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("standard_parallel") != null) {
-                            projStr += "+lat_ts=" + pVar.findAttribute("standard_parallel").getValue(0).toString();
-                        } else if (pVar.findAttribute("scale_factor_at_projection_origin") != null) {
-                            projStr += "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "orthographic":
-                        projStr = "+proj=ortho"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "polar_stereographic":
-                        projStr = "+proj=stere"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("standard_parallel") != null) {
-                            projStr += "+lat_ts=" + pVar.findAttribute("standard_parallel").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("scaling_factor") != null) {
-                            projStr += "+k=" + pVar.findAttribute("scaling_factor").getValue(0).toString();
-                        } else if (pVar.findAttribute("standard_parallel") != null) {
-                            String stPs = pVar.findAttribute("standard_parallel").getValue(0).toString();
-                            //projStr += "+lat_ts=" + stPs;
-                            double k0 = ProjectionInfo.calScaleFactorFromStandardParallel(Double.parseDouble(stPs));
-                            projStr += "+k=" + String.format("%1$.2f", k0);
-                        } else if (pVar.findAttribute("scale_factor_at_projection_origin") != null) {
-                            projStr += "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "rotated_latitude_longitude":
-                        break;
-                    case "stereographic":
-                        projStr = "+proj=stere"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString()
-                                + "+k_0=" + pVar.findAttribute("scale_factor_at_projection_origin").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "transverse_mercator":
-                        projStr = "+proj=tmerc"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_central_meridian").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString()
-                                + "+k_0=" + pVar.findAttribute("scale_factor_at_central_meridian").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
-                    case "vertical_perspective":
-                        projStr = "+proj=geos"
-                                + "+lon_0=" + pVar.findAttribute("longitude_of_projection_origin").getValue(0).toString()
-                                + "+lat_0=" + pVar.findAttribute("latitude_of_projection_origin").getValue(0).toString()
-                                + "+h=" + pVar.findAttribute("perspective_point_height").getValue(0).toString();
-                        if (pVar.findAttribute("false_easting") != null) {
-                            projStr += "+x_0=" + pVar.findAttribute("false_easting").getValue(0).toString();
-                        }
-                        if (pVar.findAttribute("false_northing") != null) {
-                            projStr += "+y_0=" + pVar.findAttribute("false_northing").getValue(0).toString();
-                        }
-                        break;
                 }
             }
         }
@@ -3519,10 +3529,11 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
         } else //Join time
         {
             try {
-                if (dataJoinType == 1)
+                if (dataJoinType == 1) {
                     joinDataFiles_Time(inFiles, outFile, tDimName);
-                else
+                } else {
                     joinDataFiles_Time_pack(inFiles, outFile, tDimName);
+                }
             } catch (IOException | InvalidRangeException | ParseException ex) {
                 Logger.getLogger(NetCDFDataInfo.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -4084,39 +4095,44 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                     Attribute asf = aVarS.findAttribute("scale_factor");
                     Attribute bao = bVarS.findAttribute("add_offset");
                     Attribute bsf = bVarS.findAttribute("scale_factor");
-                    if (aao != null){
-                        if (bao == null)
+                    if (aao != null) {
+                        if (bao == null) {
                             unpack = true;
-                        else {
+                        } else {
                             double vaao = Double.parseDouble(aao.getValue(0).toString());
                             double vbao = Double.parseDouble(bao.getValue(0).toString());
-                            if (vaao != vbao)
-                                unpack =true;
+                            if (vaao != vbao) {
+                                unpack = true;
+                            }
                         }
                     } else {
-                        if (bao != null)
+                        if (bao != null) {
                             unpack = true;
+                        }
                     }
-                    if (asf != null){
-                        if (bsf == null)
+                    if (asf != null) {
+                        if (bsf == null) {
                             unpack = true;
-                        else {
+                        } else {
                             double vasf = Double.parseDouble(asf.getValue(0).toString());
                             double vbsf = Double.parseDouble(bsf.getValue(0).toString());
-                            if (vasf != vbsf)
-                                unpack =true;
+                            if (vasf != vbsf) {
+                                unpack = true;
+                            }
                         }
                     } else {
-                        if (bsf != null)
+                        if (bsf != null) {
                             unpack = true;
+                        }
                     }
                 }
             }
             if (IsSame) {
-                if (unpack)
+                if (unpack) {
                     return 3;
-                else
+                } else {
                     return 1;    //Can join time
+                }
             } else {
                 return 0;
             }
