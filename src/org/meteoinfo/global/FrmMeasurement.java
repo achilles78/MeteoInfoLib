@@ -47,7 +47,7 @@ public class FrmMeasurement extends javax.swing.JDialog {
 
     /**
      * Creates new form FrmMeasurement
-     * @param parent Paranet form
+     * @param parent Parent form
      * @param modal Model or not
      */
     public FrmMeasurement(java.awt.Frame parent, boolean modal) {
@@ -171,7 +171,10 @@ public class FrmMeasurement extends javax.swing.JDialog {
         _unitStr = "Kilometers";
 
         this.jButton_Feature.doClick();
-        _previousValue = 0;
+        this.jTextArea_Content.setText("");
+        this._previousValue = 0;
+        this._currentValue = 0;
+        this._totalValue = 0;
     }//GEN-LAST:event_formWindowOpened
 
     private void jButton_FeatureActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_FeatureActionPerformed
@@ -181,6 +184,10 @@ public class FrmMeasurement extends javax.swing.JDialog {
         this.jButton_Distance.setSelected(false);
 
         _measureType = MeasureTypes.Feature;
+        this.jTextArea_Content.setText("");
+        this._previousValue = 0;
+        this._currentValue = 0;
+        this._totalValue = 0;
     }//GEN-LAST:event_jButton_FeatureActionPerformed
 
     private void jButton_AreaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_AreaActionPerformed
@@ -191,6 +198,10 @@ public class FrmMeasurement extends javax.swing.JDialog {
 
         _measureType = MeasureTypes.Area;
         _isArea = true;
+        this.jTextArea_Content.setText("");
+        this._previousValue = 0;
+        this._currentValue = 0;
+        this._totalValue = 0;
     }//GEN-LAST:event_jButton_AreaActionPerformed
 
     private void jButton_DistanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_DistanceActionPerformed
@@ -201,6 +212,10 @@ public class FrmMeasurement extends javax.swing.JDialog {
 
         _measureType = MeasureTypes.Length;
         _isArea = false;
+        this.jTextArea_Content.setText("");
+        this._previousValue = 0;
+        this._currentValue = 0;
+        this._totalValue = 0;
     }//GEN-LAST:event_jButton_DistanceActionPerformed
 
     private void jComboBox_UnitsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox_UnitsActionPerformed
