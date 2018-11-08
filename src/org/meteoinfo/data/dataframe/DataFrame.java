@@ -2012,9 +2012,12 @@ public class DataFrame implements Iterable {
             boolean index) throws IOException {
         BufferedWriter sw = new BufferedWriter(new FileWriter(new File(fileName)));
         String str = "";
-        //String format = this.index.getNameFormat();
+        String idxFormat = this.index.format;
         if (index) {
             str = this.index.getName();
+            if (dateFormat != null && (this.index instanceof DateTimeIndex)){
+                idxFormat = dateFormat;
+            }
         }
         for (int i = 0; i < this.size(); i++) {
             if (str.isEmpty()) {
@@ -2037,7 +2040,7 @@ public class DataFrame implements Iterable {
         for (int j = 0; j < this.length(); j++) {
             line = "";
             if (index) {
-                line = this.index.toString(j);
+                line = this.index.toString(j, idxFormat);
             }
             for (int i = 0; i < this.size(); i++) {
                 if (formats.get(i) == null) {

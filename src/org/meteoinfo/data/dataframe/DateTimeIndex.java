@@ -405,7 +405,17 @@ public class DateTimeIndex extends Index<DateTime> {
     @Override
     public String toString(int idx) {
         return ((DateTime)this.data.get(idx)).toString(this.format);
-        //return this.dtFormatter.print((DateTime)this.data.get(idx));
+    }
+    
+    /**
+     * Convert i_th index to string
+     * @param idx Index i
+     * @param format Format string
+     * @return String
+     */
+    @Override
+    public String toString(int idx, String format) {
+        return ((DateTime)this.data.get(idx)).toString(format);
     }
     
     @Override

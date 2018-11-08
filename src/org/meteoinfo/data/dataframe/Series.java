@@ -274,7 +274,7 @@ public class Series implements Iterable {
             }
         }
         Index idx;
-        if (this.index instanceof DateTimeIndex && !(idxValues.get(0) instanceof DateTime)) {
+        if (this.index instanceof DateTimeIndex && (rIndex.get(0) instanceof String)) {
             List<DateTime> values = new ArrayList<>();
             for (String v : (List<String>) rIndex) {
                 values.add(DateUtil.getDateTime(v));

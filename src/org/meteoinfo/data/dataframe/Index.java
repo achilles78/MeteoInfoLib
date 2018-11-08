@@ -537,6 +537,16 @@ public class Index<V> implements Iterable<V>{
         return String.format(this.format, this.data.get(idx));
     }
     
+    /**
+     * Convert i_th index to string
+     * @param idx Index i
+     * @param format Format string
+     * @return String
+     */
+    public String toString(int idx, String format) {
+        return String.format(format, this.data.get(idx));
+    }
+    
     @Override
     public Object clone() {
         List ndata = new ArrayList<>(this.data);
