@@ -2040,7 +2040,7 @@ public class DataFrame implements Iterable {
         for (int j = 0; j < this.length(); j++) {
             line = "";
             if (index) {
-                line = this.index.toString(j, idxFormat);
+                line = this.index.toString(j, idxFormat).trim();
             }
             for (int i = 0; i < this.size(); i++) {
                 if (formats.get(i) == null) {
@@ -2184,7 +2184,7 @@ public class DataFrame implements Iterable {
      */
     public <V> DataFrame apply(final Function<?, ?> function) {
         DataFrame r = new Grouping().apply(this, function);
-        if (this.index instanceof DateTimeIndex) {
+        if (r.index instanceof DateTimeIndex) {
             ((DateTimeIndex) r.getIndex()).setPeriod(((DateTimeIndex) this.index).getResamplePeriod());
         }
         return r;
