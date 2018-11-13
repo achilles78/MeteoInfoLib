@@ -1683,26 +1683,36 @@ public class Axis implements Cloneable {
         }
 
         //Draw label
-        XAlign x_align = XAlign.RIGHT;
-        YAlign y_align = YAlign.CENTER;
+        XAlign x_align = XAlign.CENTER;
+        YAlign y_align = YAlign.BOTTOM;
         if (this.isDrawLabel()) {            
             if (this.location == Location.LEFT) {
-                x = sx - this.tickSpace - this.getMaxLabelLength(g);
-                if (!this.isInsideTick()) {
-                    x -= len;
+                x = sx - this.tickSpace;                
+                if (this.drawTickLine) {
+                    if (!this.isInsideTick()) {
+                        x -= len;
+                    }
+                    if (this.drawTickLabel) {
+                        x = x - this.getMaxLabelLength(g) - this.tickSpace;
+                    }
                 }
                 y = (maxy - miny) / 2 + miny; 
             } else {
-                x = sx + this.tickSpace + this.getMaxLabelLength(g) + 5;
-                if (!this.isInsideTick()) {
-                    x += len;
+                x = sx + this.tickSpace;                
+                if (this.drawTickLine) {
+                    if (!this.isInsideTick()) {
+                        x += len;
+                    }
+                    if (this.drawTickLabel){
+                        x = x + this.getMaxLabelLength(g) + 5;
+                    }
                 }
                 y = (maxy - miny) / 2 + miny;
-                x_align = XAlign.LEFT;                
+                y_align = YAlign.TOP;                
             }
-            g.setFont(this.getLabelFont());
-            Draw.drawString(g, (float)x, (float)y, this.label.getText(), x_align, 
-                y_align, 90, this.label.isUseExternalFont());
+            this.label.setXAlign(x_align);
+            this.label.setYAlign(y_align);
+            this.label.draw(g, (float)x, (float)y);
         }
     }
     
