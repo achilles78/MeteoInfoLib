@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.meteoinfo.data.ArrayMath;
+import org.meteoinfo.data.ArrayUtil;
 import org.meteoinfo.data.GridArray;
 import org.meteoinfo.data.meteodata.MeteoDataType;
 import org.meteoinfo.global.util.DateUtil;
@@ -48,6 +49,7 @@ import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
+import ucar.ma2.IndexIterator;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.MAMath;
 import ucar.ma2.Section;
@@ -1031,7 +1033,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
         return attStr;
     }
 
-    private List<Date> getTimes(ucar.nc2.Variable aVar, double[] values) {
+    private List<Date> getTimes(ucar.nc2.Variable aVar, Array values) {
         //Get start time
         String unitsStr;
         int i;
@@ -1041,8 +1043,9 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
             Calendar cal = Calendar.getInstance();
             cal.set(1985, 0, 1, 0, 0);
             Date sTime = cal.getTime();
-            for (double v : values) {
-                cal.add(Calendar.HOUR, (int) v);
+            IndexIterator ii = values.getIndexIterator();
+            while (ii.hasNext()) {
+                cal.add(Calendar.HOUR, ii.getIntNext());
                 times.add(cal.getTime());
                 cal.setTime(sTime);
             }
@@ -1055,10 +1058,9 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                 return null;
             }
             //Get data time
-            double[] DTimes = values;
             SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-            for (i = 0; i < DTimes.length; i++) {
-                String md = String.valueOf((int) DTimes[i]);
+            for (i = 0; i < values.getSize(); i++) {
+                String md = String.valueOf(values.getInt(i));
                 if (md.length() <= 3) {
                     md = "0" + md;
                 }
@@ -1086,42 +1088,42 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
             //getPSDTimeInfo(unitsStr, sTime, aTU);                        
 
             //Get data time
-            double[] DTimes = values;
-            for (i = 0; i < values.length; i++) {
+            for (i = 0; i < values.getSize(); i++) {                
                 switch (aTU) {
                     case Year:
-                        cal.add(Calendar.YEAR, (int) DTimes[i]);
+                        cal.add(Calendar.YEAR, values.getInt(i));
                         times.add(cal.getTime());
                         break;
                     case Month:
                         if (unitsStr.equalsIgnoreCase("month")) {
-                            cal.add(Calendar.MONTH, (int) DTimes[i] - 1);
+                            cal.add(Calendar.MONTH, values.getInt(i) - 1);
                         } else {
-                            cal.add(Calendar.MONTH, (int) DTimes[i]);
+                            cal.add(Calendar.MONTH, values.getInt(i));
                         }
                         times.add(cal.getTime());
                         break;
                     case Day:
                         //cal.add(Calendar.DAY_OF_YEAR, (int) DTimes[i]);                        
                         //times.add(cal.getTime());
-                        times.add(DateUtil.addDays(sTime, (float) DTimes[i]));
+                        times.add(DateUtil.addDays(sTime, values.getFloat(i)));
                         break;
                     case Hour:
+                        
                         if (cal.get(Calendar.YEAR) == 1 && cal.get(Calendar.MONTH) == 1
-                                && cal.get(Calendar.DAY_OF_MONTH) == 1 && DTimes[i] > 48) {
-                            cal.add(Calendar.HOUR, (int) DTimes[i] - 48);
+                                && cal.get(Calendar.DAY_OF_MONTH) == 1 && values.getInt(i) > 48) {
+                            cal.add(Calendar.HOUR, values.getInt(i) - 48);
                             times.add(cal.getTime());
                         } else {
-                            cal.add(Calendar.HOUR, (int) DTimes[i]);
+                            cal.add(Calendar.HOUR, values.getInt(i));
                             times.add(cal.getTime());
                         }
                         break;
                     case Minute:
-                        cal.add(Calendar.MINUTE, (int) DTimes[i]);
+                        cal.add(Calendar.MINUTE, values.getInt(i));
                         times.add(cal.getTime());
                         break;
                     case Second:
-                        cal.add(Calendar.SECOND, (int) DTimes[i]);
+                        cal.add(Calendar.SECOND, values.getInt(i));
                         times.add(cal.getTime());
                         break;
                 }
@@ -1180,23 +1182,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
             var = this.findNCVariable("Time");
             if (var != null && var.getDimensions().size() == 1) {
                 Array darray = var.read();
-//                int n = (int) darray.getSize();
-//                double[] values = new double[n];
-//                for (int i = 0; i < n; i++) {
-//                    values[i] = darray.getDouble(i);
-//                }
-//                List<Date> times = this.getTimes(var, values);
-//                List<Double> ts = new ArrayList<Double>();
-//                for (Date t : times) {
-//                    ts.add(DataConvert.toOADate(t));
-//                }
-
-                int n = (int) darray.getSize();
-                double[] values = new double[n];
-                for (int i = 0; i < n; i++) {
-                    values[i] = darray.getDouble(i);
-                }
-                List<Date> times = this.getTimes(var, values);
+                List<Date> times = this.getTimes(var, darray);
                 List<Double> ts = new ArrayList<>();
                 for (Date t : times) {
                     ts.add(DateUtil.toOADate(t));
@@ -1230,25 +1216,19 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
 
                 DimensionType dimType = getDimType(var);
                 dim.setDimType(dimType);
-                Array darray = var.read();
-                double[] values = new double[(int) darray.getSize()];
-                BigDecimal b;
-                for (int i = 0; i < values.length; i++) {
-                    b = new BigDecimal(Float.toString(darray.getFloat(i)));
-                    values[i] = b.doubleValue();
-                }
-                if (values.length > 1) {
-                    if (values[0] > values[1]) {
+                Array values = var.read();
+                if (values.getSize() > 1) {
+                    if (values.getDouble(0) > values.getDouble(1)) {
                         switch (dimType) {
                             case X:
                                 this.setXReverse(true);
                                 dim.setReverse(true);
-                                MIMath.arrayReverse(values);
+                                values = values.flip(0);
                                 break;
                             case Y:
                                 this.setYReverse(true);
                                 dim.setReverse(true);
-                                MIMath.arrayReverse(values);
+                                values = values.flip(0);
                                 break;
                         }
                     }
@@ -1256,8 +1236,8 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                 //aDim.setValues(values);
                 switch (dimType) {
                     case X:
-                        double[] X = values;
-                        double XDelt = X[1] - X[0];
+                        double[] X = (double[])ArrayUtil.copyToNDJavaArray(values);
+                        double XDelt = X[1] - X[0];                        
                         if (this.getProjectionInfo().isLonLat()) {
                             if (X[X.length - 1] + XDelt
                                     - X[0] == 360) {
@@ -1277,7 +1257,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                         this.setXDimension(dim);
                         break;
                     case Y:
-                        double[] Y = values;
+                        double[] Y = (double[])ArrayUtil.copyToNDJavaArray(values);
                         if (!this.getProjectionInfo().isLonLat()) {
                             ucar.nc2.Attribute unitAtt = var.findAttribute("units");
                             if (unitAtt != null) {
@@ -1292,7 +1272,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                         this.setYDimension(dim);
                         break;
                     case Z:
-                        double[] levels = values;
+                        double[] levels = (double[])ArrayUtil.copyToNDJavaArray(values);
                         dim.setValues(levels);
                         this.setZDimension(dim);
                         break;
@@ -1308,7 +1288,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                         this.setTimeDimension(dim);
                         break;
                     default:
-                        dim.setValues(values);
+                        dim.setValues((double[])ArrayUtil.copyToNDJavaArray(values));
                         break;
                 }
             }
