@@ -801,47 +801,11 @@ public abstract class AbstractPlot2D extends Plot {
 
         //Draw wind arrow - quiverkey
         if (this.getWindArrow() != null) {
-            Object rendering = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             ChartWindArrow wa = this.getWindArrow();
-            float zoom = 1.0f;
-            if (wa.getLayer() != null) {
-                if (wa.getLayer() instanceof VectorLayer) {
-                    zoom = ((VectorLayer) wa.getLayer()).getDrawingZoom();
-                } else if (wa.getLayer() instanceof GraphicCollection) {
-                    zoom = ((GraphicCollection) wa.getLayer()).getArrowZoom();
-                }
-            }
             float x = (float) (area.getWidth() * wa.getX());
             float y = (float) (area.getHeight() * (1 - wa.getY()));
-            WindArrow aArraw = wa.getWindArrow();
-            Font drawFont = wa.getFont();
-            g.setFont(drawFont);
-            String drawStr = wa.getLabel();
-            Dimension dim = Draw.getStringDimension(drawStr, g);
-            if (wa.isFill() || wa.isDrawNeatline()) {
-                Rectangle2D rect = Draw.getArrawBorder(new PointF(x, y), aArraw, g, zoom);
-                double gap = 5;
-                double width = Math.max(rect.getWidth(), dim.getWidth());
-                rect.setRect(rect.getX() - gap, rect.getY() - gap, width + gap * 2,
-                        rect.getHeight() + dim.height + gap * 2);
-                if (wa.isFill()) {
-                    g.setColor(wa.getBackground());
-                    g.fill(rect);
-                }
-                if (wa.isDrawNeatline()) {
-                    g.setColor(wa.getNeatlineColor());
-                    g.draw(rect);
-                }
-            }
-            Draw.drawArraw(wa.getColor(), new PointF(x, y), aArraw, g, zoom);
-            g.setColor(wa.getLabelColor());
-            Draw.drawString(g, drawStr, x, y + dim.height);
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, rendering);
+            wa.draw(g, x, y);
         }
-
-//        g.setTransform(oldMatrix);
-//        g.setClip(oldRegion);
     }
 
     /**

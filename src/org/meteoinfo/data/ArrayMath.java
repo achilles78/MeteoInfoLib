@@ -8,7 +8,7 @@ package org.meteoinfo.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.meteoinfo.data.analysis.MeteoMath;
+import org.meteoinfo.math.meteo.MeteoMath;
 import org.meteoinfo.data.analysis.Statistics;
 import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.MIMath;

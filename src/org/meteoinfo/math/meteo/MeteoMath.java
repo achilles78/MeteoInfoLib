@@ -3,9 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.meteoinfo.data.analysis;
+package org.meteoinfo.math.meteo;
 
 import ucar.ma2.Array;
+import ucar.ma2.Index;
+import ucar.ma2.DataType;
 
 /**
  *
@@ -16,7 +18,7 @@ public class MeteoMath {
     /**
      * Calculate saturation vapor pressure
      *
-     * @param tc Ari temperature
+     * @param tc Air temperature
      * @return Saturation vapor pressure
      */
     public static double cal_Es(double tc) {
@@ -104,7 +106,7 @@ public class MeteoMath {
         double e = cal_Es(tdc);
         return e / es * 100;
     }
-    
+
     /**
      * Calculate relative humidity from dewpoint
      *
@@ -117,13 +119,13 @@ public class MeteoMath {
         for (int i = 0; i < r.getSize(); i++) {
             r.setDouble(i, MeteoMath.dewpoint2rh(tc.getDouble(i), tdc.getDouble(i)));
         }
-        
+
         return r;
     }
-    
+
     /**
      * Calculate dewpoint from relative humidity and temperature
-     *     
+     *
      * @param rh Relative humidity
      * @param t Temperature
      * @return Dewpoint
@@ -133,7 +135,7 @@ public class MeteoMath {
         double e = esw * (rh / 100);
         return cal_Tdc(e);
     }
-    
+
     /**
      * Calculate dewpoint from relative humidity and temperature
      *
@@ -146,7 +148,7 @@ public class MeteoMath {
         for (int i = 0; i < r.getSize(); i++) {
             r.setDouble(i, MeteoMath.rh2dewpoint(rh.getDouble(i), tc.getDouble(i)));
         }
-        
+
         return r;
     }
 
@@ -259,14 +261,14 @@ public class MeteoMath {
             return h;
         }
     }
-    
+
     /**
      * Calculate pressure frmo height
      *
      * @param height Height - meter
      * @return Pressure - hPa
      */
-    public static double height2Press(double height) {        
+    public static double height2Press(double height) {
         double[] ps = new double[]{1013.3, 845.4, 700.8, 504.7, 410.4, 307.1, 193.1, 102.8, 46.7, 8.7};
         double[] hs = new double[]{0, 1500, 3000, 5500, 7000, 9000, 12000, 16000, 21000, 32000};
         int idx = -1;
@@ -288,5 +290,165 @@ public class MeteoMath {
             double p = (height - z1) * (p2 - p1) / (z2 - z1) + p1;
             return p;
         }
+    }
+
+    /**
+     * Estimate sea level pressure
+     *
+     * @param z Height (m)
+     * @param t Temperature array (K)
+     * @param p Pressure array (Pa)
+     * @param q Mixing ratio (kg/kg)
+     * @return Sea level pressure (Pa)
+     */
+    public static Array calSeaPrs(Array z, Array t, Array p, Array q) {
+        //Specific constants for assumptions made in this routine:
+        double RD = 287.0;
+        double G = 9.81;
+        double USSALR = 0.00650;      // deg C per m
+        double TC = 273.16 + 17.5;
+        double PCONST = 10000.;
+        boolean ridiculous_mm5_test = true;
+
+        int[] shape = z.getShape();
+        int nz = shape[0];
+        int ny = shape[1];
+        int nx = shape[2];
+        int i, j, k;
+        int klo, khi;
+        int errcnt, bad_i, bad_j;
+        double bad_sfp;
+        double plo, phi, tlo, thi, zlo, zhi;
+        double p_at_pconst, t_at_pconst, z_at_pconst;
+        boolean l1, l2, l3, found;
+
+        //  Find least zeta level that is PCONST Pa above the surface.  We
+        //  later use this level to extrapolate a surface pressure and
+        //  temperature, which is supposed to reduce the effect of the diurnal
+        //  heating cycle in the pressure field.
+        //int errstat = 0;
+        errcnt = 0;
+        bad_i = -1;
+        bad_j = -1;
+        bad_sfp = -1;
+        int[][] level = new int[ny][nx];
+        Index idx3 = Index.factory(shape);
+        for (i = 0; i < ny; i++) {
+            for (j = 0; j < nx; j++) {
+                level[i][j] = -1;
+                k = 0;
+                found = false;
+                while ((!found) && (k < nz)) {
+                    if (p.getDouble(idx3.set(k, i, j)) < p.getDouble(idx3.set(0, i, j)) - PCONST) {
+                        level[i][j] = k;
+                        found = true;
+                    }
+                    k = k + 1;
+                }
+
+                if (level[i][j] == -1) {
+                    errcnt = errcnt + 1;
+                    //$OMP CRITICAL
+                    // Only do this the first time
+                    if (bad_i == -1) {
+                        bad_i = i;
+                        bad_j = j;
+                        bad_sfp = p.getDouble(idx3.set(0, i, j)) / 100.;
+                    }
+                    //$OMP END CRITICAL
+                }
+            }
+        }
+
+        if (errcnt > 0) {
+            //errstat = ALGERR;
+            System.out.println("Error in finding 100 hPa up.  i=" + bad_i + "j=" + bad_j + "sfc_p=" + bad_sfp);
+            return null;
+        }
+
+        //     Get temperature PCONST Pa above surface.  Use this to extrapolate
+        //     the temperature at the surface and down to sea level.
+        //$OMP PARALLEL DO COLLAPSE(2) PRIVATE(i,j,klo,khi,plo, &
+        //$OMP phi,tlo,thi,zlo,zhi,p_at_pconst,t_at_pconst,z_at_pconst) &
+        //$OMP REDUCTION(+:errcnt) SCHEDULE(runtime)
+        double[][] t_surf = new double[ny][nx];
+        double[][] t_sea_level = new double[ny][nx];
+        for (i = 0; i < ny; i++) {
+            for (j = 0; j < nx; j++) {
+                klo = Math.max(level[i][j] - 1, 0);
+                khi = Math.min(klo + 1, nz - 1);
+
+                if (klo == khi) {
+                    errcnt = errcnt + 1;
+                    //$OMP CRITICAL
+                    if (bad_i == -1) {
+                        bad_i = i;
+                        bad_j = j;
+                    }
+                    //$OMP END CRITICAL
+                }
+
+                plo = p.getDouble(idx3.set(klo, i, j));
+                phi = p.getDouble(idx3.set(khi, i, j));
+                tlo = t.getDouble(idx3.set(klo, i, j)) * (1.0 + 0.6080 * q.getDouble(idx3.set(klo, i, j)));
+                thi = t.getDouble(idx3.set(khi, i, j)) * (1.0 + 0.6080 * q.getDouble(idx3.set(khi, i, j)));
+                zlo = z.getDouble(idx3.set(klo, i, j));
+                zhi = z.getDouble(idx3.set(khi, i, j));
+                p_at_pconst = p.getDouble(idx3.set(0, i, j)) - PCONST;
+                t_at_pconst = thi - (thi - tlo) * Math.log(p_at_pconst / phi) * Math.log(plo / phi);
+                z_at_pconst = zhi - (zhi - zlo) * Math.log(p_at_pconst / phi) * Math.log(plo / phi);
+
+                t_surf[i][j] = t_at_pconst * Math.pow(p.getDouble(idx3.set(0, i, j)) / p_at_pconst, USSALR * RD / G);
+                t_sea_level[i][j] = t_at_pconst + USSALR * z_at_pconst;
+            }
+        }
+        //$OMP END PARALLEL DO
+
+        if (errcnt > 0) {
+            //errstat = ALGERR;
+            System.out.println("Error trapping levels at i=" + bad_i + "j=" + bad_j);
+            return null;
+        }
+
+        // If we follow a traditional computation, there is a correction to the
+        // sea level temperature if both the surface and sea level
+        // temperatures are *too* hot.
+        if (ridiculous_mm5_test) {
+            //$OMP PARALLEL DO COLLAPSE(2) PRIVATE(l1,l2,l3) SCHEDULE(runtime)   
+            l1 = true;
+            for (i = 0; i < ny; i++) {
+                for (j = 0; j < nx; j++) {
+                    l1 = (t_sea_level[i][j] < TC);                
+                    l2 = (t_surf[i][j] <= TC);
+                    l3 = !l1;
+                    if (l2 && l3) {
+                        t_sea_level[i][j] = TC;
+                    } else {
+                        t_sea_level[i][j] = TC - 0.0050 * Math.pow(t_surf[i][j] - TC, 2);
+                    }
+                }
+            }
+        }
+        //$OMP END PARALLEL DO
+
+        //     The grand finale: ta da!
+        //$OMP PARALLEL DO COLLAPSE(2) SCHEDULE(runtime)
+        Array sea_level_pressure = Array.factory(DataType.DOUBLE, new int[]{ny, nx});
+        double v;
+        for (i = 0; i < ny; i++) {
+            for (j = 0; j < nx; j++) {
+                //z_half_lowest = z(i,j,1)
+
+                // Convert to hPa in this step, by multiplying by 0.01. The original
+                // Fortran routine didn't do this, but the NCL script that called it
+                // did, so we moved it here.
+                v = 0.01 * (p.getDouble(idx3.set(0, i, j)) * Math.exp((2.0 * G * z.getDouble(idx3.set(0, i, j)))
+                        / (RD * (t_sea_level[i][j] + t_surf[i][j]))));
+                sea_level_pressure.setDouble(i * nx + j, v);
+            }
+        }
+        //$OMP END PARALLEL DO
+
+        return sea_level_pressure;
     }
 }
