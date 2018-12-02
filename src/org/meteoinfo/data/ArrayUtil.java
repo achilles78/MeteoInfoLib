@@ -621,7 +621,7 @@ public class ArrayUtil {
 
         return a;
     }
-    
+
     /**
      * Array line space
      *
@@ -1116,7 +1116,7 @@ public class ArrayUtil {
         }
         return dataType;
     }
-    
+
     /**
      * Merge data type to one data type
      * @param dt1 Data type 1
@@ -1382,7 +1382,7 @@ public class ArrayUtil {
 
         return r;
     }
-    
+
     /**
      * Convert array to double type
      *
@@ -1697,7 +1697,7 @@ public class ArrayUtil {
 
         return javaArray;
     }
-    
+
     /**
      * Convert array to N-Dimension double Java array
      *
@@ -1739,7 +1739,7 @@ public class ArrayUtil {
             ja[i] = iter.getDoubleNext();
         }
     }
-    
+
     protected static void copyTo1DJavaArray_Long(IndexIterator iter, Object javaArray) {
         long[] ja = (long[]) javaArray;
         for (int i = 0; i < ja.length; i++) {
@@ -1760,7 +1760,7 @@ public class ArrayUtil {
         double min = ArrayMath.getMinimum(a);
         double max = ArrayMath.getMaximum(a);
         double[] bins = MIMath.getIntervalValues(min, max, nbins);
-        Array ba = Array.factory(DataType.DOUBLE, new int[]{bins.length}, bins);        
+        Array ba = Array.factory(DataType.DOUBLE, new int[]{bins.length}, bins);
         return histogram(a, ba);
     }
 
@@ -2205,7 +2205,7 @@ public class ArrayUtil {
         int NWIdx;
         double x, y, v;
 
-        //---- Do interpolation with IDW method 
+        //---- Do interpolation with IDW method
         for (i = 0; i < rowNum; i++) {
             for (j = 0; j < colNum; j++) {
                 r.setDouble(i * colNum + j, Double.NaN);
@@ -3198,9 +3198,13 @@ public class ArrayUtil {
                         sum += eVal * w;
                         wSum += w;
                     }
-                    if (wSum < 0.000001) {
-                        r.setDouble(i * xNum + j, Double.NaN);
-                    } else {
+//                    if (wSum < 0.000001) {
+//                        r.setDouble(i * xNum + j, Double.NaN);
+//                    } else {
+//                        double aData = r.getDouble(i * xNum + j) + sum / wSum;
+//                        r.setDouble(i * xNum + j, Math.max(BOT[i][j], Math.min(TOP[i][j], aData)));
+//                    }
+                    if (wSum >= 0.000001) {
                         double aData = r.getDouble(i * xNum + j) + sum / wSum;
                         r.setDouble(i * xNum + j, Math.max(BOT[i][j], Math.min(TOP[i][j], aData)));
                     }
@@ -3212,6 +3216,208 @@ public class ArrayUtil {
         return r;
     }
     
+    /**
+     * Cressman analysis
+     *
+     * @param x_s scatter X array
+     * @param y_s scatter Y array
+     * @param v_s scatter value array
+     * @param X x array
+     * @param Y y array
+     * @param radList radii list
+     * @return result grid data
+     */
+    public static Array cressman_bak(List<Number> x_s, List<Number> y_s, Array v_s, List<Number> X, List<Number> Y,
+            List<Number> radList) {
+        int xNum = X.size();
+        int yNum = Y.size();
+        int pNum = x_s.size();
+        //double[][] gridData = new double[yNum][xNum];
+        Array r = Array.factory(DataType.DOUBLE, new int[]{yNum, xNum});
+        int irad = radList.size();
+        int i, j;
+
+        //Loop through each stn report and convert stn lat/lon to grid coordinates
+        double xMin = X.get(0).doubleValue();
+        double xMax;
+        double yMin = Y.get(0).doubleValue();
+        double yMax;
+        double xDelt = X.get(1).doubleValue() - X.get(0).doubleValue();
+        double yDelt = Y.get(1).doubleValue() - Y.get(0).doubleValue();
+        double x, y;
+        double sum;
+        int stNum = 0;
+        double[][] stationData = new double[pNum][3];
+        for (i = 0; i < pNum; i++) {
+            x = x_s.get(i).doubleValue();
+            y = y_s.get(i).doubleValue();
+            stationData[i][0] = (x - xMin) / xDelt;
+            stationData[i][1] = (y - yMin) / yDelt;
+            stationData[i][2] = v_s.getDouble(i);
+            if (!Double.isNaN(stationData[i][2])) {
+                //total += stationData[i][2];
+                stNum += 1;
+            }
+        }
+        //total = total / stNum;
+
+        double HITOP = -999900000000000000000.0;
+        double HIBOT = 999900000000000000000.0;
+        double[][] TOP = new double[yNum][xNum];
+        double[][] BOT = new double[yNum][xNum];
+        for (i = 0; i < yNum; i++) {
+            for (j = 0; j < xNum; j++) {
+                TOP[i][j] = HITOP;
+                BOT[i][j] = HIBOT;
+            }
+        }
+
+        //Initial grid values are average of station reports within the first radius
+        double rad;
+        if (radList.size() > 0) {
+            rad = radList.get(0).doubleValue();
+        } else {
+            rad = 4;
+        }
+        for (i = 0; i < yNum; i++) {
+            y = (double) i;
+            yMin = y - rad;
+            yMax = y + rad;
+            for (j = 0; j < xNum; j++) {
+                x = (double) j;
+                xMin = x - rad;
+                xMax = x + rad;
+                stNum = 0;
+                sum = 0;
+                for (int s = 0; s < pNum; s++) {
+                    double val = stationData[s][2];
+                    double sx = stationData[s][0];
+                    double sy = stationData[s][1];
+                    if (sx < 0 || sx >= xNum - 1 || sy < 0 || sy >= yNum - 1) {
+                        continue;
+                    }
+
+                    if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
+                        continue;
+                    }
+
+                    double dis = Math.sqrt(Math.pow(sx - x, 2) + Math.pow(sy - y, 2));
+                    if (dis > rad) {
+                        continue;
+                    }
+
+                    sum += val;
+                    stNum += 1;
+                    if (TOP[i][j] < val) {
+                        TOP[i][j] = val;
+                    }
+                    if (BOT[i][j] > val) {
+                        BOT[i][j] = val;
+                    }
+                }
+                if (stNum == 0) {
+                    r.setDouble(i * xNum + j, Double.NaN);
+                } else {
+                    r.setDouble(i * xNum + j, sum / stNum);
+                }
+            }
+        }
+
+        //Perform the objective analysis
+        for (int p = 0; p < irad; p++) {
+            rad = radList.get(p).doubleValue();
+            for (i = 0; i < yNum; i++) {
+                y = (double) i;
+                yMin = y - rad;
+                yMax = y + rad;
+                for (j = 0; j < xNum; j++) {
+                    if (Double.isNaN(r.getDouble(i * xNum + j))) {
+                        continue;
+                    }
+
+                    x = (double) j;
+                    xMin = x - rad;
+                    xMax = x + rad;
+                    sum = 0;
+                    double wSum = 0;
+                    for (int s = 0; s < pNum; s++) {
+                        double val = stationData[s][2];
+                        double sx = stationData[s][0];
+                        double sy = stationData[s][1];
+                        if (sx < 0 || sx >= xNum - 1 || sy < 0 || sy >= yNum - 1) {
+                            continue;
+                        }
+
+                        if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
+                            continue;
+                        }
+
+                        double dis = Math.sqrt(Math.pow(sx - x, 2) + Math.pow(sy - y, 2));
+                        if (dis > rad) {
+                            continue;
+                        }
+
+                        int i1 = (int) sy;
+                        int j1 = (int) sx;
+                        int i2 = i1 + 1;
+                        int j2 = j1 + 1;
+                        double a = r.getDouble(i1 * xNum + j1);
+                        double b = r.getDouble(i1 * xNum + j2);
+                        double c = r.getDouble(i2 * xNum + j1);
+                        double d = r.getDouble(i2 * xNum + j2);
+                        List<Double> dList = new ArrayList<>();
+                        if (!Double.isNaN(a)) {
+                            dList.add(a);
+                        }
+                        if (!Double.isNaN(b)) {
+                            dList.add(b);
+                        }
+                        if (!Double.isNaN(c)) {
+                            dList.add(c);
+                        }
+                        if (Double.isNaN(d)) {
+                            dList.add(d);
+                        }
+
+                        double calVal;
+                        if (dList.isEmpty()) {
+                            continue;
+                        } else if (dList.size() == 1) {
+                            calVal = dList.get(0);
+                        } else if (dList.size() <= 3) {
+                            double aSum = 0;
+                            for (double dd : dList) {
+                                aSum += dd;
+                            }
+                            calVal = aSum / dList.size();
+                        } else {
+                            double x1val = a + (c - a) * (sy - i1);
+                            double x2val = b + (d - b) * (sy - i1);
+                            calVal = x1val + (x2val - x1val) * (sx - j1);
+                        }
+                        double eVal = val - calVal;
+                        double w = (rad * rad - dis * dis) / (rad * rad + dis * dis);
+                        sum += eVal * w;
+                        wSum += w;
+                    }
+                    if (wSum < 0.000001) {
+                        r.setDouble(i * xNum + j, Double.NaN);
+                    } else {
+                        double aData = r.getDouble(i * xNum + j) + sum / wSum;
+                        r.setDouble(i * xNum + j, Math.max(BOT[i][j], Math.min(TOP[i][j], aData)));
+                    }
+//                    if (wSum >= 0.000001) {
+//                        double aData = r.getDouble(i * xNum + j) + sum / wSum;
+//                        r.setDouble(i * xNum + j, Math.max(BOT[i][j], Math.min(TOP[i][j], aData)));
+//                    }
+                }
+            }
+        }
+
+        //Return
+        return r;
+    }
+
     /**
      * Interpolates from a rectilinear grid to another rectilinear grid using bilinear interpolation.
      *
@@ -3231,7 +3437,7 @@ public class ArrayUtil {
         shape[n - 2] = yn;
         double x, y, v;
         Array r = Array.factory(DataType.DOUBLE, shape);
-        
+
         Index index = r.getIndex();
         int[] counter;
         int yi, xi;
@@ -3506,7 +3712,7 @@ public class ArrayUtil {
         return idx;
     }
 
-    // </editor-fold>    
+    // </editor-fold>
     // <editor-fold desc="Geocomputation">
     /**
      * Reproject
@@ -3726,7 +3932,7 @@ public class ArrayUtil {
 
         return iValue;
     }
-    
+
     /**
      * Get value index in a dimension array
      * @param dim Dimension array
@@ -3738,7 +3944,7 @@ public class ArrayUtil {
         if (v < dim.getDouble(0) || v > dim.getDouble(n - 1)){
             return -1;
         }
-        
+
         int idx = n - 1;
         for (int i = 1; i < n; i++){
             if (v < dim.getDouble(i)){
@@ -3748,18 +3954,18 @@ public class ArrayUtil {
         }
         return idx;
     }
-    
+
     private static int[] gridIndex(Array xdim, Array ydim, double x, double y){
         int xn = (int)xdim.getSize();
         int yn = (int)ydim.getSize();
         int xIdx = getDimIndex(xdim, x);
         if (xIdx < 0)
             return null;
-        
+
         int yIdx = getDimIndex(ydim, y);
         if (yIdx < 0)
             return null;
-        
+
         if (xIdx == xn - 1)
             xIdx = xn - 2;
         if (yIdx == yn - 1)
@@ -3768,16 +3974,16 @@ public class ArrayUtil {
         int j1 = xIdx;
         int i2 = i1 + 1;
         int j2 = j1 + 1;
-        
+
         return new int[]{i1,j1,i2,j2};
     }
-    
+
     private static double bilinear(Array data, Index dindex, Array xdim, Array ydim, double x, double y){
         double iValue = Double.NaN;
         int[] xyIdx = gridIndex(xdim, ydim, x, y);
         if (xyIdx == null)
             return iValue;
-        
+
         int i1 = xyIdx[0];
         int j1 = xyIdx[1];
         int i2 = xyIdx[2];
@@ -3822,7 +4028,7 @@ public class ArrayUtil {
                 aSum += dd;
             }
             iValue = aSum / dList.size();
-        } else {            
+        } else {
             double dx = xdim.getDouble(j1 + 1) - xdim.getDouble(j1);
             double dy = ydim.getDouble(i1 + 1) - ydim.getDouble(i1);
             double x1val = a + (c - a) * (y - ydim.getDouble(i1)) / dy;
