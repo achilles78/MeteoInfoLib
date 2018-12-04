@@ -3037,9 +3037,9 @@ public class ArrayUtil {
 
         //Loop through each stn report and convert stn lat/lon to grid coordinates
         double xMin = X.get(0).doubleValue();
-        double xMax;
+        double xMax = X.get(xNum - 1).doubleValue();
         double yMin = Y.get(0).doubleValue();
-        double yMax;
+        double yMax = Y.get(yNum - 1).doubleValue();
         double xDelt = X.get(1).doubleValue() - X.get(0).doubleValue();
         double yDelt = Y.get(1).doubleValue() - Y.get(0).doubleValue();
         double x, y;
@@ -3071,6 +3071,7 @@ public class ArrayUtil {
         }
 
         //Initial grid values are average of station reports within the first radius
+        double val, sx, sy, sxi, syi;
         double rad;
         if (radList.size() > 0) {
             rad = radList.get(0).doubleValue();
@@ -3078,23 +3079,21 @@ public class ArrayUtil {
             rad = 4;
         }
         for (i = 0; i < yNum; i++) {
-            y = (double) i;
+            y = Y.get(i).doubleValue();
             yMin = y - rad;
             yMax = y + rad;
             for (j = 0; j < xNum; j++) {
-                x = (double) j;
+                x = X.get(j).doubleValue();
                 xMin = x - rad;
                 xMax = x + rad;
                 stNum = 0;
                 sum = 0;
                 for (int s = 0; s < pNum; s++) {
-                    double val = stationData[s][2];
-                    double sx = stationData[s][0];
-                    double sy = stationData[s][1];
-                    if (sx < 0 || sx >= xNum - 1 || sy < 0 || sy >= yNum - 1) {
-                        continue;
-                    }
-
+                    val = stationData[s][2];
+                    sx = x_s.get(s).doubleValue();
+                    sy = y_s.get(s).doubleValue();
+                    sxi = stationData[s][0];
+                    syi = stationData[s][1];
                     if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
                         continue;
                     }
@@ -3125,7 +3124,7 @@ public class ArrayUtil {
         for (int p = 0; p < irad; p++) {
             rad = radList.get(p).doubleValue();
             for (i = 0; i < yNum; i++) {
-                y = (double) i;
+                y = Y.get(i).doubleValue();
                 yMin = y - rad;
                 yMax = y + rad;
                 for (j = 0; j < xNum; j++) {
@@ -3133,19 +3132,17 @@ public class ArrayUtil {
                         continue;
                     }
 
-                    x = (double) j;
+                    x = X.get(j).doubleValue();
                     xMin = x - rad;
                     xMax = x + rad;
                     sum = 0;
                     double wSum = 0;
                     for (int s = 0; s < pNum; s++) {
-                        double val = stationData[s][2];
-                        double sx = stationData[s][0];
-                        double sy = stationData[s][1];
-                        if (sx < 0 || sx >= xNum - 1 || sy < 0 || sy >= yNum - 1) {
-                            continue;
-                        }
-
+                        val = stationData[s][2];
+                        sx = x_s.get(s).doubleValue();
+                        sy = y_s.get(s).doubleValue();
+                        sxi = stationData[s][0];
+                        syi = stationData[s][1];
                         if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
                             continue;
                         }
@@ -3155,8 +3152,8 @@ public class ArrayUtil {
                             continue;
                         }
 
-                        int i1 = (int) sy;
-                        int j1 = (int) sx;
+                        int i1 = (int) syi;
+                        int j1 = (int) sxi;
                         int i2 = i1 + 1;
                         int j2 = j1 + 1;
                         double a = r.getDouble(i1 * xNum + j1);
@@ -3189,9 +3186,9 @@ public class ArrayUtil {
                             }
                             calVal = aSum / dList.size();
                         } else {
-                            double x1val = a + (c - a) * (sy - i1);
-                            double x2val = b + (d - b) * (sy - i1);
-                            calVal = x1val + (x2val - x1val) * (sx - j1);
+                            double x1val = a + (c - a) * (syi - i1);
+                            double x2val = b + (d - b) * (syi - i1);
+                            calVal = x1val + (x2val - x1val) * (sxi - j1);
                         }
                         double eVal = val - calVal;
                         double w = (rad * rad - dis * dis) / (rad * rad + dis * dis);
