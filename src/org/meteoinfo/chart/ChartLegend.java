@@ -72,9 +72,9 @@ public class ChartLegend {
     protected boolean drawNeatLine;
     protected Color neatLineColor;
     protected float neatLineSize;
-    private float _breakSpace;
-    private float _topSpace;
-    private float _leftSpace;
+    private float breakSpace;
+    private float topSpace;
+    private float leftSpace;
     protected float _vBarWidth;
     protected float _hBarHeight;
     private int rowColNum = 1;
@@ -107,9 +107,9 @@ public class ChartLegend {
         drawNeatLine = true;
         neatLineColor = Color.black;
         neatLineSize = 1;
-        _breakSpace = 3;
-        _topSpace = 5;
-        _leftSpace = 5;
+        breakSpace = 3;
+        topSpace = 5;
+        leftSpace = 5;
         _vBarWidth = 10;
         _hBarHeight = 10;
         this.labelLocation = "out";
@@ -818,8 +818,6 @@ public class ChartLegend {
 
     private void drawVerticalLegend(Graphics2D g, LegendScheme aLS) {
         String caption;
-        float leftSpace = _leftSpace;
-        float breakSpace = _breakSpace;
         float breakHeight = this.getBreakHeight(g);
         float symbolHeight = this.symbolDimension.height;
         float symbolWidth = this.symbolDimension.width;
@@ -839,12 +837,21 @@ public class ChartLegend {
         }
         rowNums[0] = aLS.getVisibleBreakNum() - num;
 
+        //Draw title        
+        float y0 = 0;
+        if (this.label != null){
+            float x0 = (float)(this.width / 2.);
+            y0 += this.breakSpace * 2;
+            this.label.draw(g, x0, y0);
+            y0 += this.label.getDimension(g).height + this.breakSpace * 2;
+        }
+        
         //Draw legend                        
         float x, y;
         i = 0;
         for (int col = 0; col < rowColNum; col++) {
             x = symbolWidth / 2 + leftSpace + col * colWidth;
-            y = breakHeight / 2 + breakSpace * 2;
+            y = y0 + breakHeight / 2 + breakSpace * 2;
             for (int row = 0; row < rowNums[col]; row++) {
                 if (!aLS.getLegendBreaks().get(i).isDrawShape()) {
                     continue;
@@ -906,7 +913,7 @@ public class ChartLegend {
 
         //Draw legend    
         float x, y;
-        y = this._breakSpace + breakHeight / 2;
+        y = this.breakSpace + breakHeight / 2;
         i = 0;
         for (int row = 0; row < rowColNum; row++) {
             x = this.symbolDimension.width / 2 + 5;
@@ -940,7 +947,7 @@ public class ChartLegend {
                 x += this.symbolDimension.width + dim.width + 15;
                 i += 1;
             }
-            y += breakHeight + this._breakSpace * 2;
+            y += breakHeight + this.breakSpace * 2;
         }
     }
 
@@ -1447,12 +1454,19 @@ public class ChartLegend {
                 }
             } else {
                 int breakHeight = getBreakHeight(g);
+                int titleHeight = 0;
+                int titleWidth = 0;
+                if (this.label != null) {
+                    Dimension dim = this.label.getDimension(g);
+                    titleHeight = dim.height + (int)(this.breakSpace * 4);
+                    titleWidth = dim.width;
+                }
                 switch (this.orientation) {
                     case VERTICAL:
                         //Get column number
                         if (this.autoRowColNum) {
-                            int tHeight = (int) (legendScheme.getBreakNum() * (breakHeight + _breakSpace)
-                                    + _breakSpace * 2 + breakHeight / 2 + 5);
+                            int tHeight = (int) (legendScheme.getBreakNum() * (breakHeight + breakSpace)
+                                    + breakSpace * 2 + breakHeight / 2 + 5);
                             rowColNum = 1;
                             if (tHeight > limitDim.height * 10 / 8) {
                                 rowColNum = tHeight / (limitDim.height * 10 / 8) + 1;
@@ -1494,8 +1508,8 @@ public class ChartLegend {
 
 //                        this.height = (int) (rowNums[0] * (breakHeight + _breakSpace)
 //                                + _breakSpace * 2 + breakHeight / 2 + 5);
-                        this.height = (int) (rowNums[0] * (breakHeight + _breakSpace)
-                                + _breakSpace * 3);
+                        this.height = (int) (rowNums[0] * (breakHeight + breakSpace)
+                                + breakSpace * 3);
                         break;
                     case HORIZONTAL:
                         //Get row number
@@ -1524,7 +1538,7 @@ public class ChartLegend {
                         }
 
                         //Get height
-                        this.height = (int) (breakHeight + this._breakSpace * 2) * this.rowColNum;
+                        this.height = (int) (breakHeight + this.breakSpace * 2) * this.rowColNum;
 
                         //Get width
                         //FontMetrics metrics = g.getFontMetrics(tickFont);
@@ -1560,6 +1574,8 @@ public class ChartLegend {
                         this.width = maxWidth;
                         break;
                 }
+                this.height += titleHeight;
+                this.width = Math.max(this.width, titleWidth);
             }
         }
 
