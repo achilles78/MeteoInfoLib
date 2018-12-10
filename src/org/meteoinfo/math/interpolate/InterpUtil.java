@@ -202,7 +202,8 @@ public class InterpUtil {
         //Construct K-D tree
         Euclidean<double[]> kdTree = new Euclidean<>(2);
         for (i = 0; i < pNum; i++) {
-            kdTree.addPoint(new double[]{stationData[i][0], stationData[i][1]}, stationData[i]);
+            if (!Double.isNaN(stationData[i][2]))
+                kdTree.addPoint(new double[]{stationData[i][0], stationData[i][1]}, stationData[i]);
         }
 
         double HITOP = -999900000000000000000.0;
@@ -227,28 +228,13 @@ public class InterpUtil {
         }
         for (i = 0; i < yNum; i++) {
             y = Y.get(i).doubleValue();
-            yMin = y - rad;
-            yMax = y + rad;
             for (j = 0; j < xNum; j++) {
                 x = X.get(j).doubleValue();
-                xMin = x - rad;
-                xMax = x + rad;
                 stNum = 0;
                 sum = 0;
                 ArrayList<double[]> neighbours = kdTree.ballSearch(new double[]{x, y}, rad * rad);
                 for (double[] station : neighbours) {
                     val = station[2];
-                    sx = station[0];
-                    sy = station[1];
-                    if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
-                        continue;
-                    }
-
-                    double dis = Math.sqrt(Math.pow(sx - x, 2) + Math.pow(sy - y, 2));
-                    if (dis > rad) {
-                        continue;
-                    }
-
                     sum += val;
                     stNum += 1;
                     if (TOP[i][j] < val) {
@@ -271,16 +257,12 @@ public class InterpUtil {
             rad = radList.get(p).doubleValue();
             for (i = 0; i < yNum; i++) {
                 y = Y.get(i).doubleValue();
-                yMin = y - rad;
-                yMax = y + rad;
                 for (j = 0; j < xNum; j++) {
                     if (Double.isNaN(r.getDouble(i * xNum + j))) {
                         continue;
                     }
 
                     x = X.get(j).doubleValue();
-                    xMin = x - rad;
-                    xMax = x + rad;
                     sum = 0;
                     double wSum = 0;
                     ArrayList<double[]> neighbours = kdTree.ballSearch(new double[]{x, y}, rad * rad);
@@ -290,14 +272,7 @@ public class InterpUtil {
                         sy = station[1];
                         sxi = station[3];
                         syi = station[4];
-                        if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
-                            continue;
-                        }
-
                         double dis = Math.sqrt(Math.pow(sx - x, 2) + Math.pow(sy - y, 2));
-                        if (dis > rad) {
-                            continue;
-                        }
 
                         int i1 = (int) syi;
                         int j1 = (int) sxi;
@@ -401,7 +376,8 @@ public class InterpUtil {
         //Construct K-D tree
         Euclidean<double[]> kdTree = new Euclidean<>(2);
         for (i = 0; i < pNum; i++) {
-            kdTree.addPoint(new double[]{stationData[i][0], stationData[i][1]}, stationData[i]);
+            if (!Double.isNaN(stationData[i][2]))
+                kdTree.addPoint(new double[]{stationData[i][0], stationData[i][1]}, stationData[i]);
         }
 
         double HITOP = -999900000000000000000.0;
@@ -426,12 +402,8 @@ public class InterpUtil {
         }
         for (i = 0; i < yNum; i++) {
             y = Y.get(i).doubleValue();
-            yMin = y - rad;
-            yMax = y + rad;
             for (j = 0; j < xNum; j++) {
                 x = X.get(j).doubleValue();
-                xMin = x - rad;
-                xMax = x + rad;
                 stNum = 0;
                 sum = 0;
                 wSum = 0;
@@ -440,14 +412,7 @@ public class InterpUtil {
                     val = station[2];
                     sx = station[0];
                     sy = station[1];
-                    if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
-                        continue;
-                    }
-
                     double dis = Math.pow(sx - x, 2) + Math.pow(sy - y, 2);
-                    if (dis > rad * rad) {
-                        continue;
-                    }
                     w = Math.exp(-dis / (4 * kappa));
                     wSum += w;
                     sum += w * val;
@@ -472,16 +437,12 @@ public class InterpUtil {
             rad = radList.get(p).doubleValue();
             for (i = 0; i < yNum; i++) {
                 y = Y.get(i).doubleValue();
-                yMin = y - rad;
-                yMax = y + rad;
                 for (j = 0; j < xNum; j++) {
                     if (Double.isNaN(r.getDouble(i * xNum + j))) {
                         continue;
                     }
 
                     x = X.get(j).doubleValue();
-                    xMin = x - rad;
-                    xMax = x + rad;
                     sum = 0;
                     wSum = 0;
                     ArrayList<double[]> neighbours = kdTree.ballSearch(new double[]{x, y}, rad * rad);
@@ -491,15 +452,7 @@ public class InterpUtil {
                         sy = station[1];
                         sxi = station[3];
                         syi = station[4];
-                        if (Double.isNaN(val) || sx < xMin || sx > xMax || sy < yMin || sy > yMax) {
-                            continue;
-                        }
-
                         double dis = Math.pow(sx - x, 2) + Math.pow(sy - y, 2);
-                        if (dis > rad * rad) {
-                            continue;
-                        }
-
                         int i1 = (int) syi;
                         int j1 = (int) sxi;
                         int i2 = i1 + 1;
