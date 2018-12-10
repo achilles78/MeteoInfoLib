@@ -699,6 +699,31 @@ public class ArrayUtil {
 
         return a;
     }
+    
+    /**
+     * Return a new array of given shape and type, filled with fill value.
+     *
+     * @param shape Shape
+     * @param fillValue Fill value
+     * @param dtype Data type
+     * @return Array Result array
+     */
+    public static Array full(List<Integer> shape, Object fillValue, DataType dtype) {
+        int[] ashape = new int[shape.size()];
+        for (int i = 0; i < shape.size(); i++) {
+            ashape[i] = shape.get(i);
+        }
+        if (dtype == null) {
+            dtype = ArrayMath.getDataType(fillValue);
+        }
+        Array a = Array.factory(dtype, ashape);
+        
+        for (int i = 0; i < a.getSize(); i++){
+            a.setObject(i, fillValue);
+        }
+
+        return a;
+    }
 
     /**
      * Get ones array
