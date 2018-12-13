@@ -600,10 +600,10 @@ public class HYSPLITConcDataInfo extends DataInfo implements IGridDataInfo {
                                     //JP = br.readShort();
                                     //aConc = br.readFloat();
                                     System.arraycopy(bytes, start, sbytes, 0, 2);
-                                    IP = DataConvert.bytes2Short(sbytes, byteOrder);
+                                    IP = DataConvert.bytes2Short(sbytes, byteOrder) - 1;
                                     start += 2;
                                     System.arraycopy(bytes, start, sbytes, 0, 2);                                    
-                                    JP = DataConvert.bytes2Short(sbytes, byteOrder);
+                                    JP = DataConvert.bytes2Short(sbytes, byteOrder) - 1;
                                     start += 2;
                                     System.arraycopy(bytes, start, aBytes, 0, 4);
                                     aConc = DataConvert.bytes2Float(aBytes, byteOrder);
@@ -770,8 +770,8 @@ public class HYSPLITConcDataInfo extends DataInfo implements IGridDataInfo {
                                     if (br.getFilePointer() + 8 > br.length()) {
                                         break;
                                     }
-                                    IP = br.readShort();
-                                    JP = br.readShort();
+                                    IP = br.readShort() - 1;
+                                    JP = br.readShort() - 1;
                                     aConc = br.readFloat();
                                     if (IP >= 0 && IP < xNum && JP >= 0 && JP < yNum) {
                                         dataArray[IP][JP] = aConc;
