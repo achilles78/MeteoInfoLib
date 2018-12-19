@@ -87,11 +87,6 @@
       <version>${jcalendar.version}</version>
     </dependency>
     <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>${jodatime.version}</version>
-    </dependency>
-    <dependency>
       <groupId>edu.ucar</groupId>
       <artifactId>netcdfAll</artifactId>
       <version>${netcdfAll.version}</version>
@@ -155,11 +150,6 @@
       <groupId>org.apache.sanselan</groupId>
       <artifactId>sanselan</artifactId>
       <version>${sanselan.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>com.l2fprod</groupId>
