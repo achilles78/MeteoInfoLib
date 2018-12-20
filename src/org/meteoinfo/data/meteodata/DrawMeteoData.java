@@ -847,7 +847,7 @@ public class DrawMeteoData {
                 valueIdx = -valueIdx - 1;
             }
             //valueIdx = Arrays.asList(cValues).indexOf(aValue);            
-            if (valueIdx == cValues.length - 1) {
+            if (valueIdx >= cValues.length - 1) {
                 aPolygonShape.highValue = maxData;
             } else {
                 aPolygonShape.highValue = cValues[valueIdx + 1];

@@ -6,7 +6,7 @@
 
   <groupId>org.meteothinker</groupId>
   <artifactId>meteoInfoLib</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
@@ -37,7 +37,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>1.7</java.version>
-    <jodatime.version>2.2</jodatime.version>
+    <jodatime.version>2.10</jodatime.version>
     <netcdfAll.version>4.6.11</netcdfAll.version>
     <grib.version>4.5.5</grib.version>
     <jcalendar.version>1.4</jcalendar.version>
@@ -87,11 +87,6 @@
       <version>${jcalendar.version}</version>
     </dependency>
     <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>${jodatime.version}</version>
-    </dependency>
-    <dependency>
       <groupId>edu.ucar</groupId>
       <artifactId>netcdfAll</artifactId>
       <version>${netcdfAll.version}</version>
@@ -100,6 +95,16 @@
       <groupId>edu.ucar</groupId>
       <artifactId>grib</artifactId>
       <version>${grib.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>slf4j-api</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>joda-time</artifactId>
+          <groupId>joda-time</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.scilab.forge</groupId>
@@ -109,11 +114,6 @@
     <dependency>
       <groupId>org.freehep</groupId>
       <artifactId>freehep-graphics2d</artifactId>
-      <version>${freehep.graphics.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-graphicsio</artifactId>
       <version>${freehep.graphics.version}</version>
     </dependency>
     <dependency>
@@ -132,16 +132,6 @@
       <version>${freehep.graphics.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
-      <version>${groovy.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freehep</groupId>
-      <artifactId>freehep-io</artifactId>
-      <version>${freehep.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.freehep</groupId>
       <artifactId>freehep-util</artifactId>
       <version>${freehep.version}</version>
@@ -157,19 +147,9 @@
       <version>${jython.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.fifesoft</groupId>
-      <artifactId>rsyntaxtextarea</artifactId>
-      <version>${rsyntaxtextarea.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.sanselan</groupId>
       <artifactId>sanselan</artifactId>
       <version>${sanselan.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>com.l2fprod</groupId>
@@ -183,43 +163,13 @@
     </dependency>
     <dependency>
       <groupId>org.ejml</groupId>
-      <artifactId>ejml-core</artifactId>
-      <version>${ejml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-cdense</artifactId>
-      <version>${ejml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-ddense</artifactId>
-      <version>${ejml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-dsparse</artifactId>
-      <version>${ejml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ejml</groupId>
       <artifactId>ejml-experimental</artifactId>
       <version>${ejml.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.ejml</groupId>
-      <artifactId>ejml-fdense</artifactId>
-      <version>${ejml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ejml</groupId>
       <artifactId>ejml-simple</artifactId>
-      <version>${ejml.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-zdense</artifactId>
       <version>${ejml.version}</version>
     </dependency>
     <dependency>
