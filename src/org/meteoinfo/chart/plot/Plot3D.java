@@ -53,6 +53,7 @@ import org.meteoinfo.shape.Polyline;
 import org.meteoinfo.shape.PolylineZShape;
 import org.meteoinfo.shape.Shape;
 import org.meteoinfo.shape.ShapeTypes;
+import org.meteoinfo.shape.WindArrow3D;
 
 /**
  *
@@ -679,6 +680,9 @@ public class Plot3D extends Plot {
             case PolygonZ:
                 this.drawPolygonShape(g, graphic);
                 break;
+            case WindArraw:
+                
+                break;
             case Image:
 
                 break;
@@ -1302,6 +1306,26 @@ public class Plot3D extends Plot {
         g.drawImage(image, transform, null);
     }
 
+    private void drawWindArrow(Graphics2D g, Graphic graphic) {        
+        if (extent.intersects(graphic.getExtent())) {
+            WindArrow3D shape = (WindArrow3D) graphic.getShape();
+            PointBreak pb = (PointBreak) graphic.getLegend();
+            float zoom = pb.getSize() / 10;
+            PointZ p = (PointZ) shape.getPoint();
+            PointZ pp = new PointZ((p.X - xmin) * xfactor - 10, (p.Y - ymin) * yfactor - 10,
+                    (p.Z - this.zmin) * zfactor - 10);
+            projection = projector.project((float) pp.X, (float) pp.Y, (float) pp.Z);
+            PointF pf = new PointF(projection.x, projection.y);
+            p = (PointZ)shape.getEndPoint();
+            pp = new PointZ((p.X - xmin) * xfactor - 10, (p.Y - ymin) * yfactor - 10,
+                    (p.Z - this.zmin) * zfactor - 10);
+            projection = projector.project((float) pp.X, (float) pp.Y, (float) pp.Z);
+            PointF epf = new PointF(projection.x, projection.y);
+            PointF[] points = new PointF[]{pf, epf};
+            Draw.drawArrow(points, pb, 4, g);
+        }
+    }
+    
     /**
      * Draws the base plane. The base plane is the x-y plane.
      *

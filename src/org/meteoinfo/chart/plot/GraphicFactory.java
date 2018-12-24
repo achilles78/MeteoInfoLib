@@ -63,6 +63,7 @@ import org.meteoinfo.shape.RectangleShape;
 import org.meteoinfo.shape.Shape;
 import org.meteoinfo.shape.ShapeTypes;
 import org.meteoinfo.shape.WindArrow;
+import org.meteoinfo.shape.WindArrow3D;
 import org.meteoinfo.shape.WindBarb;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -4138,7 +4139,7 @@ public class GraphicFactory {
             }
         }
 
-        int i, j;
+        int i;
         WindArrow wa;
         double windDir, windSpeed;
         PointD aPoint;
@@ -4169,6 +4170,71 @@ public class GraphicFactory {
                     Graphic graphic = new Graphic(wa, cb);
                     gc.add(graphic);
                 }
+            }
+        }
+
+        gc.setLegendScheme(ls);
+        if (cdata != null) {
+            gc.setSingleLegend(false);
+        }
+
+        return gc;
+    }
+    
+    /**
+     * Create wind arrows
+     *
+     * @param xdata X data array
+     * @param ydata Y data array
+     * @param zdata Z data array
+     * @param udata U data array
+     * @param vdata V data array
+     * @param wdata W data array
+     * @param cdata Colored data array
+     * @param ls Legend scheme
+     * @return GraphicCollection
+     */
+    public static GraphicCollection createArrows3D(Array xdata, Array ydata, Array zdata, Array udata, 
+            Array vdata, Array wdata, Array cdata, LegendScheme ls) {
+        GraphicCollection gc = new GraphicCollection();
+        ShapeTypes sts = ls.getShapeType();
+        ls = ls.convertTo(ShapeTypes.Point);
+        if (sts != ShapeTypes.Point) {
+            for (int i = 0; i < ls.getBreakNum(); i++) {
+                ((PointBreak) ls.getLegendBreaks().get(i)).setSize(10);
+            }
+        }
+
+        int i;
+        WindArrow3D wa;
+        double u, v, w;
+        PointZ aPoint;
+        ColorBreak cb;
+        double value;
+        int dn = (int) xdata.getSize();
+        for (i = 0; i < dn; i++) {
+            u = udata.getDouble(i);
+            v = vdata.getDouble(i);
+            w = wdata.getDouble(i);
+            if (!Double.isNaN(u) && !Double.isNaN(v) && !Double.isNaN(w)) {
+                    aPoint = new PointZ();
+                    aPoint.X = xdata.getDouble(i);
+                    aPoint.Y = ydata.getDouble(i);
+                    aPoint.Z = zdata.getDouble(i);
+                    wa = new WindArrow3D();
+                    wa.u = u;
+                    wa.v = v;
+                    wa.w = w;
+                    wa.setPoint(aPoint);
+                    if (cdata == null) {
+                        cb = ls.getLegendBreaks().get(0);
+                    } else {
+                        value = cdata.getDouble(i);
+                        wa.setValue(value);
+                        cb = ls.findLegendBreak(value);
+                    }
+                    Graphic graphic = new Graphic(wa, cb);
+                    gc.add(graphic);
             }
         }
 
