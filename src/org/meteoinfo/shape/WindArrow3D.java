@@ -14,7 +14,7 @@ public class WindArrow3D extends PointZShape {
     public double u;
     public double v;
     public double w;
-    public float size = 6;
+    public float length = 1;
     
     // </editor-fold>
     // <editor-fold desc="Constructor">
@@ -40,9 +40,9 @@ public class WindArrow3D extends PointZShape {
     public PointZ getEndPoint() {
         PointZ sp = (PointZ)this.getPoint();
         PointZ ed = new PointZ();
-        ed.X = sp.X + u;
-        ed.Y = sp.Y + v;
-        ed.Z = sp.Z + w;
+        ed.X = sp.X + u * length;
+        ed.Y = sp.Y + v * length;
+        ed.Z = sp.Z + w * length;
         return ed;
     }
 

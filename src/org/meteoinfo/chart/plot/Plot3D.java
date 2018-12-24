@@ -681,7 +681,7 @@ public class Plot3D extends Plot {
                 this.drawPolygonShape(g, graphic);
                 break;
             case WindArraw:
-                
+                this.drawWindArrow(g, graphic);
                 break;
             case Image:
 
@@ -1310,7 +1310,6 @@ public class Plot3D extends Plot {
         if (extent.intersects(graphic.getExtent())) {
             WindArrow3D shape = (WindArrow3D) graphic.getShape();
             PointBreak pb = (PointBreak) graphic.getLegend();
-            float zoom = pb.getSize() / 10;
             PointZ p = (PointZ) shape.getPoint();
             PointZ pp = new PointZ((p.X - xmin) * xfactor - 10, (p.Y - ymin) * yfactor - 10,
                     (p.Z - this.zmin) * zfactor - 10);

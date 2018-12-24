@@ -1968,6 +1968,40 @@ public class ArrayUtil {
 
         return new Array[]{rx, ry};
     }
+    
+    /**
+     * Mesh grid
+     *
+     * @param xs X arrays
+     * @return Result arrays - matrix
+     */
+    public static Array[] meshgrid(Array... xs) {
+        int n = xs.length;
+        int[] shape = new int[n];
+        int i = 0;
+        Array x;
+        for (i = 0; i < n; i++) {
+            x = xs[i];
+            shape[n - i - 1] = (int) x.getSize();
+        }
+        
+        Array[] rs = new Array[n];
+        Array r;        
+        int idx;
+        for (int s = 0; s < n; s++) {
+            x = xs[s];
+            r = Array.factory(xs[s].getDataType(), shape);
+            Index index = r.getIndex();
+            for (i = 0; i < r.getSize(); i++) {
+                idx = index.getCurrentCounter()[n - s - 1];
+                r.setObject(index, x.getObject(idx));
+                index.incr();
+            }
+            rs[s] = r;
+        }
+        
+        return rs;
+    }
 
     /**
      * Create mesh polygon layer

@@ -4190,12 +4190,13 @@ public class GraphicFactory {
      * @param udata U data array
      * @param vdata V data array
      * @param wdata W data array
+     * @param length The length of each wind arrow
      * @param cdata Colored data array
      * @param ls Legend scheme
      * @return GraphicCollection
      */
     public static GraphicCollection createArrows3D(Array xdata, Array ydata, Array zdata, Array udata, 
-            Array vdata, Array wdata, Array cdata, LegendScheme ls) {
+            Array vdata, Array wdata, float length, Array cdata, LegendScheme ls) {
         GraphicCollection gc = new GraphicCollection();
         ShapeTypes sts = ls.getShapeType();
         ls = ls.convertTo(ShapeTypes.Point);
@@ -4225,6 +4226,7 @@ public class GraphicFactory {
                     wa.u = u;
                     wa.v = v;
                     wa.w = w;
+                    wa.length = length;
                     wa.setPoint(aPoint);
                     if (cdata == null) {
                         cb = ls.getLegendBreaks().get(0);
