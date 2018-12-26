@@ -3651,7 +3651,7 @@ public class ArrayUtil {
      * @param xi The coordinates to sample the gridded data at
      * @return Interpolation value
      */
-    public static double interpn(List<List<Number>> points, Array values, List<Number> xi) {
+    public static double interpn_s(List<List<Number>> points, Array values, List<Number> xi) {
         Object[] r = findIndices(points, xi);
         boolean outBounds = (boolean) r[2];
         if (outBounds) {
@@ -3675,6 +3675,84 @@ public class ArrayUtil {
 
             return v;
         }
+    }
+    
+    /**
+     * Multidimensional interpolation on regular grids.
+     *
+     * @param points The points defining the regular grid in n dimensions.
+     * @param values The data on the regular grid in n dimensions.
+     * @param xi The coordinates to sample the gridded data at
+     * @return Interpolation value
+     */
+    public static double interpn_s(List<Array> points, Array values, Array xi) {        
+        Object[] r = findIndices(points, xi);
+        boolean outBounds = (boolean) r[2];
+        if (outBounds) {
+            return Double.NaN;
+        } else {
+            double v, weight;
+            Index index = values.getIndex();
+            int[] indices = (int[]) r[0];
+            double[] distances = (double[]) r[1];
+            v = 0;
+            List<Index> ii = new ArrayList<>();
+            iterIndex(ii, index, indices, 0);
+            int n = indices.length;
+            for (Index idx : ii) {
+                weight = 1;
+                for (int i = 0; i < n; i++) {
+                    weight *= idx.getCurrentCounter()[i] == indices[i] ? 1 - distances[i] : distances[i];
+                }
+                v += values.getDouble(idx) * weight;
+            }
+
+            return v;
+        }
+    }
+    
+    /**
+     * Multidimensional interpolation on regular grids.
+     *
+     * @param points The points defining the regular grid in n dimensions.
+     * @param values The data on the regular grid in n dimensions.
+     * @param xi The coordinates to sample the gridded data at - 2D
+     * @return Interpolation value
+     */
+    public static Array interpn(List<Array> points, Array values, List<Array> xi) { 
+        int n = xi.size();
+        Array r = Array.factory(DataType.DOUBLE, new int[]{n});
+        for (int i = 0; i < n; i++) {
+            Array x = xi.get(i);
+            r.setDouble(i, interpn_s(points, values, x));
+        }      
+        
+        return r;
+    }
+    
+    /**
+     * Multidimensional interpolation on regular grids.
+     *
+     * @param points The points defining the regular grid in n dimensions.
+     * @param values The data on the regular grid in n dimensions.
+     * @param xi The coordinates to sample the gridded data at - 2D
+     * @return Interpolation value
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static Object interpn(List<Array> points, Array values, Array xi) throws InvalidRangeException {
+        if (xi.getRank() == 1) {
+            return interpn_s(points, values, xi);
+        }
+        
+        int n = xi.getShape()[0];
+        int m = xi.getShape()[1];
+        Array r = Array.factory(DataType.DOUBLE, new int[]{n});
+        for (int i = 0; i < n; i++) {
+            Array x = xi.section(new int[]{i, 0}, new int[]{1, m});
+            r.setDouble(i, interpn_s(points, values, x));
+        }      
+        
+        return r;
     }
 
     private static void iterIndex(List<Index> ii, Index index, int[] indices, int idx) {
@@ -3718,6 +3796,35 @@ public class ArrayUtil {
             }
             indices[i] = idx;
             distances[i] = (x - a.get(idx).doubleValue()) / (a.get(idx + 1).doubleValue() - a.get(idx).doubleValue());
+        }
+
+        return new Object[]{indices, distances, outBounds};
+    }
+    
+    /**
+     * Find indices
+     *
+     * @param points The points defining the regular grid in n dimensions.
+     * @param xi The coordinates to sample the gridded data at
+     * @return Indices
+     */
+    public static Object[] findIndices(List<Array> points, Array xi) {
+        int n = points.size();
+        int[] indices = new int[n];
+        double[] distances = new double[n];
+        boolean outBounds = false;
+        double x;
+        Array a;
+        for (int i = 0; i < n; i++) {
+            x = xi.getDouble(i);
+            a = points.get(i);
+            int idx = searchSorted(a, x);
+            if (idx < 0) {
+                outBounds = true;
+                idx = 0;
+            }
+            indices[i] = idx;
+            distances[i] = (x - a.getDouble(idx)) / (a.getDouble(idx + 1) - a.getDouble(idx));
         }
 
         return new Object[]{indices, distances, outBounds};
@@ -3767,6 +3874,70 @@ public class ArrayUtil {
 
         return idx;
     }
+    
+    /**
+     * Search sorted list index
+     *
+     * @param a Sorted list
+     * @param v value
+     * @return Index
+     */
+    public static int searchSorted(Array a, double v) {
+        int idx = -1;
+        int n = (int)a.getSize();
+        if (a.getDouble(1) > a.getDouble(0)) {
+            if (v < a.getDouble(0)) {
+                return idx;
+            }
+
+            if (v > a.getDouble(n - 1)) {
+                return idx;
+            }
+
+            for (int i = 1; i < n; i++) {
+                if (v < a.getDouble(i)) {
+                    idx = i - 1;
+                    break;
+                }
+            }
+        } else {
+            if (v > a.getDouble(0)) {
+                return idx;
+            }
+
+            if (v < a.getDouble(n - 1)) {
+                return idx;
+            }
+
+            for (int i = 1; i < n; i++) {
+                if (v > a.getDouble(i)) {
+                    idx = i - 1;
+                    break;
+                }
+            }
+        }
+
+        return idx;
+    }
+    
+//    /**
+//     * Search sorted list index
+//     *
+//     * @param a Sorted list
+//     * @param v value
+//     * @return Index
+//     */
+//    public static int searchSorted(Array a, double v) {
+//        if (v < a.getDouble(0) || v > a.getDouble((int)a.getSize() - 1)) {
+//            return -1;
+//        }
+//        
+//        int idx = Arrays.binarySearch((double[])a.get1DJavaArray(double.class), v);
+//        if (idx < 0) {
+//            idx = -idx - 1;
+//        }
+//        return idx;
+//    }
 
     // </editor-fold>
     // <editor-fold desc="Geocomputation">
