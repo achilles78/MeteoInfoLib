@@ -360,6 +360,16 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         pb.setDrawFill(false);
         this.boundary = new Graphic(value, pb);
     }
+    
+    /**
+     * Set boundary property
+     * @param pb Boundary property
+     */
+    public void setBoundaryProp(PolygonBreak pb) {
+        if (this.boundary != null) {
+            this.boundary = new Graphic(this.boundary.getShape(), pb);
+        }
+    }
 
     // </editor-fold>
     // <editor-fold desc="Methods">
@@ -391,11 +401,22 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
 
     @Override
     void drawGraph(Graphics2D g, Rectangle2D area) {
-        this.mapView.setAntiAlias(this.antialias);
+        this.mapView.setAntiAlias(this.antialias);        
         this.mapView.setViewExtent((Extent) this.getDrawExtent().clone());
+        if (this.boundary != null) {
+            PolygonBreak pb = (PolygonBreak)this.boundary.getLegend();
+            if (pb.isDrawFill()) {
+                pb.setDrawOutline(false);
+                this.mapView.drawGraphic(g, this.boundary, area.getBounds());
+                pb.setDrawOutline(true);
+            }
+        }
         this.mapView.paintGraphics(g, area, this.tileLoadListener);
         if (this.boundary != null) {
+            PolygonBreak pb = (PolygonBreak)this.boundary.getLegend();
+            pb.setDrawFill(false);
             this.mapView.drawGraphic(g, this.boundary, area.getBounds());
+            pb.setDrawFill(true);
         }
     }
 

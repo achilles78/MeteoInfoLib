@@ -5887,7 +5887,15 @@ public class MapView extends JPanel implements IWebMapPanel {
         }
     }
 
+    /**
+     * Draw a graphic
+     * @param g The Graphics2D
+     * @param graphic The graphic
+     * @param rect Drawing rectangle
+     */
     public void drawGraphic(Graphics2D g, Graphic graphic, Rectangle rect) {
+        refreshXYScale(rect.width, rect.height);
+        
         AffineTransform oldMatrix = g.getTransform();
         Rectangle oldRegion = g.getClipBounds();
         g.setClip(rect);

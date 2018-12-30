@@ -6,9 +6,6 @@
         <group>
             <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/projection/ProjectionNames.java</file>
             <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/projection/info/ProjectionInfo.java</file>
-            <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/projection/info/Sinusoidal.java</file>
-            <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/projection/info/Mercator.java</file>
-            <file>file:/D:/MyProgram/java/MeteoInfoDev/MeteoInfoLib/src/org/meteoinfo/projection/info/Molleweide.java</file>
         </group>
     </open-files>
 </project-private>
