@@ -32,7 +32,7 @@ import org.meteoinfo.data.meteodata.netcdf.NetCDFDataInfo;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

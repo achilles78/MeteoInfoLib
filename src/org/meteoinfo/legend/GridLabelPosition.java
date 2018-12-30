@@ -19,9 +19,9 @@ package org.meteoinfo.legend;
  */
 public enum GridLabelPosition {
 
-    LeftBottom,
-    LeftUp,
-    RightBottom,
-    RightUp,
-    All
+    LEFT_BOTTOM,
+    LEFT_UP,
+    RIGHT_BOTTOM,
+    RIGHT_UP,
+    ALL
 }

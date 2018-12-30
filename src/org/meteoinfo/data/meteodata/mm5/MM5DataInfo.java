@@ -26,7 +26,7 @@ import org.meteoinfo.data.meteodata.Variable;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.util.DateUtil;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -149,7 +149,7 @@ public class MM5DataInfo extends DataInfo implements IGridDataInfo {
                                 + "+lon_0=" + String.valueOf(ebh.getXLONC());
                         break;
                 }
-                this.setProjectionInfo(new ProjectionInfo(projStr));
+                this.setProjectionInfo(ProjectionInfo.factory(projStr));
                 //Set X Y
                 double[] X = new double[xn];
                 double[] Y = new double[yn];
@@ -215,7 +215,7 @@ public class MM5DataInfo extends DataInfo implements IGridDataInfo {
                                         + "+lon_0=" + String.valueOf(bh.getXLONC());
                                 break;
                         }
-                        this.setProjectionInfo(new ProjectionInfo(projStr));
+                        this.setProjectionInfo(ProjectionInfo.factory(projStr));
                         //Set X Y
                         double[] X = new double[xn];
                         double[] Y = new double[yn];

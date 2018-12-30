@@ -32,7 +32,7 @@ import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.Extent;
 import org.meteoinfo.layer.WorldFilePara;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -500,7 +500,7 @@ public class AWXDataInfo extends DataInfo implements IGridDataInfo, IStationData
             }
 
             if (!projStr.equals(this.getProjectionInfo().toProj4String())) {
-                this.setProjectionInfo(new ProjectionInfo(projStr));
+                this.setProjectionInfo(ProjectionInfo.factory(projStr));
             }
 
             calCoordinate_1(projType);

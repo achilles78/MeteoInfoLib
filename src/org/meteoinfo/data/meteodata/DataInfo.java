@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 import org.meteoinfo.global.util.DateUtil;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 

@@ -44,7 +44,7 @@ import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.global.util.DateUtil;
 import org.meteoinfo.projection.proj4j.proj.Projection;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.ProjectionNames;
 import org.meteoinfo.projection.Reproject;
 import ucar.ma2.Array;
@@ -438,7 +438,7 @@ public class ARLDataInfo extends DataInfo implements IGridDataInfo {
                             + "+lon_0=" + String.valueOf(aDH.REF_LON + aDH.ORIENT);
                 }
 
-                theProj = new ProjectionInfo(ProjStr);
+                theProj = ProjectionInfo.factory(ProjStr);
                 this.setProjectionInfo(theProj);
 
                 //Set X Y

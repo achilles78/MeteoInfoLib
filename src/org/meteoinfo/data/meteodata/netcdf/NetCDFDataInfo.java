@@ -43,7 +43,7 @@ import org.meteoinfo.data.GridArray;
 import org.meteoinfo.data.meteodata.MeteoDataType;
 import org.meteoinfo.global.util.DateUtil;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
@@ -898,7 +898,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
         }
 
         try {
-            ProjectionInfo projInfo = new ProjectionInfo(projStr);
+            ProjectionInfo projInfo = ProjectionInfo.factory(projStr);
             return projInfo;
         } catch (Exception e) {
             return KnownCoordinateSystems.geographic.world.WGS1984;
@@ -970,7 +970,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                 break;
         }
 
-        return new ProjectionInfo(projStr);
+        return ProjectionInfo.factory(projStr);
     }
 
     private ProjectionInfo getProjection_WRFOUT() {
@@ -1013,11 +1013,11 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                 break;
         }
 
-        ProjectionInfo projInfo = new ProjectionInfo(projStr);
-        double clon = Double.parseDouble(this.getGlobalAttStr("CEN_LON"));
-        double clat = Double.parseDouble(this.getGlobalAttStr("CEN_LAT"));
-        projInfo.setCenterLat(clat);
-        projInfo.setCenterLon(clon);
+        ProjectionInfo projInfo = ProjectionInfo.factory(projStr);
+        //double clon = Double.parseDouble(this.getGlobalAttStr("CEN_LON"));
+        //double clat = Double.parseDouble(this.getGlobalAttStr("CEN_LAT"));
+        //projInfo.setCenterLat(clat);
+        //projInfo.setCenterLon(clon);
         return projInfo;
     }
 

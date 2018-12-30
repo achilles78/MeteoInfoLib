@@ -13,6 +13,7 @@
  */
 package org.meteoinfo.projection;
 
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.global.PointD;
 import org.meteoinfo.projection.proj4j.CoordinateTransform;
 import org.meteoinfo.projection.proj4j.CoordinateTransformFactory;
@@ -28,18 +29,30 @@ public class Reproject {
 
     /**
      * Reproject a point
+     * @param x X
+     * @param y Y
+     * @param source Source projection info
+     * @param dest Destination projection info
+     * @return Projected point
+     */
+    public static PointD reprojectPoint(double x, double y, ProjectionInfo source, ProjectionInfo dest) {
+        double[][] points = new double[1][];
+        points[0] = new double[]{x, y};
+        Reproject.reprojectPoints(points, source, dest, 0, points.length);
+        PointD rPoint = new PointD(points[0][0], points[0][1]);
+        
+        return rPoint;
+    }
+    
+    /**
+     * Reproject a point
      * @param point The point
      * @param source Source projection info
      * @param dest Destination projection info
      * @return Projected point
      */
     public static PointD reprojectPoint(PointD point, ProjectionInfo source, ProjectionInfo dest) {
-        double[][] points = new double[1][];
-        points[0] = new double[]{point.X, point.Y};
-        Reproject.reprojectPoints(points, source, dest, 0, points.length);
-        PointD rPoint = new PointD(points[0][0], points[0][1]);
-        
-        return rPoint;
+        return reprojectPoint(point.X, point.Y, source, dest);
     }
     
     /**
@@ -70,6 +83,8 @@ public class Reproject {
                 }
                 if (points[i][0] > 180.0) {
                     points[i][0] -= 360;
+                } else if (points[i][0] < -180) {
+                    points[i][0] += 360;
                 }
             }
         }

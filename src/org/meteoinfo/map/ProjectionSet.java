@@ -13,21 +13,15 @@
  */
 package org.meteoinfo.map;
 
-import org.meteoinfo.data.mapdata.Field;
-import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.event.IProjectionChangedListener;
 import org.meteoinfo.global.event.ProjectionChangedEvent;
 import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;
-import org.meteoinfo.table.DataColumn;
-import org.meteoinfo.table.DataRow;
-import org.meteoinfo.table.DataTable;
 import org.meteoinfo.layer.RasterLayer;
 import org.meteoinfo.layer.VectorLayer;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
-import org.meteoinfo.projection.ProjectionNames;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.CircleShape;
 import org.meteoinfo.shape.CurveLineShape;
@@ -47,12 +41,9 @@ import org.meteoinfo.shape.WindBarb;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.proj4j.CRSFactory;
-import ucar.ma2.InvalidRangeException;
 
 /**
  *
@@ -146,7 +137,7 @@ public class ProjectionSet {
      * @param projStr Porj4 string
      */
     public void setProjStr(String projStr) {
-        _projInfo = new ProjectionInfo(projStr);
+        _projInfo = ProjectionInfo.factory(projStr);
     }
 
 //    /**
@@ -254,7 +245,7 @@ public class ProjectionSet {
                     break;
                 case RasterLayer:
                     RasterLayer oRLayer = (RasterLayer) aMapView.getLayers().get(i);
-                    projectLayer(oRLayer, toProj);                    
+                    ProjectionUtil.projectLayer(oRLayer, toProj);                    
                     break;
             }
         }
@@ -268,7 +259,7 @@ public class ProjectionSet {
         aMapView.setExtent(aMapView.getLayersWholeExtent());
         Extent aExten = aMapView.getExtent();
         aMapView.setLonLatLayer(aMapView.generateLonLatLayer());
-        projectLayer(aMapView.getLonLatLayer(), toProj);
+        ProjectionUtil.projectLayer(aMapView.getLonLatLayer(), toProj);
         //aMapView.setLonLatProjLayer(aMapView.getLonLatLayer());
         for (int i = 0; i < aMapView.getLonLatLayer().getShapeNum(); i++) {
             PolylineShape aPLS = (PolylineShape) aMapView.getLonLatLayer().getShapes().get(i);
@@ -307,487 +298,487 @@ public class ProjectionSet {
         this.fireProjectionChangedEvent();
     }
 
-    /**
-     * Project raster layer
-     *
-     * @param oLayer The layer
-     * @param toProj To projection
-     */
-    public void projectLayer(RasterLayer oLayer, ProjectionInfo toProj) {
-        try {
-            //            if (toProj.getProjectionName() == ProjectionNames.Robinson) {
+//    /**
+//     * Project raster layer
+//     *
+//     * @param oLayer The layer
+//     * @param toProj To projection
+//     */
+//    public void projectLayer(RasterLayer oLayer, ProjectionInfo toProj) {
+//        try {
+//            //            if (toProj.getProjectionName() == ProjectionNames.Robinson) {
+////                return;
+////            }
+//
+//            if (oLayer.getProjInfo().toProj4String().equals(toProj.toProj4String())) {
+//                if (oLayer.isProjected()) {
+//                    oLayer.getOriginData();
+//                    oLayer.updateGridData();
+//                    if (oLayer.getLegendScheme().getBreakNum() < 50) {
+//                        oLayer.updateImage();
+//                    } else {
+//                        oLayer.setPaletteByLegend();
+//                    }
+//                }
 //                return;
 //            }
-
-            if (oLayer.getProjInfo().toProj4String().equals(toProj.toProj4String())) {
-                if (oLayer.isProjected()) {
-                    oLayer.getOriginData();
-                    oLayer.updateGridData();
-                    if (oLayer.getLegendScheme().getBreakNum() < 50) {
-                        oLayer.updateImage();
-                    } else {
-                        oLayer.setPaletteByLegend();
-                    }
-                }
-                return;
-            }
-
-            if (!oLayer.isProjected()) {
-                oLayer.updateOriginData();
-            } else {
-                oLayer.getOriginData();
-            }
-
-            oLayer.setGridData(oLayer.getGridData().project(oLayer.getProjInfo(), toProj));
-            oLayer.updateImage(oLayer.getLegendScheme());
-//            if (oLayer.getLegendScheme().getBreakNum() < 50) {
-//                oLayer.updateImage(oLayer.getLegendScheme());
+//
+//            if (!oLayer.isProjected()) {
+//                oLayer.updateOriginData();
 //            } else {
-//                oLayer.setPaletteByLegend();
+//                oLayer.getOriginData();
 //            }
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(ProjectionSet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    /**
-     * Project vector layer
-     *
-     * @param oLayer The layer
-     * @param toProj To projection info
-     */
-    public void projectLayer(VectorLayer oLayer, ProjectionInfo toProj) {
-        projectLayer(oLayer, toProj, true);
-    }
-
-    /**
-     * Project vector layer
-     *
-     * @param oLayer The layer
-     * @param toProj To projection info
-     * @param projectLabels If project labels
-     */
-    public void projectLayer(VectorLayer oLayer, ProjectionInfo toProj, boolean projectLabels) {
-        ProjectionInfo fromProj = oLayer.getProjInfo();
-        if (fromProj.equals(toProj)) {
-            if (oLayer.isProjected()) {
-                oLayer.getOriginData();
-            }
-
-            return;
-        }
-
-        if (oLayer.isProjected()) {
-            oLayer.getOriginData();
-        } else {
-            oLayer.updateOriginData();
-        }
-
-        double refLon = toProj.getRefCutLon();
-        if (oLayer.getExtent().maxX > 180 && oLayer.getExtent().minX > refLon) {
-            refLon += 360;
-        }
-
-        //coordinate transform process
-        int i, s;
-        ArrayList newPoints = new ArrayList();
-        Extent lExtent = new Extent();
-
-        DataTable aTable = new DataTable();
-        for (DataColumn aDC : oLayer.getAttributeTable().getTable().getColumns()) {
-            Field bDC = new Field(aDC.getColumnName(), aDC.getDataType());
-            aTable.getColumns().add(bDC);
-        }
-
-        //aLayer.AttributeTable.Table.Rows.Clear();
-        switch (oLayer.getShapeType()) {
-            case Point:
-            case PointM:
-            case PointZ:
-            case WeatherSymbol:
-            case WindArraw:
-            case WindBarb:
-            case StationModel:
-                List<Shape> shapePoints = new ArrayList<>();
-                newPoints.clear();
-                for (s = 0; s < oLayer.getShapeNum(); s++) {
-                    PointShape aPS = (PointShape) oLayer.getShapes().get(s);
-                    if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
-                        switch (toProj.getProjectionName()) {
-                            case Lambert_Conformal_Conic:
-                                if (aPS.getPoint().Y < -80) {
-                                    continue;
-                                }
-                                break;
-                            case North_Polar_Stereographic_Azimuthal:
-                                if (aPS.getPoint().Y < 0) {
-                                    continue;
-                                }
-                                break;
-                            case South_Polar_Stereographic_Azimuthal:
-                                if (aPS.getPoint().Y > 0) {
-                                    continue;
-                                }
-                                break;
-                            case Mercator:
-                                if (aPS.getPoint().Y > 85.0511 || aPS.getPoint().Y < -85.0511) {
-                                    continue;
-                                }
-                                break;
-                        }
-                    }
-                    aPS = projectPointShape(aPS, fromProj, toProj);
-                    if (aPS != null) {
-                        shapePoints.add(aPS);
-                        newPoints.add(aPS.getPoint());
-
-                        DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
-                        try {
-                            aTable.addRow(aDR);
-                        } catch (Exception ex) {
-                            Logger.getLogger(ProjectionSet.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-                oLayer.setShapes(new ArrayList<>(shapePoints));
-                oLayer.setExtent(MIMath.getPointsExtent(newPoints));
-
-                break;
-            case Polyline:
-            case PolylineM:
-            case PolylineZ:
-                List<Shape> newPolylines = new ArrayList<>();
-                for (s = 0; s < oLayer.getShapeNum(); s++) {
-                    PolylineShape aPLS = (PolylineShape) oLayer.getShapes().get(s);
-                    List<PolylineShape> plsList = new ArrayList<>();
-                    if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
-                        switch (toProj.getProjectionName()) {
-                            case Lambert_Conformal_Conic:
-                                if (aPLS.getExtent().minY < -80) {
-                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, -80, true);
-                                }
-                                break;
-                            case North_Polar_Stereographic_Azimuthal:
-                                if (aPLS.getExtent().minY < 0) {
-                                    //continue;
-                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, 0, true);
-                                }
-                                break;
-                            case South_Polar_Stereographic_Azimuthal:
-                                if (aPLS.getExtent().maxY > 0) {
-                                    //continue;
-                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, 0, false);
-                                }
-                                break;
-                            case Mercator:
-                                if (aPLS.getExtent().maxY > 85.0511) {
-                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, 85.0511, false);
-                                }
-                                if (aPLS.getExtent().minY < -85.0511) {
-                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, -85.0511, true);
-                                }
-                                break;
-                        }
-                        if (aPLS == null) {
-                            continue;
-                        }
-
-//                        aPLS = GeoComputation.clipPolylineShape_Lon(aPLS, refLon);
+//
+//            oLayer.setGridData(oLayer.getGridData().project(oLayer.getProjInfo(), toProj));
+//            oLayer.updateImage(oLayer.getLegendScheme());
+////            if (oLayer.getLegendScheme().getBreakNum() < 50) {
+////                oLayer.updateImage(oLayer.getLegendScheme());
+////            } else {
+////                oLayer.setPaletteByLegend();
+////            }
+//        } catch (InvalidRangeException ex) {
+//            Logger.getLogger(ProjectionSet.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
+//
+//    /**
+//     * Project vector layer
+//     *
+//     * @param oLayer The layer
+//     * @param toProj To projection info
+//     */
+//    public void projectLayer(VectorLayer oLayer, ProjectionInfo toProj) {
+//        projectLayer(oLayer, toProj, true);
+//    }
+//
+//    /**
+//     * Project vector layer
+//     *
+//     * @param oLayer The layer
+//     * @param toProj To projection info
+//     * @param projectLabels If project labels
+//     */
+//    public void projectLayer(VectorLayer oLayer, ProjectionInfo toProj, boolean projectLabels) {
+//        ProjectionInfo fromProj = oLayer.getProjInfo();
+//        if (fromProj.equals(toProj)) {
+//            if (oLayer.isProjected()) {
+//                oLayer.getOriginData();
+//            }
+//
+//            return;
+//        }
+//
+//        if (oLayer.isProjected()) {
+//            oLayer.getOriginData();
+//        } else {
+//            oLayer.updateOriginData();
+//        }
+//
+//        double refLon = toProj.getRefCutLon();
+//        if (oLayer.getExtent().maxX > 180 && oLayer.getExtent().minX > refLon) {
+//            refLon += 360;
+//        }
+//
+//        //coordinate transform process
+//        int i, s;
+//        ArrayList newPoints = new ArrayList();
+//        Extent lExtent = new Extent();
+//
+//        DataTable aTable = new DataTable();
+//        for (DataColumn aDC : oLayer.getAttributeTable().getTable().getColumns()) {
+//            Field bDC = new Field(aDC.getColumnName(), aDC.getDataType());
+//            aTable.getColumns().add(bDC);
+//        }
+//
+//        //aLayer.AttributeTable.Table.Rows.Clear();
+//        switch (oLayer.getShapeType()) {
+//            case Point:
+//            case PointM:
+//            case PointZ:
+//            case WeatherSymbol:
+//            case WindArraw:
+//            case WindBarb:
+//            case StationModel:
+//                List<Shape> shapePoints = new ArrayList<>();
+//                newPoints.clear();
+//                for (s = 0; s < oLayer.getShapeNum(); s++) {
+//                    PointShape aPS = (PointShape) oLayer.getShapes().get(s);
+//                    if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
+//                        switch (toProj.getProjectionName()) {
+//                            case Lambert_Conformal_Conic:
+//                                if (aPS.getPoint().Y < -80) {
+//                                    continue;
+//                                }
+//                                break;
+//                            case North_Polar_Stereographic_Azimuthal:
+//                                if (aPS.getPoint().Y < 0) {
+//                                    continue;
+//                                }
+//                                break;
+//                            case South_Polar_Stereographic_Azimuthal:
+//                                if (aPS.getPoint().Y > 0) {
+//                                    continue;
+//                                }
+//                                break;
+//                            case Mercator:
+//                                if (aPS.getPoint().Y > 85.0511 || aPS.getPoint().Y < -85.0511) {
+//                                    continue;
+//                                }
+//                                break;
+//                        }
+//                    }
+//                    aPS = projectPointShape(aPS, fromProj, toProj);
+//                    if (aPS != null) {
+//                        shapePoints.add(aPS);
+//                        newPoints.add(aPS.getPoint());
+//
+//                        DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
+//                        try {
+//                            aTable.addRow(aDR);
+//                        } catch (Exception ex) {
+//                            Logger.getLogger(ProjectionSet.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                    }
+//                }
+//                oLayer.setShapes(new ArrayList<>(shapePoints));
+//                oLayer.setExtent(MIMath.getPointsExtent(newPoints));
+//
+//                break;
+//            case Polyline:
+//            case PolylineM:
+//            case PolylineZ:
+//                List<Shape> newPolylines = new ArrayList<>();
+//                for (s = 0; s < oLayer.getShapeNum(); s++) {
+//                    PolylineShape aPLS = (PolylineShape) oLayer.getShapes().get(s);
+//                    List<PolylineShape> plsList = new ArrayList<>();
+//                    if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
+//                        switch (toProj.getProjectionName()) {
+//                            case Lambert_Conformal_Conic:
+//                                if (aPLS.getExtent().minY < -80) {
+//                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, -80, true);
+//                                }
+//                                break;
+//                            case North_Polar_Stereographic_Azimuthal:
+//                                if (aPLS.getExtent().minY < 0) {
+//                                    //continue;
+//                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, 0, true);
+//                                }
+//                                break;
+//                            case South_Polar_Stereographic_Azimuthal:
+//                                if (aPLS.getExtent().maxY > 0) {
+//                                    //continue;
+//                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, 0, false);
+//                                }
+//                                break;
+//                            case Mercator:
+//                                if (aPLS.getExtent().maxY > 85.0511) {
+//                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, 85.0511, false);
+//                                }
+//                                if (aPLS.getExtent().minY < -85.0511) {
+//                                    aPLS = GeoComputation.clipPolylineShape_Lat(aPLS, -85.0511, true);
+//                                }
+//                                break;
+//                        }
 //                        if (aPLS == null) {
 //                            continue;
 //                        }
-                        if (aPLS.getExtent().minX <= refLon && aPLS.getExtent().maxX >= refLon) {
-                            plsList.add(GeoComputation.clipPolylineShape_Lon(aPLS, refLon));
-                        } else {
-                            plsList.add(aPLS);
-                        }
-                    } else {
-                        plsList.add(aPLS);
-                    }
-                    for (i = 0; i < plsList.size(); i++) {
-                        aPLS = plsList.get(i);
-                        aPLS = projectPolylineShape(aPLS, fromProj, toProj);
-                        if (aPLS != null) {
-                            newPolylines.add(aPLS);
+//
+////                        aPLS = GeoComputation.clipPolylineShape_Lon(aPLS, refLon);
+////                        if (aPLS == null) {
+////                            continue;
+////                        }
+//                        if (aPLS.getExtent().minX < refLon && aPLS.getExtent().maxX > refLon) {
+//                            plsList.add(GeoComputation.clipPolylineShape_Lon(aPLS, refLon));
+//                        } else {
+//                            plsList.add(aPLS);
+//                        }
+//                    } else {
+//                        plsList.add(aPLS);
+//                    }
+//                    for (i = 0; i < plsList.size(); i++) {
+//                        aPLS = plsList.get(i);
+//                        aPLS = projectPolylineShape(aPLS, fromProj, toProj);
+//                        if (aPLS != null) {
+//                            newPolylines.add(aPLS);
+//
+//                            DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
+//                            try {
+//                                aTable.addRow(aDR);
+//                            } catch (Exception ex) {
+//                                Logger.getLogger(ProjectionSet.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+//
+//                            if (s == 0 && i == 0) {
+//                                lExtent = (Extent) aPLS.getExtent().clone();
+//                            } else {
+//                                lExtent = MIMath.getLagerExtent(lExtent, aPLS.getExtent());
+//                            }
+//                        }
+//                    }
+//                }
+//                oLayer.setShapes(new ArrayList<>(newPolylines));
+//                newPolylines.clear();
+//                oLayer.setExtent(lExtent);
+//                break;
+//            case Polygon:
+//            case PolygonM:
+//                List<Shape> newPolygons = new ArrayList<>();
+//                for (s = 0; s < oLayer.getShapeNum(); s++) {
+//                    DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
+//                    PolygonShape aPGS = (PolygonShape) oLayer.getShapes().get(s);
+//                    List<PolygonShape> pgsList = new ArrayList<>();
+//                    if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
+//                        switch (toProj.getProjectionName()) {
+//                            case Lambert_Conformal_Conic:
+//                                if (aPGS.getExtent().minY < -80) {
+//                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, -80, true);
+//                                }
+//                                break;
+//                            case North_Polar_Stereographic_Azimuthal:
+//                                if (aPGS.getExtent().minY < 0) {
+//                                    //continue;
+//                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, 0, true);
+//                                }
+//                                break;
+//                            case South_Polar_Stereographic_Azimuthal:
+//                                if (aPGS.getExtent().maxY > 0) {
+//                                    //continue;
+//                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, 0, false);
+//                                }
+//                                break;
+//                            case Mercator:
+//                                if (aPGS.getExtent().maxY > 85.0511) {
+//                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, 85.0511, false);
+//                                }
+//                                if (aPGS.getExtent().minY < -85.0511) {
+//                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, -85.0511, true);
+//                                }
+//                                break;
+//                        }
+//                        if (aPGS == null) {
+//                            continue;
+//                        }
+//
+//                        if (aPGS.getExtent().minX <= refLon && aPGS.getExtent().maxX >= refLon) {
+//                            pgsList.add(GeoComputation.clipPolygonShape_Lon(aPGS, refLon));
+//                        } else {
+//                            pgsList.add(aPGS);
+//                        }
+//                    } else {
+//                        pgsList.add(aPGS);
+//                    }
+//                    for (i = 0; i < pgsList.size(); i++) {
+//                        aPGS = pgsList.get(i);
+//                        aPGS = projectPolygonShape(aPGS, fromProj, toProj);
+//                        if (aPGS != null) {
+//                            newPolygons.add(aPGS);
+//
+//                            aTable.getRows().add(aDR);
+//
+//                            if (s == 0) {
+//                                lExtent = (Extent) aPGS.getExtent().clone();
+//                            } else {
+//                                lExtent = MIMath.getLagerExtent(lExtent, aPGS.getExtent());
+//                            }
+//                        }
+//                    }
+//                }
+//                oLayer.setShapes(new ArrayList<>(newPolygons));
+//                newPolygons.clear();
+//                oLayer.setExtent(lExtent);
+//                break;
+//        }
+//        oLayer.getAttributeTable().setTable(aTable);
+//
+//        if (oLayer.getLabelPoints().size() > 0) {
+//            if (projectLabels) {
+//                oLayer.setLabelPoints(projectGraphics(oLayer.getLabelPoints(), fromProj, toProj));
+//            } else {
+//                oLayer.setLabelPoints(new ArrayList<>(oLayer.getLabelPoints()));
+//            }
+//        }
+//    }
+//
+//    /**
+//     * Project layer angle
+//     *
+//     * @param oLayer The layer
+//     * @param fromProj From projection
+//     * @param toProj To projection
+//     * @return VectorLayer
+//     */
+//    public VectorLayer projectLayerAngle(VectorLayer oLayer, ProjectionInfo fromProj, ProjectionInfo toProj) {
+//        //coordinate transform process            
+//        ArrayList newPoints = new ArrayList();
+//
+//        VectorLayer aLayer = (VectorLayer) oLayer.clone();
+//
+//        //aLayer.AttributeTable.Table = oLayer.AttributeTable.Table.Clone();
+//        DataTable aTable = new DataTable();
+//        for (DataColumn aDC : oLayer.getAttributeTable().getTable().getColumns()) {
+//            Field bDC = new Field(aDC.getColumnName(), aDC.getDataType());
+//            aTable.getColumns().add(bDC);
+//        }
+//
+//        int s;
+//        List<Shape> vectors = new ArrayList<>();
+//        newPoints.clear();
+//        for (s = 0; s < aLayer.getShapeNum(); s++) {
+//            PointShape aPS = (PointShape) aLayer.getShapes().get(s);
+//            if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
+//                switch (toProj.getProjectionName()) {
+//                    case Lambert_Conformal_Conic:
+//                    case North_Polar_Stereographic_Azimuthal:
+//                        if (aPS.getPoint().X < -89) {
+//                            continue;
+//                        }
+//                        break;
+//                    case South_Polar_Stereographic_Azimuthal:
+//                        if (aPS.getPoint().Y > 89) {
+//                            continue;
+//                        }
+//                        break;
+//                }
+//            }
+//            double[] fromP = new double[]{aPS.getPoint().X, aPS.getPoint().Y};
+//            double[] toP;
+//            double[][] points = new double[1][];
+//            points[0] = (double[]) fromP.clone();
+//            try {
+//                //Reproject point back to fromProj
+//                Reproject.reprojectPoints(points, toProj, fromProj, 0, points.length);
+//                toP = points[0];
+//                switch (aLayer.getLayerDrawType()) {
+//                    case Vector:
+//                        ((WindArrow) aPS).angle = projectAngle(((WindArrow) aPS).angle, toP, fromP, fromProj, toProj);
+//                        break;
+//                    case Barb:
+//                        ((WindBarb) aPS).angle = projectAngle(((WindBarb) aPS).angle, toP, fromP, fromProj, toProj);
+//                        break;
+//                    case StationModel:
+//                        ((StationModelShape) aPS).windBarb.angle = projectAngle(((StationModelShape) aPS).windBarb.angle, toP, fromP, fromProj, toProj);
+//                        break;
+//                }
+//                newPoints.add(aPS.getPoint());
+//                vectors.add(aPS);
+//
+//                DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
+//                aTable.getRows().add(aDR);
+//            } catch (Exception e) {
+//            }
+//        }
+//        aLayer.setShapes(new ArrayList<>(vectors));
+//        aLayer.setExtent(MIMath.getPointsExtent(newPoints));
+//        aLayer.getAttributeTable().setTable(aTable);
+//
+//        //if (aLayer.LabelSetV.DrawLabels)
+//        //{
+//        //    aLayer.AddLabels();
+//        //}
+//        return aLayer;
+//    }
 
-                            DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
-                            try {
-                                aTable.addRow(aDR);
-                            } catch (Exception ex) {
-                                Logger.getLogger(ProjectionSet.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-
-                            if (s == 0 && i == 0) {
-                                lExtent = (Extent) aPLS.getExtent().clone();
-                            } else {
-                                lExtent = MIMath.getLagerExtent(lExtent, aPLS.getExtent());
-                            }
-                        }
-                    }
-                }
-                oLayer.setShapes(new ArrayList<>(newPolylines));
-                newPolylines.clear();
-                oLayer.setExtent(lExtent);
-                break;
-            case Polygon:
-            case PolygonM:
-                List<Shape> newPolygons = new ArrayList<>();
-                for (s = 0; s < oLayer.getShapeNum(); s++) {
-                    DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
-                    PolygonShape aPGS = (PolygonShape) oLayer.getShapes().get(s);
-                    List<PolygonShape> pgsList = new ArrayList<>();
-                    if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
-                        switch (toProj.getProjectionName()) {
-                            case Lambert_Conformal_Conic:
-                                if (aPGS.getExtent().minY < -80) {
-                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, -80, true);
-                                }
-                                break;
-                            case North_Polar_Stereographic_Azimuthal:
-                                if (aPGS.getExtent().minY < 0) {
-                                    //continue;
-                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, 0, true);
-                                }
-                                break;
-                            case South_Polar_Stereographic_Azimuthal:
-                                if (aPGS.getExtent().maxY > 0) {
-                                    //continue;
-                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, 0, false);
-                                }
-                                break;
-                            case Mercator:
-                                if (aPGS.getExtent().maxY > 85.0511) {
-                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, 85.0511, false);
-                                }
-                                if (aPGS.getExtent().minY < -85.0511) {
-                                    aPGS = GeoComputation.clipPolygonShape_Lat(aPGS, -85.0511, true);
-                                }
-                                break;
-                        }
-                        if (aPGS == null) {
-                            continue;
-                        }
-
-                        if (aPGS.getExtent().minX <= refLon && aPGS.getExtent().maxX >= refLon) {
-                            pgsList.add(GeoComputation.clipPolygonShape_Lon(aPGS, refLon));
-                        } else {
-                            pgsList.add(aPGS);
-                        }
-                    } else {
-                        pgsList.add(aPGS);
-                    }
-                    for (i = 0; i < pgsList.size(); i++) {
-                        aPGS = pgsList.get(i);
-                        aPGS = projectPolygonShape(aPGS, fromProj, toProj);
-                        if (aPGS != null) {
-                            newPolygons.add(aPGS);
-
-                            aTable.getRows().add(aDR);
-
-                            if (s == 0) {
-                                lExtent = (Extent) aPGS.getExtent().clone();
-                            } else {
-                                lExtent = MIMath.getLagerExtent(lExtent, aPGS.getExtent());
-                            }
-                        }
-                    }
-                }
-                oLayer.setShapes(new ArrayList<>(newPolygons));
-                newPolygons.clear();
-                oLayer.setExtent(lExtent);
-                break;
-        }
-        oLayer.getAttributeTable().setTable(aTable);
-
-        if (oLayer.getLabelPoints().size() > 0) {
-            if (projectLabels) {
-                oLayer.setLabelPoints(projectGraphics(oLayer.getLabelPoints(), fromProj, toProj));
-            } else {
-                oLayer.setLabelPoints(new ArrayList<>(oLayer.getLabelPoints()));
-            }
-        }
-    }
-
-    /**
-     * Project layer angle
-     *
-     * @param oLayer The layer
-     * @param fromProj From projection
-     * @param toProj To projection
-     * @return VectorLayer
-     */
-    public VectorLayer projectLayerAngle(VectorLayer oLayer, ProjectionInfo fromProj, ProjectionInfo toProj) {
-        //coordinate transform process            
-        ArrayList newPoints = new ArrayList();
-
-        VectorLayer aLayer = (VectorLayer) oLayer.clone();
-
-        //aLayer.AttributeTable.Table = oLayer.AttributeTable.Table.Clone();
-        DataTable aTable = new DataTable();
-        for (DataColumn aDC : oLayer.getAttributeTable().getTable().getColumns()) {
-            Field bDC = new Field(aDC.getColumnName(), aDC.getDataType());
-            aTable.getColumns().add(bDC);
-        }
-
-        int s;
-        List<Shape> vectors = new ArrayList<>();
-        newPoints.clear();
-        for (s = 0; s < aLayer.getShapeNum(); s++) {
-            PointShape aPS = (PointShape) aLayer.getShapes().get(s);
-            if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
-                switch (toProj.getProjectionName()) {
-                    case Lambert_Conformal_Conic:
-                    case North_Polar_Stereographic_Azimuthal:
-                        if (aPS.getPoint().X < -89) {
-                            continue;
-                        }
-                        break;
-                    case South_Polar_Stereographic_Azimuthal:
-                        if (aPS.getPoint().Y > 89) {
-                            continue;
-                        }
-                        break;
-                }
-            }
-            double[] fromP = new double[]{aPS.getPoint().X, aPS.getPoint().Y};
-            double[] toP;
-            double[][] points = new double[1][];
-            points[0] = (double[]) fromP.clone();
-            try {
-                //Reproject point back to fromProj
-                Reproject.reprojectPoints(points, toProj, fromProj, 0, points.length);
-                toP = points[0];
-                switch (aLayer.getLayerDrawType()) {
-                    case Vector:
-                        ((WindArrow) aPS).angle = projectAngle(((WindArrow) aPS).angle, toP, fromP, fromProj, toProj);
-                        break;
-                    case Barb:
-                        ((WindBarb) aPS).angle = projectAngle(((WindBarb) aPS).angle, toP, fromP, fromProj, toProj);
-                        break;
-                    case StationModel:
-                        ((StationModelShape) aPS).windBarb.angle = projectAngle(((StationModelShape) aPS).windBarb.angle, toP, fromP, fromProj, toProj);
-                        break;
-                }
-                newPoints.add(aPS.getPoint());
-                vectors.add(aPS);
-
-                DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
-                aTable.getRows().add(aDR);
-            } catch (Exception e) {
-            }
-        }
-        aLayer.setShapes(new ArrayList<>(vectors));
-        aLayer.setExtent(MIMath.getPointsExtent(newPoints));
-        aLayer.getAttributeTable().setTable(aTable);
-
-        //if (aLayer.LabelSetV.DrawLabels)
-        //{
-        //    aLayer.AddLabels();
-        //}
-        return aLayer;
-    }
-
-    /**
-     * Project wind layer
-     *
-     * @param oLayer Origin layer
-     * @param toProj To projection
-     * @param IfReprojectAngle If reproject wind angle
-     */
-    public void projectWindLayer(VectorLayer oLayer, ProjectionInfo toProj, boolean IfReprojectAngle) {
-        ProjectionInfo fromProj = oLayer.getProjInfo();
-        if (fromProj.toProj4String().equals(toProj.toProj4String())) {
-            if (oLayer.isProjected()) {
-                oLayer.getOriginData();
-            }
-
-            return;
-        }
-
-        if (oLayer.isProjected()) {
-            oLayer.getOriginData();
-        } else {
-            oLayer.updateOriginData();
-        }
-
-        //Set reference longitude
-        double refLon = toProj.getRefCutLon();
-        if (oLayer.getExtent().maxX > 180 && oLayer.getExtent().minX > refLon) {
-            refLon += 360;
-        }
-
-        //coordinate transform process
-        int s;
-        //PointD wPoint = new PointD();
-        PointD aPoint;
-        List<PointD> newPoints = new ArrayList<>();
-        //Extent lExtent = new Extent();
-
-        DataTable aTable = new DataTable();
-        for (DataColumn aDC : oLayer.getAttributeTable().getTable().getColumns()) {
-            Field bDC = new Field(aDC.getColumnName(), aDC.getDataType());
-            aTable.getColumns().add(bDC);
-        }
-
-        List<Shape> shapes = new ArrayList<>();
-        newPoints.clear();
-        for (s = 0; s < oLayer.getShapeNum(); s++) {
-            PointShape aPS = (PointShape) oLayer.getShapes().get(s);
-            if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
-                switch (toProj.getProjectionName()) {
-                    case Lambert_Conformal_Conic:
-                    case North_Polar_Stereographic_Azimuthal:
-                        if (aPS.getPoint().Y < -89) {
-                            continue;
-                        }
-                        break;
-                    case South_Polar_Stereographic_Azimuthal:
-                        if (aPS.getPoint().Y > 89) {
-                            continue;
-                        }
-                        break;
-                }
-            }
-            double[] fromP = new double[]{aPS.getPoint().X, aPS.getPoint().Y};
-            double[] toP;
-            double[][] points = new double[1][];
-            points[0] = (double[]) fromP.clone();
-            try {
-                Reproject.reprojectPoints(points, fromProj, toProj, 0, points.length);
-                toP = points[0];
-                aPoint = new PointD();
-                aPoint.X = (float) toP[0];
-                aPoint.Y = (float) toP[1];
-                aPS.setPoint(aPoint);
-                if (IfReprojectAngle) {
-                    switch (oLayer.getLayerDrawType()) {
-                        case Vector:
-                            ((WindArrow) aPS).angle = projectAngle(((WindArrow) aPS).angle, fromP, toP, fromProj, toProj);
-                            break;
-                        case Barb:
-                            ((WindBarb) aPS).angle = projectAngle(((WindBarb) aPS).angle, fromP, toP, fromProj, toProj);
-                            break;
-                        case StationModel:
-                            ((StationModelShape) aPS).windBarb.angle = projectAngle(((StationModelShape) aPS).windBarb.angle, fromP, toP, fromProj, toProj);
-                            break;
-                    }
-                }
-                newPoints.add(aPoint);
-                shapes.add(aPS);
-
-                DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
-                aTable.getRows().add(aDR);
-            } catch (Exception e) {
-            }
-        }
-        oLayer.setShapes(new ArrayList<>(shapes));
-        oLayer.setExtent(MIMath.getPointsExtent(newPoints));
-        oLayer.getAttributeTable().setTable(aTable);
-
-        if (oLayer.getLabelPoints().size() > 0) {
-            oLayer.setLabelPoints(projectGraphics(oLayer.getLabelPoints(), fromProj, toProj));
-        }
-    }
+//    /**
+//     * Project wind layer
+//     *
+//     * @param oLayer Origin layer
+//     * @param toProj To projection
+//     * @param IfReprojectAngle If reproject wind angle
+//     */
+//    public void projectWindLayer(VectorLayer oLayer, ProjectionInfo toProj, boolean IfReprojectAngle) {
+//        ProjectionInfo fromProj = oLayer.getProjInfo();
+//        if (fromProj.toProj4String().equals(toProj.toProj4String())) {
+//            if (oLayer.isProjected()) {
+//                oLayer.getOriginData();
+//            }
+//
+//            return;
+//        }
+//
+//        if (oLayer.isProjected()) {
+//            oLayer.getOriginData();
+//        } else {
+//            oLayer.updateOriginData();
+//        }
+//
+//        //Set reference longitude
+//        double refLon = toProj.getRefCutLon();
+//        if (oLayer.getExtent().maxX > 180 && oLayer.getExtent().minX > refLon) {
+//            refLon += 360;
+//        }
+//
+//        //coordinate transform process
+//        int s;
+//        //PointD wPoint = new PointD();
+//        PointD aPoint;
+//        List<PointD> newPoints = new ArrayList<>();
+//        //Extent lExtent = new Extent();
+//
+//        DataTable aTable = new DataTable();
+//        for (DataColumn aDC : oLayer.getAttributeTable().getTable().getColumns()) {
+//            Field bDC = new Field(aDC.getColumnName(), aDC.getDataType());
+//            aTable.getColumns().add(bDC);
+//        }
+//
+//        List<Shape> shapes = new ArrayList<>();
+//        newPoints.clear();
+//        for (s = 0; s < oLayer.getShapeNum(); s++) {
+//            PointShape aPS = (PointShape) oLayer.getShapes().get(s);
+//            if (fromProj.getProjectionName() == ProjectionNames.LongLat) {
+//                switch (toProj.getProjectionName()) {
+//                    case Lambert_Conformal_Conic:
+//                    case North_Polar_Stereographic_Azimuthal:
+//                        if (aPS.getPoint().Y < -89) {
+//                            continue;
+//                        }
+//                        break;
+//                    case South_Polar_Stereographic_Azimuthal:
+//                        if (aPS.getPoint().Y > 89) {
+//                            continue;
+//                        }
+//                        break;
+//                }
+//            }
+//            double[] fromP = new double[]{aPS.getPoint().X, aPS.getPoint().Y};
+//            double[] toP;
+//            double[][] points = new double[1][];
+//            points[0] = (double[]) fromP.clone();
+//            try {
+//                Reproject.reprojectPoints(points, fromProj, toProj, 0, points.length);
+//                toP = points[0];
+//                aPoint = new PointD();
+//                aPoint.X = (float) toP[0];
+//                aPoint.Y = (float) toP[1];
+//                aPS.setPoint(aPoint);
+//                if (IfReprojectAngle) {
+//                    switch (oLayer.getLayerDrawType()) {
+//                        case Vector:
+//                            ((WindArrow) aPS).angle = projectAngle(((WindArrow) aPS).angle, fromP, toP, fromProj, toProj);
+//                            break;
+//                        case Barb:
+//                            ((WindBarb) aPS).angle = projectAngle(((WindBarb) aPS).angle, fromP, toP, fromProj, toProj);
+//                            break;
+//                        case StationModel:
+//                            ((StationModelShape) aPS).windBarb.angle = projectAngle(((StationModelShape) aPS).windBarb.angle, fromP, toP, fromProj, toProj);
+//                            break;
+//                    }
+//                }
+//                newPoints.add(aPoint);
+//                shapes.add(aPS);
+//
+//                DataRow aDR = oLayer.getAttributeTable().getTable().getRows().get(s);
+//                aTable.getRows().add(aDR);
+//            } catch (Exception e) {
+//            }
+//        }
+//        oLayer.setShapes(new ArrayList<>(shapes));
+//        oLayer.setExtent(MIMath.getPointsExtent(newPoints));
+//        oLayer.getAttributeTable().setTable(aTable);
+//
+//        if (oLayer.getLabelPoints().size() > 0) {
+//            oLayer.setLabelPoints(projectGraphics(oLayer.getLabelPoints(), fromProj, toProj));
+//        }
+//    }
 
     private PointShape projectPointShape(PointShape aPS, ProjectionInfo fromProj, ProjectionInfo toProj) {
         PointShape newPS = (PointShape) aPS.clone();

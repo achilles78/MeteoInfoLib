@@ -57,7 +57,7 @@ import org.meteoinfo.layer.RasterLayer;
 import org.meteoinfo.legend.LegendScheme;
 import org.meteoinfo.legend.LegendType;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.shape.PointShape;
 import org.meteoinfo.shape.PolygonShape;
 import org.meteoinfo.shape.Shape;

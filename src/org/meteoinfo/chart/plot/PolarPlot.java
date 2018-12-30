@@ -552,7 +552,7 @@ public class PolarPlot extends Plot2D {
         }
     }
     
-    void drawGridLabel(Graphics2D g, Rectangle2D area) {
+    void drawGridLabel_bak(Graphics2D g, Rectangle2D area) {
         GridLine gridLine = this.getGridLine();
         if (!gridLine.isDrawXLine() && !gridLine.isDrawYLine()) {
             return;
@@ -617,6 +617,99 @@ public class PolarPlot extends Plot2D {
                 }
                 g.setColor(Color.black);
                 g.drawString(label, (float) x, (float) y);
+            }
+        }
+
+        //Draw y grid lines
+        if (gridLine.isDrawYLine()) {
+            g.setFont(this.yTickFont);
+            if (this.yTickAuto)
+                this.yTickLocations = this.getTickValues();
+            
+            for (int i = 0; i < this.yTickLocations.size(); i++) {
+                double v = this.yTickLocations.get(i);
+                if (v > 0){
+                    g.setColor(Color.black);
+                    xy = MIMath.polarToCartesian(Math.toRadians(this.yTickLabelPos), v);
+                    xy = this.projToScreen(xy[0], xy[1], area);
+                    x = xy[0];
+                    y = xy[1];
+                    x += minx;
+                    y += miny;
+                    String label;
+                    if (this.yTickLabels != null)
+                        label = this.yTickLabels.get(i);
+                    else {
+                        if (this.yTickFormat.equals("%"))
+                            label = DataConvert.removeTailingZeros(String.valueOf(BigDecimalUtil.mul(v, 100))) + "%";
+                        else
+                            label = DataConvert.removeTailingZeros(String.valueOf(v));
+                    }
+                    g.drawString(label, (float)x, (float)y);
+                }
+            }
+        }
+    }
+    
+    void drawGridLabel(Graphics2D g, Rectangle2D area) {
+        GridLine gridLine = this.getGridLine();
+        if (!gridLine.isDrawXLine() && !gridLine.isDrawYLine()) {
+            return;
+        }
+
+        double[] xy;
+        double x, y;
+        double miny = area.getY();
+        double minx = area.getX();     
+
+        //Draw x grid line labels
+        g.setColor(Color.black);
+        if (gridLine.isDrawXLine()) {
+            g.setFont(this.xTickFont);
+            float shift = 5;
+            for (int i = 0; i < this.xTickLocations.size(); i++) {
+                double angle = this.xTickLocations.get(i);
+                xy = MIMath.polarToCartesian(Math.toRadians(angle), this.radius);
+                xy = this.projToScreen(xy[0], xy[1], area);
+                x = xy[0];
+                y = xy[1];
+                x += minx;
+                y += miny;
+                //Draw x tick label
+                String label = this.xTickLabels.get(i);
+                Dimension dim = Draw.getStringDimension(label, g);
+                float w = dim.width;
+                float h = dim.height;
+                if (angle == 0 || angle == 180){
+                    if (angle == 0) {
+                        x += shift;
+                        Draw.drawString(g, (float)x, (float)y, label, XAlign.LEFT, YAlign.CENTER, false);
+                    }
+                    else {                        
+                        x -= shift;
+                        Draw.drawString(g, (float)x, (float)y, label, XAlign.RIGHT, YAlign.CENTER, false);
+                    }
+                } else if (angle == 90 || angle == 270) {
+                    if (angle == 90) {
+                        y -= shift;
+                        Draw.drawString(g, (float)x, (float)y, label, XAlign.CENTER, YAlign.BOTTOM, false);
+                    } else {                        
+                        y += shift;
+                        Draw.drawString(g, (float)x, (float)y, label, XAlign.CENTER, YAlign.TOP, false);
+                    }
+                } else if (angle > 0  && angle < 90) {
+                    x += shift;
+                    Draw.drawString(g, (float)x, (float)y, label, XAlign.LEFT, YAlign.BOTTOM, false);
+                } else if (angle > 90 && angle < 180) {                    
+                    x -= shift;
+                    Draw.drawString(g, (float)x, (float)y, label, XAlign.RIGHT, YAlign.BOTTOM, false);
+                } else if (angle > 180 && angle < 270) {
+                    x -= shift;
+                    Draw.drawString(g, (float)x, (float)y, label, XAlign.RIGHT, YAlign.TOP, false);
+                } else if (angle > 270) {
+                    x += shift;
+                    Draw.drawString(g, (float)x, (float)y, label, XAlign.LEFT, YAlign.TOP, false);
+                }                
             }
         }
 

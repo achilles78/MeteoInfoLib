@@ -29,7 +29,7 @@ import org.meteoinfo.geoprocess.GeoComputation;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.PointD;
 import org.meteoinfo.layer.VectorLayer;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.PolygonShape;
 import org.meteoinfo.shape.ShapeTypes;

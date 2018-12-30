@@ -29,6 +29,8 @@ import org.meteoinfo.chart.axis.LonLatAxis;
 import org.meteoinfo.data.Dataset;
 import org.meteoinfo.data.mapdata.webmap.IWebMapPanel;
 import org.meteoinfo.data.mapdata.webmap.TileLoadListener;
+import org.meteoinfo.drawing.Draw;
+import org.meteoinfo.global.Direction;
 import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;
@@ -44,7 +46,7 @@ import org.meteoinfo.legend.PolylineBreak;
 import org.meteoinfo.map.GridLabel;
 import org.meteoinfo.map.MapView;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.CircleShape;
@@ -73,6 +75,9 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
     private MapLayer selectedLayer;
     private final TileLoadListener tileLoadListener = new TileLoadListener(this);
     private ChartPanel parent;
+    private float[] lonLim;
+    private float[] latLim;
+    private Graphic boundary;
 
     // </editor-fold>
     // <editor-fold desc="Constructor">
@@ -88,7 +93,7 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
             this.setYAxis(new LonLatAxis("Latitude", false));
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(MapPlot.class.getName()).log(Level.SEVERE, null, ex);
-        }        
+        }
         this.getAxis(Location.TOP).setDrawTickLabel(false);
         this.getAxis(Location.RIGHT).setDrawTickLabel(false);
         this.setDrawNeatLine(true);
@@ -160,6 +165,10 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         this.mapView.setMultiGlobalDraw(isGeoMap);
         Extent extent = this.getAutoExtent();
         this.setDrawExtent(extent);
+        PolygonShape bvs = this.mapView.getProjection().getProjInfo().getBoundary();
+        if (bvs != null) {
+            this.setBoundary(bvs);
+        }
     }
 
     @Override
@@ -266,6 +275,92 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         this.selectedLayer = value;
     }
 
+    /**
+     * Get longitude limitations
+     *
+     * @return Longitude limitations
+     */
+    public float[] getLonLim() {
+        return this.lonLim;
+    }
+
+    /**
+     * Set longitude limitations
+     *
+     * @param value Longitude limitations
+     */
+    public void setLonLim(float[] value) {
+        this.lonLim = value;
+    }
+
+    /**
+     * Set longitude limitations
+     *
+     * @param lon1 Minimum longitude
+     * @param lon2 Maximum longitude
+     */
+    public void setLonLim(float lon1, float lon2) {
+        this.lonLim = new float[]{lon1, lon2};
+    }
+
+    /**
+     * Get latitude limitations
+     *
+     * @return latitude limitations
+     */
+    public float[] getLatLim() {
+        return this.latLim;
+    }
+
+    /**
+     * Set latitude limitations
+     *
+     * @param value latitude limitations
+     */
+    public void setLatLim(float[] value) {
+        this.latLim = value;
+    }
+
+    /**
+     * Set latitude limitations
+     *
+     * @param lat1 Minimum latitude
+     * @param lat2 Maximum latitude
+     */
+    public void setLatLim(float lat1, float lat2) {
+        this.latLim = new float[]{lat1, lat2};
+    }
+
+    /**
+     * Get map boundary
+     *
+     * @return Map boundary
+     */
+    public Graphic getBoundary() {
+        return this.boundary;
+    }
+
+    /**
+     * Set map boundary
+     *
+     * @param value Map boundary
+     */
+    public void setBoundary(Graphic value) {
+        this.boundary = value;
+    }
+
+    /**
+     * Set map boundary
+     *
+     * @param value Map boundary
+     */
+    public void setBoundary(PolygonShape value) {
+        PolygonBreak pb = new PolygonBreak();
+        pb.setOutlineSize(1.5f);
+        pb.setDrawFill(false);
+        this.boundary = new Graphic(value, pb);
+    }
+
     // </editor-fold>
     // <editor-fold desc="Methods">
     /**
@@ -299,7 +394,9 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         this.mapView.setAntiAlias(this.antialias);
         this.mapView.setViewExtent((Extent) this.getDrawExtent().clone());
         this.mapView.paintGraphics(g, area, this.tileLoadListener);
-        //this.mapView.repaint();
+        if (this.boundary != null) {
+            this.mapView.drawGraphic(g, this.boundary, area.getBounds());
+        }
     }
 
     /**
@@ -330,8 +427,10 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
     public void addGraphic(Graphic graphic) {
         this.getMapView().addGraphic(graphic);
     }
+
     /**
      * Add a graphic
+     *
      * @param graphic The graphic
      * @param proj The graphic projection
      * @return Added graphic
@@ -386,6 +485,20 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         super.setAxisOn(value);
         this.mapFrame.setDrawGridTickLine(value);
         this.mapFrame.setDrawGridLabel(value);
+    }
+
+    /**
+     * Get full extent
+     *
+     * @return Full extent
+     */
+    public Extent getFullExtent() {
+        Extent ext = this.mapView.getExtent();
+        if (this.boundary != null) {
+            ext = ext.union(this.boundary.getExtent().extend(0.01));
+        }
+
+        return ext;
     }
 
     /**
@@ -528,7 +641,7 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         }
         return null;
     }
-    
+
     /**
      * Add polyline
      *
@@ -548,10 +661,11 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
             y = lat.get(i).doubleValue();
             if (Double.isNaN(x)) {
                 if (points.size() >= 2) {
-                    if (iscurve)
+                    if (iscurve) {
                         pls = new CurveLineShape();
-                    else
+                    } else {
                         pls = new PolylineShape();
+                    }
                     pls.setPoints(points);
                     Graphic aGraphic = new Graphic(pls, plb);
                     this.getMapView().addGraphic(aGraphic);
@@ -567,10 +681,11 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
             }
         }
         if (points.size() >= 2) {
-            if (iscurve)
+            if (iscurve) {
                 pls = new CurveLineShape();
-            else
+            } else {
                 pls = new PolylineShape();
+            }
             pls.setPoints(points);
             Graphic aGraphic = new Graphic(pls, plb);
             this.getMapView().addGraphic(aGraphic);
@@ -621,7 +736,7 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         }
         return null;
     }
-    
+
     /**
      * Add a circle
      *
@@ -631,11 +746,11 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
      * @param pgb PolygonBreak
      * @return Graphic
      */
-    public Graphic addCircle(float x, float y, float radius, PolygonBreak pgb) {        
+    public Graphic addCircle(float x, float y, float radius, PolygonBreak pgb) {
         CircleShape aPGS = ShapeUtil.createCircleShape(x, y, radius);
         Graphic graphic = new Graphic(aPGS, pgb);
         this.mapView.addGraphic(graphic);
-        
+
         return graphic;
     }
 
@@ -755,6 +870,7 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
 
         //Draw lon/lat grid labels
         if (this.mapFrame.isDrawGridLabel()) {
+            float shift = 5;
             List<Extent> extentList = new ArrayList<>();
             Extent maxExtent = new Extent();
             Extent aExtent;
@@ -776,28 +892,28 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
             for (int i = 0; i < mapFrame.getMapView().getGridLabels().size(); i++) {
                 GridLabel aGL = mapFrame.getMapView().getGridLabels().get(i);
                 switch (mapFrame.getGridLabelPosition()) {
-                    case LeftBottom:
+                    case LEFT_BOTTOM:
                         switch (aGL.getLabDirection()) {
                             case East:
                             case North:
                                 continue;
                         }
                         break;
-                    case LeftUp:
+                    case LEFT_UP:
                         switch (aGL.getLabDirection()) {
                             case East:
                             case South:
                                 continue;
                         }
                         break;
-                    case RightBottom:
+                    case RIGHT_BOTTOM:
                         switch (aGL.getLabDirection()) {
                             case Weast:
                             case North:
                                 continue;
                         }
                         break;
-                    case RightUp:
+                    case RIGHT_UP:
                         switch (aGL.getLabDirection()) {
                             case Weast:
                             case South:
@@ -821,52 +937,7 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
                     drawStr = drawStr + String.valueOf((char) 186);
                 }
                 //}
-                FontMetrics metrics = g.getFontMetrics(font);
-                aSF = new Dimension(metrics.stringWidth(drawStr), metrics.getHeight());
-                switch (aGL.getLabDirection()) {
-                    case South:
-                        labX = labX - aSF.width / 2;
-                        labY = labY + aSF.height * 3 / 4 + space;
-                        eP.X = sP.X;
-                        if (mapFrame.isInsideTickLine()) {
-                            eP.Y = sP.Y - len;
-                        } else {
-                            eP.Y = sP.Y + len;
-                        }
-                        break;
-                    case Weast:
-                        labX = labX - aSF.width - space;
-                        labY = labY + aSF.height / 3;
-                        eP.Y = sP.Y;
-                        if (mapFrame.isInsideTickLine()) {
-                            eP.X = sP.X + len;
-                        } else {
-                            eP.X = sP.X - len;
-                        }
-                        break;
-                    case North:
-                        labX = labX - aSF.width / 2;
-                        //labY = labY - aSF.height / 3 - space;
-                        labY = labY - space;
-                        eP.X = sP.X;
-                        if (mapFrame.isInsideTickLine()) {
-                            eP.Y = sP.Y + len;
-                        } else {
-                            eP.Y = sP.Y - len;
-                        }
-                        break;
-                    case East:
-                        labX = labX + space;
-                        labY = labY + aSF.height / 3;
-                        eP.Y = sP.Y;
-                        if (mapFrame.isInsideTickLine()) {
-                            eP.X = sP.X - len;
-                        } else {
-                            eP.X = sP.X + len;
-                        }
-                        break;
-                }
-
+                aSF = Draw.getStringDimension(drawStr, g);
                 boolean ifDraw = true;
                 aExtent = new Extent();
                 aExtent.minX = labX;
@@ -893,23 +964,153 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
                         maxExtent = MIMath.getLagerExtent(maxExtent, aExtent);
                     }
                 }
-
                 if (ifDraw) {
-                    g.setColor(mapFrame.getGridLineColor());
-                    g.draw(new Line2D.Float(sP.X, sP.Y, eP.X, eP.Y));
-                    g.setColor(this.mapFrame.getForeColor());
-                    g.drawString(drawStr, labX, labY);
+                    if (aGL.isBorder()) {
+                        switch (aGL.getLabDirection()) {
+                            case South:
+                                labX = labX - aSF.width / 2;
+                                labY = labY + aSF.height * 3 / 4 + space;
+                                eP.X = sP.X;
+                                if (mapFrame.isInsideTickLine()) {
+                                    eP.Y = sP.Y - len;
+                                } else {
+                                    eP.Y = sP.Y + len;
+                                }
+                                break;
+                            case Weast:
+                                labX = labX - aSF.width - space;
+                                labY = labY + aSF.height / 3;
+                                eP.Y = sP.Y;
+                                if (mapFrame.isInsideTickLine()) {
+                                    eP.X = sP.X + len;
+                                } else {
+                                    eP.X = sP.X - len;
+                                }
+                                break;
+                            case North:
+                                labX = labX - aSF.width / 2;
+                                //labY = labY - aSF.height / 3 - space;
+                                labY = labY - space;
+                                eP.X = sP.X;
+                                if (mapFrame.isInsideTickLine()) {
+                                    eP.Y = sP.Y + len;
+                                } else {
+                                    eP.Y = sP.Y - len;
+                                }
+                                break;
+                            case East:
+                                labX = labX + space;
+                                labY = labY + aSF.height / 3;
+                                eP.Y = sP.Y;
+                                if (mapFrame.isInsideTickLine()) {
+                                    eP.X = sP.X - len;
+                                } else {
+                                    eP.X = sP.X + len;
+                                }
+                                break;
+                        }
+                        g.setColor(mapFrame.getGridLineColor());
+                        g.draw(new Line2D.Float(sP.X, sP.Y, eP.X, eP.Y));
+                        g.setColor(this.mapFrame.getForeColor());
+                        g.drawString(drawStr, labX, labY);
+                    } else {
+                        g.setColor(this.mapFrame.getForeColor());
+                        switch (this.getProjInfo().getProjectionName()) {
+                            case Orthographic_Azimuthal:
+                            case Geostationary_Satellite:
+                                float angle = aGL.getAngle();
+                                double v = aGL.getValue();
+                                if (v == 0) {
+                                    if (angle == 90) {
+                                        labX += shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.CENTER, false);
+                                    } else if (angle == 270) {
+                                        labX -= shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.CENTER, false);
+                                    } else if (angle < 90) {
+                                        labX += shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.BOTTOM, false);
+                                    } else if (angle > 90 && angle <= 180) {
+                                        labX += shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.TOP, false);
+                                    } else if (angle > 180 && angle < 270) {
+                                        labX -= shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.TOP, false);
+                                    } else if (angle > 270 && angle <= 360) {
+                                        labX -= shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.BOTTOM, false);
+                                    }
+                                } else if (v > 0) {
+                                    if (aGL.getLabDirection() == Direction.East) {
+                                        labX += shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.BOTTOM, false);
+                                    } else {
+                                        labX -= shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.BOTTOM, false);
+                                    }
+                                } else {
+                                    if (aGL.getLabDirection() == Direction.East) {
+                                        labX += shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.TOP, false);
+                                    } else {
+                                        labX -= shift;
+                                        Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.TOP, false);
+                                    }
+                                }                                
+                                break;
+                            default:
+                                angle = aGL.getAngle();
+                                if (angle == 0) {
+                                    labY -= shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.CENTER, YAlign.BOTTOM, false);
+                                } else if (angle == 180) {
+                                    labY += shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.CENTER, YAlign.TOP, false);
+                                } else if (angle == 90) {
+                                    labX += shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.CENTER, false);
+                                } else if (angle == 270) {
+                                    labX -= shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.CENTER, false);
+                                } else if (angle > 0 && angle <= 45) {
+                                    labY -= shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.BOTTOM, false);
+                                } else if (angle > 45 && angle < 90) {
+                                    labX += shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.BOTTOM, false);
+                                } else if (angle > 90 && angle <= 135) {
+                                    labX += shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.TOP, false);
+                                } else if (angle > 135 && angle < 180) {
+                                    labY += shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.LEFT, YAlign.TOP, false);
+                                } else if (angle > 180 && angle <= 225) {
+                                    labY += shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.TOP, false);
+                                } else if (angle > 225 && angle < 270) {
+                                    labX -= shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.TOP, false);
+                                } else if (angle > 270 && angle <= 315) {
+                                    labX -= shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.BOTTOM, false);
+                                } else if (angle > 315 && angle < 360) {
+                                    labY -= shift;
+                                    Draw.drawString(g, labX, labY, drawStr, XAlign.RIGHT, YAlign.BOTTOM, false);
+                                }
+                                break;
+                        }
+                    }
                 }
             }
         }
     }
-    
+
     @Override
     int getXAxisHeight(Graphics2D g) {
-        if (this.isLonLatMap()){
+        if (this.isLonLatMap()) {
             return super.getXAxisHeight(g);
         }
-        
+
         int space = 4;
         if (this.mapFrame.isDrawGridLabel()) {
             int height = space;
@@ -918,16 +1119,16 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
             height += m.getHeight();
             return height;
         }
-        
+
         return 0;
     }
-    
+
     @Override
     int getYAxisWidth(Graphics2D g) {
-        if (this.isLonLatMap()){
+        if (this.isLonLatMap()) {
             return super.getYAxisWidth(g);
         }
-        
+
         int space = 4;
         if (this.mapFrame.isDrawGridLabel()) {
             int width = space;
@@ -937,50 +1138,55 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
             int labWidth = 0, w;
             for (int i = 0; i < labels.size(); i++) {
                 w = m.stringWidth(labels.get(i).getLabString());
-                if (w > labWidth)
+                if (w > labWidth) {
                     labWidth = w;
+                }
             }
             width += labWidth;
             return width;
         }
-        
+
         return 0;
     }
-    
+
     /**
      * Get layer number
+     *
      * @return Layer number
      */
-    public int getLayerNum(){
+    public int getLayerNum() {
         return this.mapView.getLayerNum();
     }
-    
+
     /**
      * Get layers
+     *
      * @return Layers
      */
     public LayerCollection getLayers() {
         return this.mapView.getLayers();
     }
-    
+
     /**
      * Get layer by index
+     *
      * @param i The layer index
      * @return The layer
      */
-    public MapLayer getLayer(int i){
+    public MapLayer getLayer(int i) {
         return this.mapView.getLayers().get(i);
     }
-    
+
     /**
      * Get layer by name
+     *
      * @param name The layer name
      * @return The layer
      */
     public MapLayer getLayer(String name) {
         return this.mapView.getLayer(name);
     }
-    
+
     /**
      * Get legend scheme
      *
@@ -992,13 +1198,14 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
 
     /**
      * Load MeteoInfo project file
+     *
      * @param fn MeteoInfo project file name
      * @param mfidx Map frame index
      * @throws org.xml.sax.SAXException
      * @throws java.io.IOException
      * @throws javax.xml.parsers.ParserConfigurationException
      */
-    public void loadMIProjectFile(String fn, int mfidx) throws SAXException, IOException, ParserConfigurationException{
+    public void loadMIProjectFile(String fn, int mfidx) throws SAXException, IOException, ParserConfigurationException {
         File file = new File(fn);
         String userDir = System.getProperty("user.dir");
         System.setProperty("user.dir", file.getParent());
@@ -1007,28 +1214,29 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         Document doc = db.parse(new File(fn));
 
         Element root = doc.getDocumentElement();
-        
+
         Element mapFrames = (Element) root.getElementsByTagName("MapFrames").item(0);
         if (mapFrames == null) {
             this.mapFrame.importProjectXML(root);
         } else {
             NodeList mfNodes = mapFrames.getElementsByTagName("MapFrame");
             Node mfNode = mfNodes.item(mfidx);
-            this.mapFrame.importProjectXML((Element) mfNode);            
+            this.mapFrame.importProjectXML((Element) mfNode);
         }
         this.setDrawExtent(this.mapView.getViewExtent());
         this.setExtent(this.mapView.getViewExtent());
         System.setProperty("user.dir", userDir);
     }
-    
+
     /**
      * Load MeteoInfo project file
+     *
      * @param fn MeteoInfo project file name
      * @throws org.xml.sax.SAXException
      * @throws java.io.IOException
      * @throws javax.xml.parsers.ParserConfigurationException
      */
-    public void loadMIProjectFile(String fn) throws SAXException, IOException, ParserConfigurationException{
+    public void loadMIProjectFile(String fn) throws SAXException, IOException, ParserConfigurationException {
         this.loadMIProjectFile(fn, 0);
     }
     // </editor-fold>

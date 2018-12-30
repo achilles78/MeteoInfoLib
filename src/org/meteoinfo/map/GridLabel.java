@@ -26,16 +26,21 @@ public class GridLabel {
     private Direction _labDirection;
     private String _labString;
     private PointD _labPoint;
+    private PointD coord;
     private boolean _isLon;
     private boolean _isBorder;
     private float _value;
+    private float angle;
     // </editor-fold>
     // <editor-fold desc="Constructor">
-
+    /**
+     * Constructor
+     */
     public GridLabel() {
         _labDirection = Direction.East;
         _isLon = true;
         _isBorder = true;
+        this.angle = Float.NaN;
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
@@ -93,6 +98,22 @@ public class GridLabel {
     public void setLabPoint(PointD p) {
         _labPoint = p;
     }
+    
+    /**
+     * Get coordinate
+     * @return Coordinate
+     */
+    public PointD getCoord() {
+        return this.coord;
+    }
+    
+    /**
+     * Set coordinate
+     * @param value Coordinate
+     */
+    public void setCoord(PointD value) {
+        this.coord = value;
+    }
 
     /**
      * Get if is longitude
@@ -146,6 +167,22 @@ public class GridLabel {
      */
     public void setValue(float value) {
         _value = value;
+    }
+    
+    /**
+     * Get angle
+     * @return Angle
+     */
+    public float getAngle() {
+        return this.angle;
+    }
+    
+    /**
+     * Set angle
+     * @param value Angle
+     */
+    public void setAnge(float value){
+        this.angle = value;
     }
     // </editor-fold>
     // <editor-fold desc="Methods">

@@ -3174,6 +3174,21 @@ public class ArrayMath {
 
         return r;
     }
+ 
+    /**
+     * Returns an element-wise indication of the sign of a number.
+     * The sign function returns -1 if x < 0, 0 if x==0, 1 if x > 0. nan is returned for nan inputs.
+     * @param x Input array
+     * @return The sign of x array
+     */
+    public static Array sign(Array x) {
+        Array r = Array.factory(DataType.FLOAT, x.getShape());
+        for (int i = 0; i < r.getSize(); i++) {
+            r.setFloat(i, Math.signum(x.getFloat(i)));
+        }
+        
+        return r;
+    }
 
     // </editor-fold>
     // <editor-fold desc="Matrix">
@@ -5340,7 +5355,7 @@ public class ArrayMath {
                 wd = 0;
             } else {
                 wd = Math.asin(U / ws) * 180 / Math.PI;
-                if (U < 0 && V < 0) {
+                if (U <= 0 && V < 0) {
                     wd = 180.0 - wd;
                 } else if (U > 0 && V < 0) {
                     wd = 180.0 - wd;
@@ -5372,7 +5387,7 @@ public class ArrayMath {
             wd = 0;
         } else {
             wd = Math.asin(u / ws) * 180 / Math.PI;
-            if (u < 0 && v < 0) {
+            if (u <= 0 && v < 0) {
                 wd = 180.0 - wd;
             } else if (u > 0 && v < 0) {
                 wd = 180.0 - wd;

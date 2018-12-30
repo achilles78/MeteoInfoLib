@@ -15,7 +15,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import org.meteoinfo.global.util.GlobalUtil;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.table.DataTable;
 
 /**

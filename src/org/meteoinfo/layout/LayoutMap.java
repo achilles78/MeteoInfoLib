@@ -829,28 +829,28 @@ public class LayoutMap extends LayoutElement {
                 for (int i = 0; i < _mapFrame.getMapView().getGridLabels().size(); i++) {
                     GridLabel aGL = _mapFrame.getMapView().getGridLabels().get(i);
                     switch (_mapFrame.getGridLabelPosition()) {
-                        case LeftBottom:
+                        case LEFT_BOTTOM:
                             switch (aGL.getLabDirection()) {
                                 case East:
                                 case North:
                                     continue;
                             }
                             break;
-                        case LeftUp:
+                        case LEFT_UP:
                             switch (aGL.getLabDirection()) {
                                 case East:
                                 case South:
                                     continue;
                             }
                             break;
-                        case RightBottom:
+                        case RIGHT_BOTTOM:
                             switch (aGL.getLabDirection()) {
                                 case Weast:
                                 case North:
                                     continue;
                             }
                             break;
-                        case RightUp:
+                        case RIGHT_UP:
                             switch (aGL.getLabDirection()) {
                                 case Weast:
                                 case South:

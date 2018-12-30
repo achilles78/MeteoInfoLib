@@ -1,4 +1,4 @@
-/* Copyright 2012 Yaqiang Wang,
+/* Copyright 2012 - Yaqiang Wang,
  * yaqiang.wang@gmail.com
  * 
  * This library is free software; you can redistribute it and/or modify it
@@ -11,31 +11,43 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
  * General Public License for more details.
  */
-package org.meteoinfo.projection;
+package org.meteoinfo.projection.info;
 
-import org.meteoinfo.projection.info.ProjectionInfo;
-import org.meteoinfo.projection.proj4j.CRSFactory;
+import org.meteoinfo.projection.ProjectionNames;
+import org.meteoinfo.projection.proj4j.CoordinateReferenceSystem;
 
 /**
  *
  * @author Yaqiang Wang
  */
-public class World extends CoordinateSystemCategory {
+public class Common extends ProjectionInfo {
+
     // <editor-fold desc="Variables">
-    CRSFactory _crsFactory = new CRSFactory();
-    public final ProjectionInfo WGS1984;
     // </editor-fold>
     // <editor-fold desc="Constructor">
     /**
-     * Constructor
+     * Construction
+     *
+     * @param crs Coorinate reference system
      */
-    public World(){
-        final String WGS84_PARAM = "+title=long/lat:WGS84 +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees";
-        WGS1984 = ProjectionInfo.factory(_crsFactory.createFromParameters("WGS84", WGS84_PARAM));
+    public Common(CoordinateReferenceSystem crs) {
+        this.crs = crs;
     }
+
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
+    /**
+     * Get projection name
+     *
+     * @return Projection name
+     */
+    @Override
+    public ProjectionNames getProjectionName() {
+        return ProjectionNames.Undefine;
+    }
+
     // </editor-fold>
     // <editor-fold desc="Methods">
+    
     // </editor-fold>
 }

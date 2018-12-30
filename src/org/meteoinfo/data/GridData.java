@@ -40,7 +40,7 @@ import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.layer.VectorLayer;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.PolygonShape;

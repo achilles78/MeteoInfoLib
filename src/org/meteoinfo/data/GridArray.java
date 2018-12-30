@@ -35,7 +35,7 @@ import org.meteoinfo.geoprocess.analysis.ResampleMethods;
 import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.legend.LegendManage;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import ucar.ma2.Array;

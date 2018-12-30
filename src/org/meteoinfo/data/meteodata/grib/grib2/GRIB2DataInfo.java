@@ -19,7 +19,7 @@ import org.meteoinfo.data.meteodata.IGridDataInfo;
 import org.meteoinfo.data.meteodata.MeteoDataType;
 import org.meteoinfo.data.meteodata.Variable;
 import org.meteoinfo.global.Bytes2Number;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.grib.grib2.Grib2SectionGridDefinition;

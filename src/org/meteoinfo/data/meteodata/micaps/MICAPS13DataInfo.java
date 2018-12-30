@@ -36,7 +36,7 @@ import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.util.DateUtil;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -192,7 +192,7 @@ public class MICAPS13DataInfo extends DataInfo implements IGridDataInfo {
                 break;
         }
 
-        return new ProjectionInfo(ProjStr);
+        return ProjectionInfo.factory(ProjStr);
     }
 
     private Object[] calCoordinate(double lon_LB, double lat_LB, double lon_Center, double lat_Center,

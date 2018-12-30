@@ -63,7 +63,7 @@ import org.meteoinfo.legend.PointBreak;
 import org.meteoinfo.legend.PolygonBreak;
 import org.meteoinfo.legend.PolylineBreak;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.ProjectionNames;
 import org.meteoinfo.shape.CircleShape;
 import org.meteoinfo.shape.CurveLineShape;
@@ -1329,7 +1329,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     break;
                 case Edit_Tool:
                     VectorLayer layer = (VectorLayer) this.getSelectedLayer();
-                    List<Shape> selShapes = (List<Shape>)layer.getSelectedShapes();
+                    List<Shape> selShapes = (List<Shape>) layer.getSelectedShapes();
                     if (selShapes.size() > 0) {
                         float burf = 2.5f;
                         Rectangle.Float selExtent = new Rectangle.Float(e.getX() - burf, e.getY() - burf, burf * 2, burf * 2);
@@ -1711,7 +1711,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         switch (_mouseTool) {
             case Edit_Tool:
                 VectorLayer layer = (VectorLayer) this.getSelectedLayer();
-                List<Shape> selShapes = (List<Shape>)layer.getSelectedShapes();
+                List<Shape> selShapes = (List<Shape>) layer.getSelectedShapes();
                 boolean isMove = false;
                 if (selShapes.size() > 0) {
                     float burf = 2.5f;
@@ -2170,7 +2170,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                 break;
             case Edit_MoveSelection:
                 VectorLayer slayer = (VectorLayer) this.getSelectedLayer();
-                List<Shape> selShapes = (List<Shape>)slayer.getSelectedShapes();
+                List<Shape> selShapes = (List<Shape>) slayer.getSelectedShapes();
                 if (selShapes.size() > 0) {
                     for (Shape shape : selShapes) {
                         moveShapeOnScreen(shape, _mouseDownPoint, new Point(e.getX(), e.getY()));
@@ -3312,7 +3312,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     break;
                 case Edit_Tool:
                     VectorLayer layer = (VectorLayer) this.getSelectedLayer();
-                    List<Shape> selShapes = (List<Shape>)layer.getSelectedShapes();
+                    List<Shape> selShapes = (List<Shape>) layer.getSelectedShapes();
                     if (selShapes.size() > 0) {
                         UndoableEdit edit = (new MapViewUndoRedo()).new RemoveFeaturesEdit(this, layer, selShapes);
                         layer.getUndoManager().addEdit(edit);
@@ -3436,13 +3436,13 @@ public class MapView extends JPanel implements IWebMapPanel {
         if (!aLayer.getProjInfo().equals(_projection.getProjInfo())) {
             if (EarthWind) {
                 if (aProjInfo.getProjectionName() == ProjectionNames.LongLat) {
-                    _projection.projectLayer(aLayer, _projection.getProjInfo());
+                    ProjectionUtil.projectLayer(aLayer, _projection.getProjInfo());
                 } else {
-                    _projection.projectWindLayer(aLayer, _projection.getProjInfo(), false);
-                    _projection.projectLayerAngle(aLayer, GeoProjInfo, _projection.getProjInfo());
+                    ProjectionUtil.projectWindLayer(aLayer, _projection.getProjInfo(), false);
+                    ProjectionUtil.projectLayerAngle(aLayer, GeoProjInfo, _projection.getProjInfo());
                 }
             } else {
-                _projection.projectLayer(aLayer, _projection.getProjInfo());
+                ProjectionUtil.projectLayer(aLayer, _projection.getProjInfo());
             }
 
         }
@@ -3475,7 +3475,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             case RasterLayer:
                 RasterLayer rLayer = (RasterLayer) layer;
                 if (!rLayer.getProjInfo().equals(_projection.getProjInfo())) {
-                    _projection.projectLayer(rLayer, _projection.getProjInfo());
+                    ProjectionUtil.projectLayer(rLayer, _projection.getProjInfo());
                 }
                 break;
         }
@@ -3497,7 +3497,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             case RasterLayer:
                 RasterLayer rLayer = (RasterLayer) layer;
                 if (!rLayer.getProjInfo().equals(_projection.getProjInfo())) {
-                    _projection.projectLayer(rLayer, _projection.getProjInfo());
+                    ProjectionUtil.projectLayer(rLayer, _projection.getProjInfo());
                 }
                 break;
         }
@@ -5873,7 +5873,7 @@ public class MapView extends JPanel implements IWebMapPanel {
 
             Object aSM = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            for (int i = 0; i < this._graphicCollection.getNumGraphics(); i++){
+            for (int i = 0; i < this._graphicCollection.getNumGraphics(); i++) {
                 Graphic graphic = this._graphicCollection.get(i);
                 for (int j = 0; j < graphic.getNumGraphics(); j++) {
                     Graphic gg = graphic.getGraphicN(j);
@@ -5885,6 +5885,31 @@ public class MapView extends JPanel implements IWebMapPanel {
 //            }
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aSM);
         }
+    }
+
+    public void drawGraphic(Graphics2D g, Graphic graphic, Rectangle rect) {
+        AffineTransform oldMatrix = g.getTransform();
+        Rectangle oldRegion = g.getClipBounds();
+        g.setClip(rect);
+        getMaskOutGraphicsPath(g);
+        g.translate(rect.x, rect.y);
+        _maskOutGraphicsPath.transform(g.getTransform());
+
+        RenderingHints rend = g.getRenderingHints();
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        //g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        //g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+
+        this.drawGraphic(g, graphic, 0);
+        
+        g.setTransform(oldMatrix);
+        g.setClip(oldRegion);
+        g.setRenderingHints(rend);
     }
 
     /**
@@ -6603,6 +6628,224 @@ public class MapView extends JPanel implements IWebMapPanel {
             //lon += Delt_Lon;
         }
 
+//        //Add longitudes around reference longitude
+//        switch (_projection.getProjInfo().getProjectionName()) {
+//            case LongLat:
+//            case Oblique_Stereographic_Alternative:
+//                break;
+//            default:
+//                double value;
+//                lon = refLon - 0.0001f;
+//                if (lon < -180) {
+//                    lon += 360;
+//                }
+//                aPLS = new PolylineShape();
+//                aPLS.setValue(lon);
+//                extent.minX = lon;
+//                extent.maxX = lon;
+//                extent.minY = -90;
+//                extent.maxY = 90;
+//                aPLS.setExtent(extent);
+//                PList = new ArrayList<>();
+//
+//                lat = -90;
+//                while (lat <= 90) {
+//
+//                    PList.add(new PointD(lon, lat));
+//                    lat += 1;
+//                }
+//                aPLS.setPoints(PList);
+//
+//                if (isLabelLon) {
+//                    value = refLon;
+//                } else {
+//                    value = -9999.0f;
+//                }
+//                shapeNum = aLayer.getShapeNum();
+//                try {
+//                    if (aLayer.editInsertShape(aPLS, shapeNum)) {
+//                        aLayer.editCellValue(0, shapeNum, value);
+//                        aLayer.editCellValue(1, shapeNum, "Y");
+//                    }
+//                } catch (Exception ex) {
+//                    Logger.getLogger(MapView.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//
+//                lon = refLon + 0.0001f;
+//                if (lon > 180) {
+//                    lon -= 360;
+//                }
+//                aPLS = new PolylineShape();
+//                aPLS.setValue(lon);
+//                extent.minX = lon;
+//                extent.maxX = lon;
+//                extent.minY = -90;
+//                extent.maxY = 90;
+//                aPLS.setExtent(extent);
+//                PList = new ArrayList<>();
+//
+//                lat = -90;
+//                while (lat <= 90) {
+//
+//                    PList.add(new PointD(lon, lat));
+//                    lat += 1;
+//                }
+//                aPLS.setPoints(PList);
+//
+//                if (isLabelLon) {
+//                    value = refLon;
+//                } else {
+//                    value = -9999.0f;
+//                }
+//                shapeNum = aLayer.getShapeNum();
+//                try {
+//                    if (aLayer.editInsertShape(aPLS, shapeNum)) {
+//                        aLayer.editCellValue(0, shapeNum, value);
+//                        aLayer.editCellValue(1, shapeNum, "Y");
+//                    }
+//                } catch (Exception ex) {
+//                    Logger.getLogger(MapView.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//                break;
+//        }
+
+        //Latitue
+        lat = -90;
+        double cenLon = this._projection.getProjInfo().getCenterLon();
+        double epsilon = 1e-10;
+        while (lat <= 90) {
+            aPLS = new PolylineShape();
+            aPLS.setValue(lat);
+            extent.minX = -180;
+            extent.minY = lat;
+            extent.maxY = lat;
+            extent.maxX = 180;
+            aPLS.setExtent(extent);
+            PList = new ArrayList<>();
+
+            lon = cenLon - 180 + epsilon;
+            while (lon < cenLon + 180 - epsilon) {
+                PList.add(new PointD(lon, lat));
+                lon += 1;
+            }
+            PList.add(new PointD(cenLon + 180 - epsilon, lat));
+            aPLS.setPoints(PList);
+
+            shapeNum = aLayer.getShapeNum();
+            try {
+                if (aLayer.editInsertShape(aPLS, shapeNum)) {
+                    aLayer.editCellValue(0, shapeNum, lat);
+                    aLayer.editCellValue(1, shapeNum, "N");
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(MapView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            lineNum += 1;
+            lat = BigDecimalUtil.add(lat, Delt_Lat);
+            //System.out.println(lat);
+            //lat += Delt_Lat;
+        }
+
+        //Generate layer
+        Extent lExt = new Extent();
+        lExt.minX = -180;
+        lExt.maxX = 180;
+        lExt.minY = -90;
+        lExt.maxY = 90;
+
+        aLayer.setExtent(lExt);
+        aLayer.setLayerName("Map_LonLat");
+        aLayer.setFileName("");
+        aLayer.setLayerDrawType(LayerDrawType.Map);
+        aLayer.setLegendScheme(LegendManage.createSingleSymbolLegendScheme(ShapeTypes.Polyline, Color.darkGray, 1.0F));
+        PolylineBreak aPLB = (PolylineBreak) aLayer.getLegendScheme().getLegendBreaks().get(0);
+        aPLB.setStyle(LineStyles.DASH);
+        aLayer.setVisible(true);
+
+        //Get projected lon/lat layer   
+        return aLayer;
+    }
+
+    private VectorLayer generateLonLatLayer_bak(double origin_Lon, double origin_Lat, double Delt_Lon, double Delt_Lat) {
+        //Create lon/lat layer                        
+        PolylineShape aPLS;
+        int lineNum;
+        double lon, lat;
+        List<PointD> PList;
+
+        VectorLayer aLayer = new VectorLayer(ShapeTypes.Polyline);
+        String columnName = "Value";
+        Field aDC = new Field(columnName, DataTypes.Float);
+        aLayer.editAddField(aDC);
+        aDC = new Field("Longitude", DataTypes.String);
+        aLayer.editAddField(aDC);
+        int shapeNum;
+
+        double refLon = _projection.getProjInfo().getRefCutLon();
+
+        //Longitude
+        lineNum = 0;
+        Extent extent = new Extent();
+        boolean isLabelLon = false;
+        lon = origin_Lon;
+        while (true) {
+            if (lon >= origin_Lon && lineNum > 0 && lon - Delt_Lon < origin_Lon) {
+                break;
+            }
+
+            if (lon > 180) {
+                lon = BigDecimalUtil.sub(lon, 360);
+                //lon = lon - 360;
+            }
+
+            if (!_projection.isLonLatMap()) {
+                if (refLon == 180 || refLon == -180) {
+                    if (lon == 180 || lon == -180) {
+                        isLabelLon = true;
+                        lon = BigDecimalUtil.add(lon, Delt_Lon);
+                        continue;
+                    }
+                } else if (MIMath.doubleEquals(lon, refLon)) {
+                    isLabelLon = true;
+                    lon = BigDecimalUtil.add(lon, Delt_Lon);
+                    continue;
+                }
+            }
+
+            aPLS = new PolylineShape();
+            aPLS.setValue(lon);
+            extent.minX = lon;
+            extent.maxX = lon;
+            extent.minY = -90;
+            extent.maxY = 90;
+            aPLS.setExtent(extent);
+            PList = new ArrayList<>();
+
+            lat = -90;
+            while (lat <= 90) {
+
+                PList.add(new PointD(lon, lat));
+                lat += 1;
+            }
+            aPLS.setPoints(PList);
+
+            shapeNum = aLayer.getShapeNum();
+            try {
+                if (aLayer.editInsertShape(aPLS, shapeNum)) {
+                    aLayer.editCellValue(0, shapeNum, lon);
+                    aLayer.editCellValue(1, shapeNum, "Y");
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(MapView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            lineNum += 1;
+            lon = BigDecimalUtil.add(lon, Delt_Lon);
+            //System.out.println(lon);
+            //lon += Delt_Lon;
+        }
+
         //Add longitudes around reference longitude
         switch (_projection.getProjInfo().getProjectionName()) {
             case LongLat:
@@ -6744,7 +6987,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             _lonLatLayer = generateLonLatLayer();
             if (!_projection.isLonLatMap()) {
                 ProjectionInfo toProj = _projection.getProjInfo();
-                _projection.projectLayer(_lonLatLayer, toProj);
+                ProjectionUtil.projectLayer(_lonLatLayer, toProj);
             }
 
             _gridDeltChanged = false;
@@ -6876,12 +7119,12 @@ public class MapView extends JPanel implements IWebMapPanel {
                                 if (!aGL.isLongitude()) {
                                     aGL.setLabDirection(Direction.North);
                                 } else {
-                                    if (aGL.getLabPoint().Y > 0 && Math.abs(aGL.getLabPoint().X) < 1000) {
+                                    if (aGL.getCoord().Y > 0 && Math.abs(aGL.getCoord().X) < 1000) {
                                         continue;
                                     }
 
                                     if (MIMath.lonDistance(aGL.getValue(), (float) _projection.getProjInfo().getCoordinateReferenceSystem().getProjection().getProjectionLongitudeDegrees()) > 60) {
-                                        if (aGL.getLabPoint().X < 0) {
+                                        if (aGL.getCoord().X < 0) {
                                             aGL.setLabDirection(Direction.Weast);
                                         } else {
                                             aGL.setLabDirection(Direction.East);
@@ -6895,17 +7138,18 @@ public class MapView extends JPanel implements IWebMapPanel {
                         }
                         break;
                     case Albers_Equal_Area:
+                    case Lambert_Equal_Area_Conic:
                         for (GridLabel aGL : gridLabels) {
                             if (!aGL.isBorder()) {
                                 if (!aGL.isLongitude()) {
                                     aGL.setLabDirection(Direction.North);
                                 } else {
-                                    if (aGL.getLabPoint().Y > 7000000 && Math.abs(aGL.getLabPoint().X) < 5000000) {
+                                    if (aGL.getCoord().Y > 7000000 && Math.abs(aGL.getCoord().X) < 5000000) {
                                         continue;
                                     }
 
                                     if (MIMath.lonDistance(aGL.getValue(), (float) _projection.getProjInfo().getCoordinateReferenceSystem().getProjection().getProjectionLongitudeDegrees()) > 60) {
-                                        if (aGL.getLabPoint().X < 0) {
+                                        if (aGL.getCoord().X < 0) {
                                             aGL.setLabDirection(Direction.Weast);
                                         } else {
                                             aGL.setLabDirection(Direction.East);
@@ -6918,12 +7162,24 @@ public class MapView extends JPanel implements IWebMapPanel {
                             labels.add(aGL);
                         }
                         break;
+                    case Mercator:
+                        for (GridLabel gl : gridLabels) {
+                            if (!gl.isBorder()) {
+                                if (gl.isLongitude()) {
+                                    if (gl.getCoord().Y > 1000) {
+                                        gl.setLabDirection(Direction.North);
+                                    }
+                                }
+                            }
+                            labels.add(gl);
+                        }
+                        break;
                     case North_Polar_Stereographic_Azimuthal:
                     case South_Polar_Stereographic_Azimuthal:
                         for (GridLabel aGL : gridLabels) {
                             if (!aGL.isBorder()) {
                                 if (aGL.isLongitude()) {
-                                    if (Math.abs(aGL.getLabPoint().X) < 1000 && Math.abs(aGL.getLabPoint().Y) < 1000) {
+                                    if (Math.abs(aGL.getCoord().X) < 1000 && Math.abs(aGL.getCoord().Y) < 1000) {
                                         continue;
                                     }
 
@@ -6942,7 +7198,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                                             } else {
                                                 aGL.setLabDirection(Direction.South);
                                             }
-                                        } else if (aGL.getLabPoint().X < 0) {
+                                        } else if (aGL.getCoord().X < 0) {
                                             aGL.setLabDirection(Direction.Weast);
                                         } else {
                                             aGL.setLabDirection(Direction.East);
@@ -6960,12 +7216,12 @@ public class MapView extends JPanel implements IWebMapPanel {
                         for (GridLabel aGL : gridLabels) {
                             if (!aGL.isBorder()) {
                                 if (aGL.isLongitude()) {
-                                    if (aGL.getLabPoint().Y < 0) {
+                                    if (aGL.getCoord().Y < 0) {
                                         aGL.setLabDirection(Direction.South);
                                     } else {
                                         aGL.setLabDirection(Direction.North);
                                     }
-                                } else if (aGL.getLabPoint().X < 0) {
+                                } else if (aGL.getCoord().X < 0) {
                                     aGL.setLabDirection(Direction.Weast);
                                 } else {
                                     aGL.setLabDirection(Direction.East);
@@ -6976,11 +7232,12 @@ public class MapView extends JPanel implements IWebMapPanel {
                         }
                         break;
                     case Molleweide:
+                    case Hammer_Eckert:
                         for (GridLabel aGL : gridLabels) {
                             if (!aGL.isBorder()) {
                                 if (aGL.isLongitude()) {
                                     continue;
-                                } else if (aGL.getLabPoint().X < 0) {
+                                } else if (aGL.getCoord().X < 0) {
                                     aGL.setLabDirection(Direction.Weast);
                                 } else {
                                     aGL.setLabDirection(Direction.East);
@@ -6991,12 +7248,12 @@ public class MapView extends JPanel implements IWebMapPanel {
                         }
                         break;
                     case Orthographic_Azimuthal:
-                        //case Geostationary:
+                    case Geostationary_Satellite:
                         for (GridLabel aGL : gridLabels) {
                             if (!aGL.isBorder()) {
                                 if (aGL.isLongitude()) {
                                     continue;
-                                } else if (aGL.getLabPoint().X < 0) {
+                                } else if (aGL.getCoord().X < 0) {
                                     aGL.setLabDirection(Direction.Weast);
                                 } else {
                                     aGL.setLabDirection(Direction.East);
@@ -7024,7 +7281,7 @@ public class MapView extends JPanel implements IWebMapPanel {
 
             this._gridLabels.clear();
             for (GridLabel aGL : labels) {
-                double[] sXY = projToScreen(aGL.getLabPoint().X, aGL.getLabPoint().Y);
+                double[] sXY = projToScreen(aGL.getCoord().X, aGL.getCoord().Y);
                 aGL.setLabPoint(new PointD(sXY[0], sXY[1]));
                 //_gridLabels[i] = aGL;
                 this._gridLabels.add(aGL);
@@ -7167,7 +7424,7 @@ public class MapView extends JPanel implements IWebMapPanel {
 
         return new float[]{projX, projY};
     }
-    
+
     private double[] getProjXYShift(PointD p, double x, double y) {
         double[] xy = projToScreen(p.X, p.Y);
         double[] pxy = screenToProj(xy[0] + x, xy[1] - y);
@@ -7185,7 +7442,7 @@ public class MapView extends JPanel implements IWebMapPanel {
 
         return new double[]{xShift, yShift};
     }
-    
+
     /**
      * Move shape by screen coordinates
      *
@@ -7197,7 +7454,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         double[] sXY = getProjXYShift(aShape.getPoints().get(0), x, y);
         moveShape(aShape, sXY[0], sXY[1]);
     }
-    
+
     /**
      * Move a graphic
      *
@@ -9181,7 +9438,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             //_projection.setRefCutLon(Double.parseDouble(Projection.getAttributes().getNamedItem("RefCutLon").getNodeValue()));
             if (!(_projection.getProjInfo().getProjectionName() == ProjectionNames.LongLat)) {
                 //ProjectionInfo fromProj = KnownCoordinateSystems.geographic.world.WGS1984;
-                ProjectionInfo toProj = new ProjectionInfo(_projection.getProjStr());
+                ProjectionInfo toProj = ProjectionInfo.factory(_projection.getProjStr());
                 projectLayers(toProj);
             }
         } catch (DOMException | NumberFormatException e) {
@@ -9379,9 +9636,10 @@ public class MapView extends JPanel implements IWebMapPanel {
                 aLayer.setTransparencyColor(ColorUtil.parseToColor(aILayer.getAttributes().getNamedItem("TransparencyColor").getNodeValue()));
                 aLayer.setUseTransColor(Boolean.parseBoolean(aILayer.getAttributes().getNamedItem("SetTransColor").getNodeValue()));
                 Node attrInterp = aILayer.getAttributes().getNamedItem("Interpolation");
-                if (attrInterp != null)
+                if (attrInterp != null) {
                     aLayer.setInterpolation(attrInterp.getNodeValue());
-                
+                }
+
                 //Load visible scale
                 NodeList visScaleNodes = ((Element) aILayer).getElementsByTagName("VisibleScale");
                 if (visScaleNodes.getLength() > 0) {
@@ -9430,9 +9688,10 @@ public class MapView extends JPanel implements IWebMapPanel {
                 aLayer.setTransparencyColor(ColorUtil.parseToColor(aILayer.getAttributes().getNamedItem("TransparencyColor").getNodeValue()));
                 aLayer.setUseTransColor(Boolean.parseBoolean(aILayer.getAttributes().getNamedItem("SetTransColor").getNodeValue()));
                 Node attrInterp = aILayer.getAttributes().getNamedItem("Interpolation");
-                if (attrInterp != null)
+                if (attrInterp != null) {
                     aLayer.setInterpolation(attrInterp.getNodeValue());
-                
+                }
+
                 //Load legend scheme
                 Node LS = (Node) ((Element) aILayer).getElementsByTagName("LegendScheme").item(0);
                 LegendScheme ls = new LegendScheme(aLayer.getShapeType());

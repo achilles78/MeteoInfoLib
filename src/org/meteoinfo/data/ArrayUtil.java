@@ -46,7 +46,7 @@ import org.meteoinfo.ma.ArrayBoolean;
 import org.meteoinfo.math.Complex;
 import org.meteoinfo.math.ListIndexComparator;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.ProjectionUtil;
 import org.meteoinfo.projection.Reproject;
 import org.meteoinfo.shape.PolygonShape;

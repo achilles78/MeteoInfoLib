@@ -36,7 +36,7 @@ import org.meteoinfo.data.mapdata.geotiff.compression.LZWCompression;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -657,7 +657,7 @@ public class GeoTiff {
             //Projection
             String projStr = getProjection();
             if (projStr != null) {
-                gData.projInfo = new ProjectionInfo(projStr);
+                gData.projInfo = ProjectionInfo.factory(projStr);
             } else {
                 gData.projInfo = KnownCoordinateSystems.geographic.world.WGS1984;
             }
@@ -715,7 +715,7 @@ public class GeoTiff {
             //Projection
             String projStr = getProjection();
             if (projStr != null) {
-                gData.projInfo = new ProjectionInfo(projStr);
+                gData.projInfo = ProjectionInfo.factory(projStr);
             } else {
                 gData.projInfo = KnownCoordinateSystems.geographic.world.WGS1984;
             }
@@ -765,7 +765,7 @@ public class GeoTiff {
     public ProjectionInfo readProj() {
         String projStr = getProjection();
         if (projStr != null) {
-            return new ProjectionInfo(projStr);
+            return ProjectionInfo.factory(projStr);
         } else {
             return KnownCoordinateSystems.geographic.world.WGS1984;
         }

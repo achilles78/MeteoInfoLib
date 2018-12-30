@@ -22,7 +22,7 @@ import org.meteoinfo.data.meteodata.Variable;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.io.EndianDataOutputStream;
 import org.meteoinfo.projection.KnownCoordinateSystems;
-import org.meteoinfo.projection.ProjectionInfo;
+import org.meteoinfo.projection.info.ProjectionInfo;
 import org.meteoinfo.projection.Reproject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -466,7 +466,7 @@ public class GrADSDataInfo extends DataInfo implements IGridDataInfo, IStationDa
                                     + " +lat_2=" + String.valueOf(aPLCC.Ntruelat)
                                     + " +lat_0=" + String.valueOf(aPLCC.latref)
                                     + " +lon_0=" + String.valueOf(aPLCC.slon);
-                            theProj = new ProjectionInfo(ProjStr);
+                            theProj = ProjectionInfo.factory(ProjStr);
                             this.setProjectionInfo(theProj);
                             if (PDEF.PDEF_Type.equals("LCCR")) {
                                 EarthWind = false;
@@ -505,7 +505,7 @@ public class GrADSDataInfo extends DataInfo implements IGridDataInfo, IStationDa
                             isLatLon = false;
                             ProjStr = "+proj=stere +lon_0=" + String.valueOf(lonRef)
                                     + " +lat_0=" + lat0;
-                            this.setProjectionInfo(new ProjectionInfo(ProjStr));
+                            this.setProjectionInfo(ProjectionInfo.factory(ProjStr));
                             //Set X Y
                             XNum = iSize;
                             YNum = jSize;

@@ -137,7 +137,7 @@ public class MapFrame extends ItemNode {
     private Color _neatLineColor = Color.black;
     private float _neatLineSize = 1.0f;
     private boolean _drawGridLabel = true;
-    private GridLabelPosition _gridLabelPosition = GridLabelPosition.LeftBottom;
+    private GridLabelPosition _gridLabelPosition = GridLabelPosition.LEFT_BOTTOM;
     private Font _gridFont = new Font("Arial", Font.PLAIN, 12);
     private Rectangle _layoutBounds;
     //private boolean _isFireMapViewUpdate = false;
@@ -186,6 +186,10 @@ public class MapFrame extends ItemNode {
         return _mapView;
     }
 
+    /**
+     * Set map view
+     * @param mapView The map view 
+     */
     public void setMapView(MapView mapView) {
         _mapView = mapView;
         _mapView.addViewExtentChangedListener(new IViewExtentChangedListener() {
@@ -196,13 +200,11 @@ public class MapFrame extends ItemNode {
                 //}
             }
         });
-//                _mapView.LayersUpdated += MapViewLayersUpdated;
-//                _mapView.MapViewRedrawed += MapViewRedrawed;
-//                _mapView.ProjectionChanged += new EventHandler(MapViewProjectionChanged);
+
 //        if (_mapView.getProjection().isLonLatMap()) {
-//            _gridLabelPosition = GridLabelPosition.LeftBottom;
+//            _gridLabelPosition = GridLabelPosition.LEFT_BOTTOM;
 //        } else {
-//            _gridLabelPosition = GridLabelPosition.All;
+//            _gridLabelPosition = GridLabelPosition.ALL;
 //        }
     }
 
@@ -438,6 +440,16 @@ public class MapFrame extends ItemNode {
      */
     public void setGridLabelPosition(GridLabelPosition pos) {
         _gridLabelPosition = pos;
+    }
+    
+    /**
+     * Set grid label position
+     *
+     * @param pos Grid label position
+     */
+    public void setGridLabelPosition(String pos) {
+        GridLabelPosition glp = GridLabelPosition.valueOf(pos.toUpperCase());
+        _gridLabelPosition = glp;
     }
 
     /**
