@@ -2507,7 +2507,7 @@ public class GeoComputation {
 
             GridLabel aGL = new GridLabel();
             aGL.setLabDirection(Direction.South);
-            aGL.setLabPoint(new PointD(aPoint.X, clipExtent.minY));
+            aGL.setCoord(new PointD(aPoint.X, clipExtent.minY));
             gridLabels.add(aGL);
         } else {
             if (aPoint.Y < clipExtent.minY || aPoint.Y > clipExtent.maxY) {
@@ -2516,7 +2516,7 @@ public class GeoComputation {
 
             GridLabel aGL = new GridLabel();
             aGL.setLabDirection(Direction.Weast);
-            aGL.setLabPoint(new PointD(clipExtent.minX, aPoint.Y));
+            aGL.setCoord(new PointD(clipExtent.minX, aPoint.Y));
             gridLabels.add(aGL);
         }
 
@@ -2528,7 +2528,7 @@ public class GeoComputation {
 
             GridLabel aGL = new GridLabel();
             aGL.setLabDirection(Direction.North);
-            aGL.setLabPoint(new PointD(aPoint.X, clipExtent.maxY));
+            aGL.setCoord(new PointD(aPoint.X, clipExtent.maxY));
             gridLabels.add(aGL);
         } else {
             if (aPoint.Y < clipExtent.minY || aPoint.Y > clipExtent.maxY) {
@@ -2537,7 +2537,7 @@ public class GeoComputation {
 
             GridLabel aGL = new GridLabel();
             aGL.setLabDirection(Direction.East);
-            aGL.setLabPoint(new PointD(clipExtent.maxX, aPoint.Y));
+            aGL.setCoord(new PointD(clipExtent.maxX, aPoint.Y));
             gridLabels.add(aGL);
         }
 
