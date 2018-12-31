@@ -272,6 +272,11 @@ public class InterpUtil {
                         sy = station[1];
                         sxi = station[3];
                         syi = station[4];
+                        
+                        if (sxi < 0 || sxi >= xNum - 1 || syi < 0 || syi >= yNum - 1) {
+                            continue;
+                        }
+                        
                         double dis = Math.sqrt(Math.pow(sx - x, 2) + Math.pow(sy - y, 2));
 
                         int i1 = (int) syi;
@@ -452,6 +457,11 @@ public class InterpUtil {
                         sy = station[1];
                         sxi = station[3];
                         syi = station[4];
+                        
+                        if (sxi < 0 || sxi >= xNum - 1 || syi < 0 || syi >= yNum - 1) {
+                            continue;
+                        }
+                        
                         double dis = Math.pow(sx - x, 2) + Math.pow(sy - y, 2);
                         int i1 = (int) syi;
                         int j1 = (int) sxi;

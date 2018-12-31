@@ -404,19 +404,19 @@ public class MapPlot extends AbstractPlot2D implements IWebMapPanel {
         this.mapView.setAntiAlias(this.antialias);        
         this.mapView.setViewExtent((Extent) this.getDrawExtent().clone());
         if (this.boundary != null) {
-            PolygonBreak pb = (PolygonBreak)this.boundary.getLegend();
+            PolygonBreak pb = (PolygonBreak)this.boundary.getLegend().clone();
             if (pb.isDrawFill()) {
                 pb.setDrawOutline(false);
-                this.mapView.drawGraphic(g, this.boundary, area.getBounds());
-                pb.setDrawOutline(true);
+                this.mapView.drawGraphic(g, new Graphic(this.boundary.getShape(), pb), area.getBounds());
+                //pb.setDrawOutline(true);
             }
         }
         this.mapView.paintGraphics(g, area, this.tileLoadListener);
         if (this.boundary != null) {
-            PolygonBreak pb = (PolygonBreak)this.boundary.getLegend();
+            PolygonBreak pb = (PolygonBreak)this.boundary.getLegend().clone();
             pb.setDrawFill(false);
-            this.mapView.drawGraphic(g, this.boundary, area.getBounds());
-            pb.setDrawFill(true);
+            this.mapView.drawGraphic(g, new Graphic(this.boundary.getShape(), pb), area.getBounds());
+            //pb.setDrawFill(true);
         }
     }
 

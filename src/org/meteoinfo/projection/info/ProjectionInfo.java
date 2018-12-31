@@ -32,7 +32,6 @@ public abstract class ProjectionInfo {
     // <editor-fold desc="Variables">
 
     protected CoordinateReferenceSystem crs;
-    protected ProjectionNames projName;
     protected PolygonShape boundary;
     protected float cutoff = Float.NaN;    //Latitude cutoff - valiad for some speciafic projections
     // </editor-fold>
@@ -150,7 +149,7 @@ public abstract class ProjectionInfo {
      * @return Boolean
      */
     public boolean isLonLat(){
-        return projName == ProjectionNames.LongLat;
+        return this.getProjectionName() == ProjectionNames.LongLat;
     }
     
     /**
@@ -242,21 +241,6 @@ public abstract class ProjectionInfo {
         return r;
     }
     
-    protected void updateCutoff() {
-        switch (this.projName) {
-            case North_Polar_Stereographic_Azimuthal:
-            case South_Polar_Stereographic_Azimuthal:
-                this.cutoff = 0.f;
-                break;
-            case Lambert_Conformal_Conic:
-                this.cutoff = -80.f;
-                break;
-            case Mercator:
-                this.cutoff = 85.0511f;
-                break;
-        }
-    }
-    
     /**
      * Get reference cut longitude for projection operation
      * @return Refrence cut longitude
@@ -305,7 +289,7 @@ public abstract class ProjectionInfo {
      * @return Boolean
      */
     public boolean equals(ProjectionInfo projInfo){
-        if (this.projName == ProjectionNames.LongLat && projInfo.projName == ProjectionNames.LongLat)
+        if (this.getProjectionName() == ProjectionNames.LongLat && projInfo.getProjectionName() == ProjectionNames.LongLat)
             return true;
         else {
             String proj4Str1 = this.toProj4String();
