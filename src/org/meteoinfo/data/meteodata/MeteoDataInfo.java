@@ -466,6 +466,16 @@ public class MeteoDataInfo {
             Logger.getLogger(MeteoDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    /**
+     * Open data file
+     *
+     * @param ncfile Netcdf file
+     * @param keepOpen Keep the file opened or not
+     */
+    public void openData(NetcdfFile ncfile, boolean keepOpen) {
+        this.openNetCDFData(ncfile, keepOpen);
+    }
 
     /**
      * Close opened file
@@ -732,6 +742,19 @@ public class MeteoDataInfo {
     public void openNetCDFData(String fileName, boolean keepOpen) {
         NetCDFDataInfo aDataInfo = new NetCDFDataInfo();
         aDataInfo.readDataInfo(fileName, keepOpen);
+        _dataInfo = aDataInfo;
+        _infoText = aDataInfo.generateInfoText();
+    }
+    
+    /**
+     * Open NetCDF data
+     *
+     * @param ncfile Netcdf file
+     * @param keepOpen Keep file opened or not
+     */
+    public void openNetCDFData(NetcdfFile ncfile, boolean keepOpen) {
+        NetCDFDataInfo aDataInfo = new NetCDFDataInfo();
+        aDataInfo.readDataInfo(ncfile, keepOpen);
         _dataInfo = aDataInfo;
         _infoText = aDataInfo.generateInfoText();
     }

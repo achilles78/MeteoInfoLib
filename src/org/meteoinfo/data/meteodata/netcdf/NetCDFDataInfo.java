@@ -180,7 +180,7 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
         try {
             //ncfile = NetcdfFile.open(fileName);
             ncfile = NetcdfDataset.openFile(fileName, null);
-            readDataInfo();
+            readDataInfo(false);
         } catch (IOException ex) {
             Logger.getLogger(NetCDFDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -202,146 +202,19 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
         }
         try {
             ncfile = NetcdfFile.open(fileName, iospClassName, 0, null, null);
-            readDataInfo();
+            readDataInfo(false);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | IOException ex) {
             Logger.getLogger(NetCDFDataInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    private void readDataInfo() {
-        try {
-            _fileTypeStr = ncfile.getFileTypeDescription();
-            _fileTypeId = ncfile.getFileTypeId();
-//            if (_fileTypeId.equals("GRIB2")){
-//                ncfile.getIosp().
-//            }
-
-            //Read variables
-            _variables = ncfile.getVariables();
-
-            //Read dimensions
-            _dimensions = ncfile.getDimensions();
-            if (_fileTypeId.equals("HDF5-EOS") || _fileTypeId.equals("HDF4-EOS")) {
-                _isHDFEOS = true;
-                List<String> dimNames = new ArrayList<>();
-                for (ucar.nc2.Variable var : _variables) {
-                    for (ucar.nc2.Dimension dim : var.getDimensions()) {
-                        String dimName = dim.getShortName();
-                        if (dimName == null) {
-                            continue;
-                        }
-                        if (!dimNames.contains(dimName)) {
-                            dimNames.add(dimName);
-                        }
-                    }
-                }
-                for (ucar.nc2.Dimension dim : _dimensions) {
-                    if (dim.getShortName().contains("_")) {
-                        for (String dimName : dimNames) {
-                            if (dim.getShortName().contains(dimName)) {
-                                dim.setShortName(dimName);
-                            }
-                        }
-//                        String newName;
-//                        //int idx = dim.getShortName().lastIndexOf("_");
-//                        int idx = dim.getShortName().indexOf("Data_Fields_");
-//                        if (idx >= 0) {
-//                            newName = dim.getShortName().substring(idx + 12);
-//                        } else {
-//                            idx = dim.getShortName().lastIndexOf("_");
-//                            newName = dim.getShortName().substring(idx + 1);
-//                        }
-//                        dim.setShortName(newName);
-                    }
-                }
-            }
-            _miDims = new ArrayList<>();
-            for (ucar.nc2.Dimension dim : _dimensions) {
-                Dimension ndim = new Dimension(dim);
-                if (dim.getShortName().equals("nXtrack")) {
-                    ndim.setDimType(DimensionType.Xtrack);
-                }
-                _miDims.add(ndim);
-            }
-
-            //Read global attribute
-            _gAtts = ncfile.getGlobalAttributes();
-            String featureType = this.getGlobalAttStr("featureType");
-            switch (featureType) {
-                case "SWATH":
-                    _isSWATH = true;
-                    break;
-                case "PROFILE":
-                    _isPROFILE = true;
-                    break;
-            }
-
-            //Get convention
-            _convention = this.getConvention();
-
-            //Get projection
-            this.getProjection();
-
-            //Get dimensions values
-            getDimensionValues(ncfile);
-
-            //Get variables
-            List<Variable> vars = new ArrayList<>();
-            //List<Dimension> coorDims = new ArrayList<Dimension>();
-            for (ucar.nc2.Variable var : _variables) {
-                Variable nvar = new Variable(var);
-                //nvar.setName(var.getShortName());
-                //nvar.setCoorVar(var.isCoordinateVariable());
-                nvar.setDimVar(var.getRank() <= 1);
-                if (_isSWATH || _isPROFILE) {
-                    nvar.setStation(true);
-                }
-
-                nvar.getDimensions().clear();
-                for (ucar.nc2.Dimension dim : var.getDimensions()) {
-                    //Dimension ndim = this.getCoordDimension(dim);
-                    int idx = this.getDimensionIndex(dim);
-                    if (idx >= 0) {
-                        Dimension ndim = _miDims.get(idx);
-                        nvar.addDimension(ndim);
-                    } else {
-                        Dimension ndim = new Dimension(dim, DimensionType.Other);
-                        nvar.addDimension(ndim);
-                    }
-                }
-
-                //nvar.setAttributes(var.getAttributes());
-                double[] packData = this.getPackData(var);
-                nvar.setAddOffset(packData[0]);
-                nvar.setScaleFactor(packData[1]);
-                nvar.setFillValue(packData[2]);
-
-                vars.add(nvar);
-            }
-            this.setVariables(vars);
-
-            //
-            //getVariableLevels();
-        } catch (IOException | ParseException ex) {
-            Logger.getLogger(NetCDFDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (null != ncfile) {
-                try {
-                    ncfile.close();
-                    ncfile = null;
-                } catch (IOException ex) {
-                    Logger.getLogger(NetCDFDataInfo.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+    
+    public void readDataInfo(NetcdfFile nf, boolean keepOpen) {
+        this.ncfile = nf;
+        readDataInfo(keepOpen);
     }
 
-    @Override
-    public void readDataInfo(String fileName, boolean keepOpen) {
-        this.setFileName(fileName);
+   public void readDataInfo(boolean keepOpen) {
         try {
-            //ncfile = NetcdfFile.open(fileName);
-            ncfile = NetcdfDataset.openFile(fileName, null);
             _fileTypeStr = ncfile.getFileTypeDescription();
             _fileTypeId = ncfile.getFileTypeId();
 //            if (_fileTypeId.equals("GRIB2")){
@@ -469,7 +342,18 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
                 }
             }
         }
-        this.keepOpen = true;
+        //this.keepOpen = true;
+    }
+
+    @Override
+    public void readDataInfo(String fileName, boolean keepOpen) {
+        try {
+            this.setFileName(fileName);
+            ncfile = NetcdfDataset.openFile(fileName, null);
+            readDataInfo(keepOpen);
+        } catch (IOException ex) {
+            Logger.getLogger(NetCDFDataInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private int getDimensionIndex(ucar.nc2.Dimension dim) {
