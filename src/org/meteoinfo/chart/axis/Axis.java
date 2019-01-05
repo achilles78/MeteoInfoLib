@@ -292,6 +292,14 @@ public class Axis implements Cloneable {
      */
     public void setLabel(String value) {
         ChartText text = new ChartText(value);
+        if (this.xAxis) {
+            text.setXAlign(XAlign.CENTER);
+            text.setYAlign(YAlign.TOP);
+        } else {
+            text.setAngle(90);
+            text.setXAlign(XAlign.CENTER);
+            text.setYAlign(YAlign.BOTTOM);
+        }
         setLabel(text);
     }
 
