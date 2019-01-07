@@ -5,15 +5,25 @@
  */
 package org.meteoinfo.image;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+
 /**
  *
  * @author
  */
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import java.awt.*;
-import java.awt.image.*;
+
 
 /**
  * Class GifDecoder - Decodes a GIF file into one or more frames.
@@ -162,8 +172,7 @@ public class GifDecoder {
      */
     protected void setPixels() {
         // expose destination image's pixels as int array
-        int[] dest
-                = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        int[] dest = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
         // fill in starting image contents based on last image's dispose code
         if (lastDispose > 0) {
@@ -186,7 +195,7 @@ public class GifDecoder {
                 if (lastDispose == 2) {
                     // fill last image rect area with background color
                     Graphics2D g = image.createGraphics();
-                    Color c = null;
+                    Color c;
                     if (transparency) {
                         c = new Color(0, 0, 0, 0);  // assume background is transparent
                     } else {
@@ -250,6 +259,7 @@ public class GifDecoder {
     /**
      * Gets the image contents of frame n.
      *
+     * @param n Frame index
      * @return BufferedImage representation of frame, or null if n is invalid.
      */
     public BufferedImage getFrame(int n) {
@@ -272,7 +282,7 @@ public class GifDecoder {
     /**
      * Reads GIF image from stream
      *
-     * @param BufferedInputStream containing GIF file.
+     * @param is containing GIF file.
      * @return read status code (0 = no errors)
      */
     public int read(BufferedInputStream is) {
@@ -299,7 +309,7 @@ public class GifDecoder {
     /**
      * Reads GIF image from stream
      *
-     * @param InputStream containing GIF file.
+     * @param is containing GIF file.
      * @return read status code (0 = no errors)
      */
     public int read(InputStream is) {
@@ -337,10 +347,14 @@ public class GifDecoder {
         status = STATUS_OK;
         try {
             name = name.trim().toLowerCase();
-            if ((name.indexOf("file:") >= 0)
+            if ((name.contains("file:"))
                     || (name.indexOf(":/") > 0)) {
-                URL url = new URL(name);
-                in = new BufferedInputStream(url.openStream());
+                try {
+                    URL url = new URL(name);
+                    in = new BufferedInputStream(url.openStream());
+                } catch (IOException e) {
+                    in = new BufferedInputStream(new FileInputStream(name));
+                }
             } else {
                 in = new BufferedInputStream(new FileInputStream(name));
             }
@@ -489,6 +503,7 @@ public class GifDecoder {
 
     /**
      * Returns true if an error was encountered during reading/decoding
+     * @return Boolean
      */
     protected boolean err() {
         return status != STATUS_OK;
@@ -507,6 +522,7 @@ public class GifDecoder {
 
     /**
      * Reads a single byte from the input stream.
+     * @return The byte
      */
     protected int read() {
         int curByte = 0;
@@ -528,7 +544,7 @@ public class GifDecoder {
         int n = 0;
         if (blockSize > 0) {
             try {
-                int count = 0;
+                int count;
                 while (n < blockSize) {
                     count = in.read(block, n, blockSize - n);
                     if (count == -1) {
@@ -765,6 +781,7 @@ public class GifDecoder {
 
     /**
      * Reads next 16-bit value, LSB first
+     * @return The short
      */
     protected int readShort() {
         // read 16-bit value, LSB first
