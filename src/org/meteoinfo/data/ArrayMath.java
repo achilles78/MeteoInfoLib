@@ -2681,6 +2681,144 @@ public class ArrayMath {
 
         return r;
     }
+    
+    /**
+     * Test whether any array element evaluates to True.
+     * @param a The array
+     * @return Boolean
+     */
+    public static boolean any(Array a) {
+        IndexIterator ii = a.getIndexIterator();
+        while (ii.hasNext()) {
+            if (ii.getBooleanNext()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Test whether any array element along a given axis evaluates to True.
+     *
+     * @param a Array a
+     * @param axis Axis
+     * @return Boolean array
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static Array any(Array a, int axis) throws InvalidRangeException {
+        int[] dataShape = a.getShape();
+        int[] shape = new int[dataShape.length - 1];
+        int idx;
+        for (int i = 0; i < dataShape.length; i++) {
+            idx = i;
+            if (idx == axis) {
+                continue;
+            } else if (idx > axis) {
+                idx -= 1;
+            }
+            shape[idx] = dataShape[i];
+        }
+        Array r = new ArrayBoolean(shape);
+        boolean b;
+        Index indexr = r.getIndex();
+        int[] current;
+        for (int i = 0; i < r.getSize(); i++) {
+            current = indexr.getCurrentCounter();
+            List<Range> ranges = new ArrayList<>();
+            for (int j = 0; j < dataShape.length; j++) {
+                if (j == axis) {
+                    ranges.add(new Range(0, dataShape[j] - 1, 1));
+                } else {
+                    idx = j;
+                    if (idx > axis) {
+                        idx -= 1;
+                    }
+                    ranges.add(new Range(current[idx], current[idx], 1));
+                }
+            }
+            IndexIterator ii = a.getRangeIterator(ranges);
+            b = false;
+            while (ii.hasNext()) {
+                if (ii.getBooleanNext()) {
+                    b = true;
+                    break;
+                }
+            }
+            r.setBoolean(i, b);
+            indexr.incr();
+        }
+
+        return r;
+    }
+    
+    /**
+     * Test whether all array element evaluates to True.
+     * @param a The array
+     * @return Boolean
+     */
+    public static boolean all(Array a) {
+        IndexIterator ii = a.getIndexIterator();
+        while (ii.hasNext()) {
+            if (!ii.getBooleanNext()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Test whether all array element along a given axis evaluates to True.
+     *
+     * @param a Array a
+     * @param axis Axis
+     * @return Boolean array
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static Array all(Array a, int axis) throws InvalidRangeException {
+        int[] dataShape = a.getShape();
+        int[] shape = new int[dataShape.length - 1];
+        int idx;
+        for (int i = 0; i < dataShape.length; i++) {
+            idx = i;
+            if (idx == axis) {
+                continue;
+            } else if (idx > axis) {
+                idx -= 1;
+            }
+            shape[idx] = dataShape[i];
+        }
+        Array r = new ArrayBoolean(shape);
+        boolean b;
+        Index indexr = r.getIndex();
+        int[] current;
+        for (int i = 0; i < r.getSize(); i++) {
+            current = indexr.getCurrentCounter();
+            List<Range> ranges = new ArrayList<>();
+            for (int j = 0; j < dataShape.length; j++) {
+                if (j == axis) {
+                    ranges.add(new Range(0, dataShape[j] - 1, 1));
+                } else {
+                    idx = j;
+                    if (idx > axis) {
+                        idx -= 1;
+                    }
+                    ranges.add(new Range(current[idx], current[idx], 1));
+                }
+            }
+            IndexIterator ii = a.getRangeIterator(ranges);
+            b = true;
+            while (ii.hasNext()) {
+                if (!ii.getBooleanNext()) {
+                    b = false;
+                    break;
+                }
+            }
+            r.setBoolean(i, b);
+            indexr.incr();
+        }
+
+        return r;
+    }
 
     /**
      * Return the array with the value of 1 when the input array element value
