@@ -1999,6 +1999,282 @@ public class DataFrame implements Iterable {
     }
 
     /**
+     * Read data frame from ASCII file
+     *
+     * @param fileName File name
+     * @param delimiter Delimiter
+     * @param skipRows Number of lines to skip at begining of the file
+     * @param formatSpec Format specifiers string
+     * @param encoding Fle encoding
+     * @param indexCol Column to be used as index
+     * @param indexFormat Index format
+     * @param names Column names
+     * @param header Row number to use as the column names
+     * @param skipFooter Number of lines at bottom of file to skip
+     * @param usecolsin Filter columns by column indices
+     * @return DataFrame object
+     * @throws java.io.FileNotFoundException
+     */
+    public static DataFrame readTable(String fileName, String delimiter, int skipRows, String formatSpec, String encoding,
+            int indexCol, String indexFormat, List<String> names, Integer header, int skipFooter,
+            List<Object> usecolsin) throws FileNotFoundException, IOException, Exception {
+        BufferedReader sr = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), encoding));
+        if (skipRows > 0) {
+            for (int i = 0; i < skipRows; i++) {
+                sr.readLine();
+            }
+        }
+
+        String title = sr.readLine().trim();
+        if (encoding.equals("UTF8")) {
+            if (title.startsWith("\uFEFF")) {
+                title = title.substring(1);
+            }
+        }
+        String[] titleArray1 = GlobalUtil.split(title, delimiter);
+        List<Integer> usecols = new ArrayList<>();
+        if (usecolsin.get(0) instanceof Integer) {
+            for (Object o : usecolsin) {
+                usecols.add((Integer) o);
+            }
+        } else {
+            int idx;
+            List<String> titleArray2 = new ArrayList(Arrays.asList(titleArray1));
+            for (Object o : usecolsin) {
+                idx = titleArray2.indexOf((String) o);
+                if (idx >= 0) {
+                    usecols.add(idx);
+                }
+            }
+        }
+        List<String> titleArray = new ArrayList<>();
+        for (int i = 0; i < titleArray1.length; i++) {
+            if (i != indexCol && usecols.contains(i)) {
+                titleArray.add(titleArray1[i]);
+            }
+        }
+
+        if (titleArray.isEmpty()) {
+            System.out.println("File Format Error!");
+            sr.close();
+            return null;
+        }
+
+        int colNum = titleArray.size();
+        if (header == null) {
+            for (int i = 0; i < colNum; i++) {
+                titleArray.set(i, "Col_" + String.valueOf(i));
+            }
+        }
+
+        //Get fields
+        ColumnIndex cols = new ColumnIndex();
+        Column col;
+        List<List> values = new ArrayList<>();
+        String[] colFormats;
+        if (formatSpec == null) {
+            colFormats = new String[colNum];
+            for (int i = 0; i < colNum; i++) {
+                colFormats[i] = "C";
+            }
+        } else {
+            colFormats = formatSpec.split("%");
+        }
+
+        int idx = 0;
+        boolean isBreak = false;
+        for (String colFormat : colFormats) {
+            if (colFormat.isEmpty()) {
+                continue;
+            }
+
+            int num = 1;
+            if (colFormat.length() > 1 && !colFormat.substring(0, 1).equals("{")) {
+                int index = colFormat.indexOf("{");
+                if (index < 0) {
+                    index = colFormat.length() - 1;
+                }
+                num = Integer.parseInt(colFormat.substring(0, index));
+                colFormat = colFormat.substring(index);
+            }
+            for (int i = 0; i < num; i++) {
+                String colName = titleArray.get(idx).trim();
+                if (colFormat.equals("C") || colFormat.equals("s")) //String
+                {
+                    col = new Column(colName, DataType.STRING);
+                } else if (colFormat.equals("i")) //Integer
+                {
+                    col = new Column(colName, DataType.INT);
+                } else if (colFormat.equals("f")) //Float
+                {
+                    col = new Column(colName, DataType.FLOAT);
+                } else if (colFormat.equals("d")) //Double
+                {
+                    col = new Column(colName, DataType.DOUBLE);
+                } else if (colFormat.equals("B")) //Boolean
+                {
+                    col = new Column(colName, DataType.BOOLEAN);
+                } else if (colFormat.substring(0, 1).equals("{")) {    //Date
+                    int eidx = colFormat.indexOf("}");
+                    String formatStr = colFormat.substring(1, eidx);
+                    col = new Column(colName, DataType.OBJECT);
+                    col.setFormat(formatStr);
+                } else {
+                    col = new Column(colName, DataType.STRING);
+                }
+                cols.add(col);
+                values.add(new ArrayList<>());
+                idx += 1;
+                if (idx == colNum) {
+                    isBreak = true;
+                    break;
+                }
+            }
+            if (isBreak) {
+                break;
+            }
+        }
+
+        if (idx < colNum) {
+            for (int i = idx; i < colNum; i++) {
+                cols.add(new Column(titleArray.get(i), DataType.STRING));
+                values.add(new ArrayList<>());
+            }
+        }
+
+        String[] dataArray;
+        List<String> indexValues = new ArrayList<>();
+        String line;
+        if (header == null) {
+            line = title;
+        } else {
+            line = sr.readLine();
+        }
+        while (line != null) {
+            line = line.trim();
+            if (line.isEmpty()) {
+                line = sr.readLine();
+                continue;
+            }
+            dataArray = GlobalUtil.split(line, delimiter);
+            int cn = 0;
+            for (int i = 0; i < dataArray.length; i++) {
+                if (cn < colNum) {
+                    if (i == indexCol) {
+                        indexValues.add(dataArray[i]);
+                    } else if (usecols.contains(i)) {
+                        values.get(cn).add(dataArray[i]);
+                        cn++;
+                    }
+                } else {
+                    break;
+                }
+            }
+            if (cn < colNum) {
+                for (int i = cn; i < colNum; i++) {
+                    values.get(i).add("");
+                }
+            }
+
+            line = sr.readLine();
+        }
+        sr.close();
+
+        int rn = values.get(0).size();
+        if (skipFooter > 0) {
+            if (indexCol >= 0) {
+                indexValues = indexValues.subList(0, rn - skipFooter);
+            }
+            for (int i = 0; i < colNum; i++) {
+                values.set(i, values.get(i).subList(0, rn - skipFooter));
+            }
+        }
+        rn = values.get(0).size();
+        Index index;
+        if (indexCol >= 0) {
+            DataType idxDT;
+            DateTimeFormatter dtFormatter = ISODateTimeFormat.dateTime();
+            if (indexFormat != null) {
+                if (indexFormat.substring(0, 1).equals("%")) {
+                    indexFormat = indexFormat.substring(1);
+                }
+                idxDT = DataConvert.getDataType(indexFormat);
+                if (idxDT == DataType.OBJECT) {
+                    indexFormat = DataConvert.getDateFormat(indexFormat);
+                    dtFormatter = DateTimeFormat.forPattern(indexFormat);
+                }
+            } else {
+                idxDT = DataConvert.detectDataType(indexValues, 10, null);
+                if (idxDT == DataType.OBJECT) {
+                    dtFormatter = TypeUtils.getDateTimeFormatter(indexValues.get(0));
+                }
+            }
+
+            List indexData = new ArrayList<>();
+            if (idxDT == DataType.OBJECT) {
+                for (String s : indexValues) {
+                    indexData.add(dtFormatter.parseDateTime(s));
+                }
+                index = new DateTimeIndex(indexData);
+                //((DateTimeIndex) index).setDateTimeFormatter(dtFormatter);
+                if (indexFormat != null) {
+                    index.format = indexFormat;
+                } else {
+                    index.updateFormat();
+                }
+            } else {
+                for (String s : indexValues) {
+                    indexData.add(DataConvert.convertStringTo(s, idxDT, null));
+                }
+                index = new Index(indexData);
+                index.updateFormat();
+            }
+        } else {
+            index = new Index(rn);
+            index.updateFormat();
+        }
+
+        DataFrame df;
+        if (cols.isSameDataType()) {
+            Array data = Array.factory(cols.get(0).dataType, new int[]{rn, colNum});
+            List vv;
+            col = cols.get(0);
+            for (int i = 0; i < colNum; i++) {
+                vv = values.get(i);
+                String v;
+                for (int j = 0; j < vv.size(); j++) {
+                    v = (String) vv.get(j);
+                    data.setObject(j * colNum + i, col.convertStringTo(v));
+                }
+            }
+            df = new DataFrame(data, index, cols);
+        } else {
+            List<Array> data = new ArrayList<>();
+            Array a;
+            List vv;
+            for (int i = 0; i < colNum; i++) {
+                vv = values.get(i);
+                col = cols.get(i);
+                DataType dt = col.getDataType();
+                a = Array.factory(dt, new int[]{rn});
+                String v;
+                for (int j = 0; j < vv.size(); j++) {
+                    v = (String) vv.get(j);
+                    a.setObject(j, col.convertStringTo(v));
+                }
+                data.add(a);
+            }
+
+            df = new DataFrame(data, index, cols);
+        }
+        if (names != null) {
+            df.setColumns(names);
+        }
+
+        return df;
+    }
+
+    /**
      * Save as CSV file
      *
      * @param fileName File name
@@ -2015,7 +2291,7 @@ public class DataFrame implements Iterable {
         String idxFormat = this.index.format;
         if (index) {
             str = this.index.getName();
-            if (dateFormat != null && (this.index instanceof DateTimeIndex)){
+            if (dateFormat != null && (this.index instanceof DateTimeIndex)) {
                 idxFormat = dateFormat;
             }
         }
