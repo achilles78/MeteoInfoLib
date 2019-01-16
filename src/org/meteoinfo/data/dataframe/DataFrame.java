@@ -2011,7 +2011,7 @@ public class DataFrame implements Iterable {
      * @param names Column names
      * @param header Row number to use as the column names
      * @param skipFooter Number of lines at bottom of file to skip
-     * @param usecolsin Filter columns by column indices
+     * @param usecolsin Filter columns by column names or indices
      * @return DataFrame object
      * @throws java.io.FileNotFoundException
      */

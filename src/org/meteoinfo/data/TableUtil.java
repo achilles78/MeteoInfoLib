@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -167,6 +168,191 @@ public class TableUtil {
                     if (cn < colNum) {
                         tableData.setValue(rn, cn, dataArray[i]);
                         cn++;
+                    } else {
+                        break;
+                    }
+                }
+                if (cn < colNum) {
+                    for (int i = cn; i < colNum; i++) {
+                        tableData.setValue(rn, i, "");
+                    }
+                }
+
+                rn += 1;
+                line = sr.readLine();
+            }
+
+            sr.close();
+        }
+
+        if (hasTimeCol) {
+            TimeTableData tTableData = new TimeTableData(tableData, tcolName);
+            return tTableData;
+        } else {
+            return tableData;
+        }
+    }
+    
+    /**
+     * Read data table from ASCII file
+     *
+     * @param fileName File name
+     * @param delimiter Delimiter
+     * @param headerLines Number of lines to skip at begining of the file
+     * @param formatSpec Format specifiers string
+     * @param encoding Fle encoding
+     * @param readVarNames Read variable names or not
+     * @param usecolsin Filter columns by column names or indices
+     * @return TableData object
+     * @throws java.io.FileNotFoundException
+     */
+    public static TableData readASCIIFile(String fileName, String delimiter, int headerLines, String formatSpec, String encoding,
+        boolean readVarNames, List<Object> usecolsin) throws FileNotFoundException, IOException, Exception {
+        TableData tableData = new TableData();
+
+        BufferedReader sr = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), encoding));
+        if (headerLines > 0) {
+            for (int i = 0; i < headerLines; i++) {
+                sr.readLine();
+            }
+        }
+
+        String title = sr.readLine().trim();
+        if (encoding.equals("UTF8")) {
+            if (title.startsWith("\uFEFF")) {
+                title = title.substring(1);
+            }
+        }
+        String[] titleArray1 = GlobalUtil.split(title, delimiter);
+        List<Integer> usecols = new ArrayList<>();
+        if (usecolsin.get(0) instanceof Integer) {
+            for (Object o : usecolsin) {
+                usecols.add((Integer) o);
+            }
+        } else {
+            int idx;
+            List<String> titleArray2 = new ArrayList(Arrays.asList(titleArray1));
+            for (Object o : usecolsin) {
+                idx = titleArray2.indexOf((String) o);
+                if (idx >= 0) {
+                    usecols.add(idx);
+                }
+            }
+        }
+        List<String> titleArray = new ArrayList<>();
+        for (int i = 0; i < titleArray1.length; i++) {
+            if (usecols.contains(i)) {
+                titleArray.add(titleArray1[i]);
+            }
+        }
+        
+        int colNum = titleArray.size();
+        if (headerLines == -1 || !readVarNames) {
+            for (int i = 0; i < colNum; i++) {
+                titleArray.set(i, "Col_" + String.valueOf(i));
+            }
+        }
+        boolean hasTimeCol = false;
+        String tcolName = null;
+        if (titleArray.size() < 2) {
+            System.out.println("File Format Error!");
+            sr.close();
+        } else {
+            //Get fields
+            String[] colFormats;
+            if (formatSpec == null) {
+                colFormats = new String[colNum];
+                for (int i = 0; i < colNum; i++) {
+                    colFormats[i] = "C";
+                }
+            } else {
+                colFormats = formatSpec.split("%");
+            }
+
+            int idx = 0;
+            boolean isBreak = false;
+            for (String colFormat : colFormats) {
+                if (colFormat.isEmpty()) {
+                    continue;
+                }
+
+                int num = 1;
+                if (colFormat.length() > 1 && !colFormat.substring(0, 1).equals("{")) {
+                    int index = colFormat.indexOf("{");
+                    if (index < 0) {
+                        index = colFormat.length() - 1;
+                    }
+                    num = Integer.parseInt(colFormat.substring(0, index));
+                    colFormat = colFormat.substring(index);
+                }
+                for (int i = 0; i < num; i++) {
+                    String colName = titleArray.get(idx).trim();
+                    if (colFormat.equals("C") || colFormat.equals("s")) //String
+                    {
+                        tableData.addColumn(colName, DataTypes.String);
+                    } else if (colFormat.equals("i")) //Integer
+                    {
+                        tableData.addColumn(colName, DataTypes.Integer);
+                    } else if (colFormat.equals("f")) //Float
+                    {
+                        tableData.addColumn(colName, DataTypes.Float);
+                    } else if (colFormat.equals("d")) //Double
+                    {
+                        tableData.addColumn(colName, DataTypes.Double);
+                    } else if (colFormat.equals("B")) //Boolean
+                    {
+                        tableData.addColumn(colName, DataTypes.Boolean);
+                    } else if (colFormat.substring(0, 1).equals("{")) {    //Date
+                        int eidx = colFormat.indexOf("}");
+                        String formatStr = colFormat.substring(1, eidx);
+                        tableData.addColumn(new DataColumn(colName, DataTypes.Date, formatStr));
+                        hasTimeCol = true;
+                        if (tcolName == null) {
+                            tcolName = titleArray.get(idx);
+                        }
+                    } else {
+                        tableData.addColumn(colName, DataTypes.String);
+                    }
+                    idx += 1;
+                    if (idx == colNum) {
+                        isBreak = true;
+                        break;
+                    }
+                }
+                if (isBreak) {
+                    break;
+                }
+            }
+
+            if (idx < colNum) {
+                for (int i = idx; i < colNum; i++) {
+                    tableData.addColumn(titleArray.get(i), DataTypes.String);
+                }
+            }
+
+            String[] dataArray;
+            int rn = 0;
+            String line;
+            if (headerLines == -1 || !readVarNames) {
+                line = title;
+            } else {
+                line = sr.readLine();
+            }
+            while (line != null) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    line = sr.readLine();
+                    continue;
+                }
+                dataArray = GlobalUtil.split(line, delimiter);
+                tableData.addRow();
+                int cn = 0;
+                for (int i = 0; i < dataArray.length; i++) {
+                    if (cn < colNum) {
+                        if (usecols.contains(i)) {
+                            tableData.setValue(rn, cn, dataArray[i]);
+                            cn++;
+                        }
                     } else {
                         break;
                     }
