@@ -55,6 +55,7 @@ import org.python.core.PyComplex;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
+import ucar.ma2.Index2D;
 import ucar.ma2.IndexIterator;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
@@ -699,7 +700,7 @@ public class ArrayUtil {
 
         return a;
     }
-    
+
     /**
      * Return a new array of given shape and type, filled with fill value.
      *
@@ -717,8 +718,8 @@ public class ArrayUtil {
             dtype = ArrayMath.getDataType(fillValue);
         }
         Array a = Array.factory(dtype, ashape);
-        
-        for (int i = 0; i < a.getSize(); i++){
+
+        for (int i = 0; i < a.getSize(); i++) {
             a.setObject(i, fillValue);
         }
 
@@ -1144,6 +1145,7 @@ public class ArrayUtil {
 
     /**
      * Merge data type to one data type
+     *
      * @param dt1 Data type 1
      * @param dt2 Data type 2
      * @return Merged data type
@@ -1151,7 +1153,7 @@ public class ArrayUtil {
     public static DataType mergeDataType(DataType dt1, DataType dt2) {
         if (dt1 == DataType.OBJECT || dt2 == DataType.OBJECT) {
             return DataType.OBJECT;
-        } else if (dt1 == DataType.STRING || dt2 == DataType.STRING){
+        } else if (dt1 == DataType.STRING || dt2 == DataType.STRING) {
             return DataType.STRING;
         } else if (dt1 == DataType.DOUBLE || dt2 == DataType.DOUBLE) {
             return DataType.DOUBLE;
@@ -1199,8 +1201,9 @@ public class ArrayUtil {
             }
             data = ii.getObjectNext();
             dstr = data.toString();
-            if (a.getDataType() == DataType.BOOLEAN)
+            if (a.getDataType() == DataType.BOOLEAN) {
                 dstr = GlobalUtil.capitalize(dstr);
+            }
             sbuff.append(dstr);
             i += 1;
             if (i == len) {
@@ -1746,7 +1749,7 @@ public class ArrayUtil {
         Class cType = jArray.getClass().getComponentType();
 
         if (!cType.isArray()) {
-            if (cType == long.class){
+            if (cType == long.class) {
                 copyTo1DJavaArray_Long(aaIter, jArray);
             } else {
                 copyTo1DJavaArray(aaIter, jArray);
@@ -1968,7 +1971,7 @@ public class ArrayUtil {
 
         return new Array[]{rx, ry};
     }
-    
+
     /**
      * Mesh grid
      *
@@ -1984,9 +1987,9 @@ public class ArrayUtil {
             x = xs[i];
             shape[n - i - 1] = (int) x.getSize();
         }
-        
+
         Array[] rs = new Array[n];
-        Array r;        
+        Array r;
         int idx;
         for (int s = 0; s < n; s++) {
             x = xs[s];
@@ -1999,7 +2002,7 @@ public class ArrayUtil {
             }
             rs[s] = r;
         }
-        
+
         return rs;
     }
 
@@ -2158,6 +2161,107 @@ public class ArrayUtil {
                         r.setDouble(i * colNum + j, a.getDouble(i * colNum + j) + s / 4 * (a.getDouble((i + 1) * colNum + j) + a.getDouble((i - 1) * colNum + j) + a.getDouble(i * colNum + j + 1)
                                 + a.getDouble(i * colNum + j - 1) - 4 * a.getDouble(i * colNum + j)));
                     }
+                }
+            }
+        }
+
+        return r;
+    }
+
+    /**
+     * Smooth with 5 points
+     *
+     * @param a Array
+     * @return Result array
+     */
+    public static Array smooth5(Array a) {
+        int[] shape = a.getShape();
+        int colNum = shape[1];
+        int rowNum = shape[0];
+        Array r = Array.factory(a.getDataType(), shape);
+        Index2D index = new Index2D(shape);
+        double v, w;
+        double sum, wsum;
+        for (int i = 0; i < rowNum; i++) {
+            for (int j = 0; j < colNum; j++) {
+                sum = 0;
+                wsum = 0;
+                for (int ii = i - 1; ii <= i + 1; ii++) {
+                    if (ii < 0 || ii >= rowNum)
+                        continue;
+                    for (int jj = j - 1; jj <= j + 1; jj++) {
+                        if (jj < 0 || jj >= colNum)
+                            continue;
+                        if ((ii == i - 1 || ii == i + 1) && jj != j) {
+                            continue;
+                        }
+                        v = a.getDouble(index.set(ii, jj));
+                        if (!Double.isNaN(v)) {
+                            if (ii == i && jj == j)
+                                w = 1;
+                            else
+                                w = 0.5;
+                            sum += v * w;
+                            wsum += w;
+                        }                        
+                    }
+                }
+                index.set(i, j);
+                if (wsum > 0) {
+                    r.setDouble(index, sum / wsum);
+                } else {
+                    r.setDouble(index, Double.NaN);
+                }
+            }
+        }
+
+        return r;
+    }
+    
+    /**
+     * Smooth with 9 points
+     *
+     * @param a Array
+     * @return Result array
+     */
+    public static Array smooth9(Array a) {
+        int[] shape = a.getShape();
+        int colNum = shape[1];
+        int rowNum = shape[0];
+        Array r = Array.factory(a.getDataType(), shape);
+        Index2D index = new Index2D(shape);
+        double v, w;
+        double sum, wsum;
+        for (int i = 0; i < rowNum; i++) {
+            for (int j = 0; j < colNum; j++) {
+                sum = 0;
+                wsum = 0;
+                for (int ii = i - 1; ii <= i + 1; ii++) {
+                    if (ii < 0 || ii >= rowNum)
+                        continue;
+                    for (int jj = j - 1; jj <= j + 1; jj++) {
+                        if (jj < 0 || jj >= colNum)
+                            continue;
+                        v = a.getDouble(index.set(ii, jj));
+                        if (!Double.isNaN(v)) {
+                            if (ii == i && jj == j)
+                                w = 1;
+                            else {
+                                if (ii == i || jj == j)
+                                    w = 0.5;
+                                else
+                                    w = 0.3;
+                            }
+                            sum += v * w;
+                            wsum += w;
+                        }
+                    }
+                }
+                index.set(i, j);
+                if (wsum > 0) {
+                    r.setDouble(index, sum / wsum);
+                } else {
+                    r.setDouble(index, Double.NaN);
                 }
             }
         }
@@ -3271,7 +3375,7 @@ public class ArrayUtil {
         //Return
         return r;
     }
-    
+
     /**
      * Cressman analysis
      *
@@ -3475,7 +3579,8 @@ public class ArrayUtil {
     }
 
     /**
-     * Interpolates from a rectilinear grid to another rectilinear grid using bilinear interpolation.
+     * Interpolates from a rectilinear grid to another rectilinear grid using
+     * bilinear interpolation.
      *
      * @param a The sample array
      * @param X X coordinate of the sample array
@@ -3485,8 +3590,8 @@ public class ArrayUtil {
      * @return Resampled array
      */
     public static Array linint2(Array a, Array X, Array Y, Array newX, Array newY) {
-        int xn = (int)newX.getSize();
-        int yn = (int)newY.getSize();
+        int xn = (int) newX.getSize();
+        int yn = (int) newY.getSize();
         int[] shape = a.getShape();
         int n = shape.length;
         shape[n - 1] = xn;
@@ -3497,7 +3602,7 @@ public class ArrayUtil {
         Index index = r.getIndex();
         int[] counter;
         int yi, xi;
-        for (int k = 0; k < r.getSize(); k++){
+        for (int k = 0; k < r.getSize(); k++) {
             counter = index.getCurrentCounter();
             yi = counter[n - 2];
             xi = counter[n - 1];
@@ -3676,7 +3781,7 @@ public class ArrayUtil {
             return v;
         }
     }
-    
+
     /**
      * Multidimensional interpolation on regular grids.
      *
@@ -3685,7 +3790,7 @@ public class ArrayUtil {
      * @param xi The coordinates to sample the gridded data at
      * @return Interpolation value
      */
-    public static double interpn_s(List<Array> points, Array values, Array xi) {        
+    public static double interpn_s(List<Array> points, Array values, Array xi) {
         Object[] r = findIndices(points, xi);
         boolean outBounds = (boolean) r[2];
         if (outBounds) {
@@ -3710,7 +3815,7 @@ public class ArrayUtil {
             return v;
         }
     }
-    
+
     /**
      * Multidimensional interpolation on regular grids.
      *
@@ -3719,17 +3824,17 @@ public class ArrayUtil {
      * @param xi The coordinates to sample the gridded data at - 2D
      * @return Interpolation value
      */
-    public static Array interpn(List<Array> points, Array values, List<Array> xi) { 
+    public static Array interpn(List<Array> points, Array values, List<Array> xi) {
         int n = xi.size();
         Array r = Array.factory(DataType.DOUBLE, new int[]{n});
         for (int i = 0; i < n; i++) {
             Array x = xi.get(i);
             r.setDouble(i, interpn_s(points, values, x));
-        }      
-        
+        }
+
         return r;
     }
-    
+
     /**
      * Multidimensional interpolation on regular grids.
      *
@@ -3743,15 +3848,15 @@ public class ArrayUtil {
         if (xi.getRank() == 1) {
             return interpn_s(points, values, xi);
         }
-        
+
         int n = xi.getShape()[0];
         int m = xi.getShape()[1];
         Array r = Array.factory(DataType.DOUBLE, new int[]{n});
         for (int i = 0; i < n; i++) {
             Array x = xi.section(new int[]{i, 0}, new int[]{1, m});
             r.setDouble(i, interpn_s(points, values, x));
-        }      
-        
+        }
+
         return r;
     }
 
@@ -3800,7 +3905,7 @@ public class ArrayUtil {
 
         return new Object[]{indices, distances, outBounds};
     }
-    
+
     /**
      * Find indices
      *
@@ -3874,7 +3979,7 @@ public class ArrayUtil {
 
         return idx;
     }
-    
+
     /**
      * Search sorted list index
      *
@@ -3884,7 +3989,7 @@ public class ArrayUtil {
      */
     public static int searchSorted(Array a, double v) {
         int idx = -1;
-        int n = (int)a.getSize();
+        int n = (int) a.getSize();
         if (a.getDouble(1) > a.getDouble(0)) {
             if (v < a.getDouble(0)) {
                 return idx;
@@ -3919,7 +4024,7 @@ public class ArrayUtil {
 
         return idx;
     }
-    
+
 //    /**
 //     * Search sorted list index
 //     *
@@ -3938,7 +4043,6 @@ public class ArrayUtil {
 //        }
 //        return idx;
 //    }
-
     // </editor-fold>
     // <editor-fold desc="Geocomputation">
     /**
@@ -4162,19 +4266,20 @@ public class ArrayUtil {
 
     /**
      * Get value index in a dimension array
+     *
      * @param dim Dimension array
      * @param v The value
      * @return value index
      */
-    public static int getDimIndex(Array dim, double v){
-        int n = (int)dim.getSize();
-        if (v < dim.getDouble(0) || v > dim.getDouble(n - 1)){
+    public static int getDimIndex(Array dim, double v) {
+        int n = (int) dim.getSize();
+        if (v < dim.getDouble(0) || v > dim.getDouble(n - 1)) {
             return -1;
         }
 
         int idx = n - 1;
-        for (int i = 1; i < n; i++){
-            if (v < dim.getDouble(i)){
+        for (int i = 1; i < n; i++) {
+            if (v < dim.getDouble(i)) {
                 idx = i - 1;
                 break;
             }
@@ -4182,34 +4287,39 @@ public class ArrayUtil {
         return idx;
     }
 
-    private static int[] gridIndex(Array xdim, Array ydim, double x, double y){
-        int xn = (int)xdim.getSize();
-        int yn = (int)ydim.getSize();
+    private static int[] gridIndex(Array xdim, Array ydim, double x, double y) {
+        int xn = (int) xdim.getSize();
+        int yn = (int) ydim.getSize();
         int xIdx = getDimIndex(xdim, x);
-        if (xIdx < 0)
+        if (xIdx < 0) {
             return null;
+        }
 
         int yIdx = getDimIndex(ydim, y);
-        if (yIdx < 0)
+        if (yIdx < 0) {
             return null;
+        }
 
-        if (xIdx == xn - 1)
+        if (xIdx == xn - 1) {
             xIdx = xn - 2;
-        if (yIdx == yn - 1)
+        }
+        if (yIdx == yn - 1) {
             yIdx = yn - 2;
+        }
         int i1 = yIdx;
         int j1 = xIdx;
         int i2 = i1 + 1;
         int j2 = j1 + 1;
 
-        return new int[]{i1,j1,i2,j2};
+        return new int[]{i1, j1, i2, j2};
     }
 
-    private static double bilinear(Array data, Index dindex, Array xdim, Array ydim, double x, double y){
+    private static double bilinear(Array data, Index dindex, Array xdim, Array ydim, double x, double y) {
         double iValue = Double.NaN;
         int[] xyIdx = gridIndex(xdim, ydim, x, y);
-        if (xyIdx == null)
+        if (xyIdx == null) {
             return iValue;
+        }
 
         int i1 = xyIdx[0];
         int j1 = xyIdx[1];
@@ -4217,7 +4327,7 @@ public class ArrayUtil {
         int j2 = xyIdx[3];
         Index index = Index.factory(data.getShape());
         int n = index.getRank();
-        for (int i = 0; i < n - 2; i++){
+        for (int i = 0; i < n - 2; i++) {
             index.setDim(i, dindex.getCurrentCounter()[i]);
         }
         index.setDim(n - 2, i1);
