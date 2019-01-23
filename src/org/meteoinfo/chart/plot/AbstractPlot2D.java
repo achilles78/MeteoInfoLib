@@ -32,9 +32,6 @@ import static org.meteoinfo.chart.plot.Plot.MINIMUM_WIDTH_TO_DRAW;
 import org.meteoinfo.drawing.Draw;
 import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.PointF;
-import org.meteoinfo.layer.VectorLayer;
-import org.meteoinfo.shape.GraphicCollection;
-import org.meteoinfo.shape.WindArrow;
 
 /**
  *

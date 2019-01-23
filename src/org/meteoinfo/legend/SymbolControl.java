@@ -435,7 +435,7 @@ public class SymbolControl extends JPanel {
                 break;
             case Polyline:
                 PolylineBreak aPLB = new PolylineBreak();
-                aPLB.setSize(2);
+                aPLB.setWidth(2);
                 aPLB.setColor(Color.black);
                 for (int i = 0; i < _symbolNumber; i++) {
                     int row = i / _colNumber;

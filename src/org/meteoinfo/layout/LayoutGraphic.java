@@ -419,10 +419,10 @@ public class LayoutGraphic extends LayoutElement {
                 switch (_graphic.getShape().getShapeType()) {
                     case Polyline:
                         PolylineBreak aPLB = (PolylineBreak) ((PolylineBreak) _graphic.getLegend()).clone();
-                        float size = aPLB.getSize();
-                        aPLB.setSize(size * zoom);
+                        float size = aPLB.getWidth();
+                        aPLB.setWidth(size * zoom);
                         Draw.drawPolyline(points, (PolylineBreak) _graphic.getLegend(), g);
-                        aPLB.setSize(size);
+                        aPLB.setWidth(size);
                         break;
                     case Polygon:
                     case Rectangle:
@@ -441,10 +441,10 @@ public class LayoutGraphic extends LayoutElement {
                         break;
                     case CurveLine:
                         aPLB = (PolylineBreak) ((PolylineBreak) _graphic.getLegend()).clone();
-                        size = aPLB.getSize();
-                        aPLB.setSize(size * zoom);
+                        size = aPLB.getWidth();
+                        aPLB.setWidth(size * zoom);
                         Draw.drawCurveLine(points, (PolylineBreak) _graphic.getLegend(), g);
-                        aPLB.setSize(size);
+                        aPLB.setWidth(size);
                         break;
                     case CurvePolygon:
                         aPGB = (PolygonBreak) ((PolygonBreak) _graphic.getLegend()).clone();

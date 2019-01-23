@@ -586,7 +586,7 @@ public class LegendView extends JPanel {
                         break;
                     case PolylineBreak:
                         PolylineBreak aPLB = (PolylineBreak)_legendScheme.getLegendBreaks().get(rowIdx);
-                        aPLB.setSize(aSize);
+                        aPLB.setWidth(aSize);
                         //_legendScheme.LegendBreaks[rowIdx] = aPLB;
                         break;
                     case PolygonBreak:
@@ -1081,7 +1081,7 @@ public class LegendView extends JPanel {
                 break;
             case PolylineBreak:
                 PolylineBreak aPLB = (PolylineBreak) aCB;
-                aSize = aPLB.getSize();
+                aSize = aPLB.getWidth();
                 width = rect.width / 3 * 2;
                 height = rect.height / 3 * 2;
                 Draw.drawPolylineSymbol(aP, width, height, aPLB, g);

@@ -15,6 +15,7 @@ import org.meteoinfo.drawing.Draw;
 import org.meteoinfo.global.DataConvert;
 import org.meteoinfo.global.PointF;
 import org.meteoinfo.layer.VectorLayer;
+import org.meteoinfo.legend.ArrowBreak;
 import org.meteoinfo.shape.GraphicCollection;
 import org.meteoinfo.shape.WindArrow;
 
@@ -26,8 +27,9 @@ public class ChartWindArrow {
 
     // <editor-fold desc="Variables">
     private final WindArrow windArrow;
+    private ArrowBreak arrowBreak;
     private Font font;
-    private Color color;
+    //private Color color;
     private Color labelColor;
     private float x;
     private float y;
@@ -49,8 +51,9 @@ public class ChartWindArrow {
         this.windArrow = new WindArrow();
         this.windArrow.angle = 270;
         this.windArrow.length = 20;
+        this.arrowBreak = new ArrowBreak();
         this.font = new Font("Arial", Font.PLAIN, 12);
-        this.color = Color.black;
+        //this.color = Color.black;
         this.labelColor = Color.black;
         this.labelSep = 5;
         this.background = Color.white;
@@ -69,6 +72,22 @@ public class ChartWindArrow {
      */
     public WindArrow getWindArrow() {
         return this.windArrow;
+    }
+    
+    /**
+     * Get arrow break
+     * @return Arrow break
+     */
+    public ArrowBreak getArrowBreak() {
+        return this.arrowBreak;
+    }
+    
+    /**
+     * Set arrow break
+     * @param value Arrow break
+     */
+    public void setArrowBreak(ArrowBreak value) {
+        this.arrowBreak = value;
     }
 
     /**
@@ -143,24 +162,6 @@ public class ChartWindArrow {
      */
     public void setFont(Font value) {
         font = value;
-    }
-
-    /**
-     * Get title color
-     *
-     * @return Title color
-     */
-    public Color getColor() {
-        return color;
-    }
-
-    /**
-     * Set title color
-     *
-     * @param value Title color
-     */
-    public void setColor(Color value) {
-        this.color = value;
     }
 
     /**
@@ -379,7 +380,8 @@ public class ChartWindArrow {
                 g.draw(rect);
             }
         }
-        Draw.drawArraw(this.color, new PointF(x, y), this.windArrow, g, zoom);
+        //Draw.drawArraw(this.color, new PointF(x, y), this.windArrow, g, zoom);
+        Draw.drawArraw(new PointF(x, y), windArrow, arrowBreak, g, zoom);
         g.setColor(this.labelColor);
         Draw.drawString(g, this.label, x, y + dim.height + this.labelSep);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, rendering);

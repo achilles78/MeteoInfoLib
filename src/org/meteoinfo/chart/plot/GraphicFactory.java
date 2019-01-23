@@ -1729,7 +1729,7 @@ public class GraphicFactory {
         BarBreak bb = bbs.get(0);
         PolylineBreak ebreak = new PolylineBreak();
         ebreak.setColor(bb.getErrorColor());
-        ebreak.setSize(bb.getErrorSize());
+        ebreak.setWidth(bb.getErrorSize());
         double width = widths.getDouble(0);
         if (autoWidth && xdata.getSize() > 1) {
             width = (xdata.getDouble(1) - xdata.getDouble(0)) * width;
@@ -1837,7 +1837,7 @@ public class GraphicFactory {
         BarBreak bb = bbs.get(0);
         PolylineBreak ebreak = new PolylineBreak();
         ebreak.setColor(bb.getErrorColor());
-        ebreak.setSize(bb.getErrorSize());
+        ebreak.setWidth(bb.getErrorSize());
         double height = heights.getDouble(0);
         if (autoHeight && ydata.getSize() > 1) {
             height = (ydata.getDouble(1) - ydata.getDouble(0)) * height;
@@ -1945,7 +1945,7 @@ public class GraphicFactory {
         BarBreak bb = bbs.get(0);
         PolylineBreak ebreak = new PolylineBreak();
         ebreak.setColor(bb.getErrorColor());
-        ebreak.setSize(bb.getErrorSize());
+        ebreak.setWidth(bb.getErrorSize());
         double width = widths.getDouble(0);
         if (autoWidth && xdata.getSize() > 1) {
             width = (xdata.getDouble(1) - xdata.getDouble(0)) * width;

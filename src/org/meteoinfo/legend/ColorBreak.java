@@ -29,14 +29,14 @@ import org.w3c.dom.Element;
 public class ColorBreak {
     // <editor-fold desc="Variables">
 
-    protected BreakTypes _breakType;
-    private Object _startValue;
-    private Object _endValue;
-    private Color _color;
-    private String _caption;
-    private boolean _isNoData;
-    private boolean _drawShape;
-    private String tag;
+    protected BreakTypes breakType;
+    protected Object startValue;
+    protected Object endValue;
+    protected Color color;
+    protected String caption;
+    protected boolean isNoData;
+    protected boolean drawShape;
+    protected String tag;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 
@@ -44,13 +44,13 @@ public class ColorBreak {
      * Constructor
      */
     public ColorBreak() {
-        _breakType = BreakTypes.ColorBreak;
-        _color = Color.red;
-        _isNoData = false;
-        _drawShape = true;
-        _startValue = 0;
-        _endValue = 0;
-        _caption = "";
+        breakType = BreakTypes.ColorBreak;
+        color = Color.BLACK;
+        isNoData = false;
+        drawShape = true;
+        startValue = 0;
+        endValue = 0;
+        caption = "";
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
@@ -61,16 +61,16 @@ public class ColorBreak {
      * @return Break type
      */
     public BreakTypes getBreakType() {
-        return _breakType;
+        return breakType;
     }
 
     /**
      * Set break type
      *
-     * @param breakType Break type
+     * @param value Break type
      */
-    public void setBreakType(BreakTypes breakType) {
-        _breakType = breakType;
+    public void setBreakType(BreakTypes value) {
+        breakType = value;
     }
 
     /**
@@ -79,16 +79,16 @@ public class ColorBreak {
      * @return Start value
      */
     public Object getStartValue() {
-        return _startValue;
+        return startValue;
     }
 
     /**
      * Set start value
      *
-     * @param startValue  Start value
+     * @param value  Start value
      */
-    public void setStartValue(Object startValue) {
-        _startValue = startValue;
+    public void setStartValue(Object value) {
+        startValue = value;
     }
 
     /**
@@ -97,16 +97,16 @@ public class ColorBreak {
      * @return End value
      */
     public Object getEndValue() {
-        return _endValue;
+        return endValue;
     }
 
     /**
      * Set end value
      *
-     * @param endValue End Value
+     * @param value End Value
      */
-    public void setEndValue(Object endValue) {
-        _endValue = endValue;
+    public void setEndValue(Object value) {
+        endValue = value;
     }
 
     /**
@@ -115,7 +115,7 @@ public class ColorBreak {
      * @return Color
      */
     public Color getColor() {
-        return _color;
+        return color;
     }
 
     /**
@@ -124,7 +124,7 @@ public class ColorBreak {
      * @param c Color
      */
     public void setColor(Color c) {
-        _color = c;
+        color = c;
     }
 
     /**
@@ -133,16 +133,16 @@ public class ColorBreak {
      * @return Caption
      */
     public String getCaption() {
-        return _caption;
+        return caption;
     }
 
     /**
      * Set caption
      *
-     * @param caption Caption
+     * @param value Caption
      */
-    public void setCaption(String caption) {
-        _caption = caption;
+    public void setCaption(String value) {
+        caption = value;
     }
 
     /**
@@ -151,7 +151,7 @@ public class ColorBreak {
      * @return boolean
      */
     public boolean isNoData() {
-        return _isNoData;
+        return isNoData;
     }
 
     /**
@@ -160,7 +160,7 @@ public class ColorBreak {
      * @param isTrue boolean
      */
     public void setNoData(boolean isTrue) {
-        _isNoData = isTrue;
+        isNoData = isTrue;
     }
 
     /**
@@ -169,7 +169,7 @@ public class ColorBreak {
      * @return boolean
      */
     public boolean isDrawShape() {
-        return _drawShape;
+        return drawShape;
     }
 
     /**
@@ -178,7 +178,7 @@ public class ColorBreak {
      * @param isTrue boolean
      */
     public void setDrawShape(boolean isTrue) {
-        _drawShape = isTrue;
+        drawShape = isTrue;
     }
     
     /**
@@ -219,12 +219,12 @@ public class ColorBreak {
     public Object clone() {
         //return MemberwiseClone();
         ColorBreak aCB = new ColorBreak();
-        aCB.setCaption(_caption);
-        aCB.setColor(_color);
-        aCB.setDrawShape(_drawShape);
-        aCB.setEndValue(_endValue);
-        aCB.setNoData(_isNoData);
-        aCB.setStartValue(_startValue);
+        aCB.setCaption(caption);
+        aCB.setColor(color);
+        aCB.setDrawShape(drawShape);
+        aCB.setEndValue(endValue);
+        aCB.setNoData(isNoData);
+        aCB.setStartValue(startValue);
         aCB.setTag(tag);
 
         return aCB;
@@ -238,25 +238,25 @@ public class ColorBreak {
      */
     public void exportToXML(Document doc, Element parent) {
         Element brk = doc.createElement("Break");
-        Attr caption = doc.createAttribute("Caption");
-        Attr startValue = doc.createAttribute("StartValue");
-        Attr endValue = doc.createAttribute("EndValue");
-        Attr color = doc.createAttribute("Color");
-        Attr isNoData = doc.createAttribute("IsNoData");
+        Attr captionAttr = doc.createAttribute("Caption");
+        Attr startValueAttr = doc.createAttribute("StartValue");
+        Attr endValueAttr = doc.createAttribute("EndValue");
+        Attr colorAttr = doc.createAttribute("Color");
+        Attr isNoDataAttr = doc.createAttribute("IsNoData");
         Attr tagAttr = doc.createAttribute("Tag");
 
-        caption.setValue(_caption);
-        startValue.setValue(String.valueOf(_startValue));
-        endValue.setValue(String.valueOf(_endValue));
-        color.setValue(ColorUtil.toHexEncoding(_color));
-        isNoData.setValue(String.valueOf(_isNoData));
+        captionAttr.setValue(caption);
+        startValueAttr.setValue(String.valueOf(startValue));
+        endValueAttr.setValue(String.valueOf(endValue));
+        colorAttr.setValue(ColorUtil.toHexEncoding(color));
+        isNoDataAttr.setValue(String.valueOf(isNoData));
         tagAttr.setValue(tag);
 
-        brk.setAttributeNode(caption);
-        brk.setAttributeNode(startValue);
-        brk.setAttributeNode(endValue);
-        brk.setAttributeNode(color);
-        brk.setAttributeNode(isNoData);
+        brk.setAttributeNode(captionAttr);
+        brk.setAttributeNode(startValueAttr);
+        brk.setAttributeNode(endValueAttr);
+        brk.setAttributeNode(colorAttr);
+        brk.setAttributeNode(isNoDataAttr);
         brk.setAttributeNode(tagAttr);
 
         parent.appendChild(brk);
@@ -268,10 +268,10 @@ public class ColorBreak {
      * @return value string
      */
     public String getValueString() {
-        if (String.valueOf(_startValue) == null ? String.valueOf(_endValue) == null : String.valueOf(_startValue).equals(String.valueOf(_endValue))) {
-            return String.valueOf(_startValue);
+        if (String.valueOf(startValue) == null ? String.valueOf(endValue) == null : String.valueOf(startValue).equals(String.valueOf(endValue))) {
+            return String.valueOf(startValue);
         } else {
-            return String.valueOf(_startValue) + " - " + String.valueOf(_endValue);
+            return String.valueOf(startValue) + " - " + String.valueOf(endValue);
         }
     }
     // </editor-fold>

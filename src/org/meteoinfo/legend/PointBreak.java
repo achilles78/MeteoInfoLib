@@ -27,17 +27,17 @@ import org.w3c.dom.Element;
 public class PointBreak extends ColorBreak {
     // <editor-fold desc="Variables">
 
-    private MarkerType _markerType;
-    private Color _outlineColor;
-    private float outlineSize;
-    private float _size;
-    private PointStyle _style;
-    private boolean _drawOutline;
-    private boolean _drawFill;
-    private String _fontName;
-    private int _charIndex;
-    private String _imagePath;
-    private float _angle;
+    protected MarkerType markerType;
+    protected Color outlineColor;
+    protected float outlineSize;
+    protected float size;
+    protected PointStyle style;
+    protected boolean drawOutline;
+    protected boolean drawFill;
+    protected String fontName;
+    protected int charIndex;
+    protected String imagePath;
+    protected float angle;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 
@@ -46,17 +46,17 @@ public class PointBreak extends ColorBreak {
      */
     public PointBreak() {
         super();
-        this._breakType = BreakTypes.PointBreak;
-        _markerType = MarkerType.Simple;
-        _fontName = "Arial";
-        _charIndex = 0;
-        _outlineColor = Color.black;
+        this.breakType = BreakTypes.PointBreak;
+        markerType = MarkerType.Simple;
+        fontName = "Arial";
+        charIndex = 0;
+        outlineColor = Color.black;
         outlineSize = 1.0f;
-        _size = 6.0f;
-        _style = PointStyle.Circle;
-        _drawOutline = true;
-        _drawFill = true;
-        _angle = 0;
+        size = 6.0f;
+        style = PointStyle.Circle;
+        drawOutline = true;
+        drawFill = true;
+        angle = 0;
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
@@ -67,16 +67,16 @@ public class PointBreak extends ColorBreak {
      * @return Marker type
      */
     public MarkerType getMarkerType() {
-        return _markerType;
+        return markerType;
     }
 
     /**
      * Set marker type
      *
-     * @param markerType Marker type
+     * @param value Marker type
      */
-    public void setMarkerType(MarkerType markerType) {
-        _markerType = markerType;
+    public void setMarkerType(MarkerType value) {
+        markerType = value;
     }
 
     /**
@@ -85,7 +85,7 @@ public class PointBreak extends ColorBreak {
      * @return Font name string
      */
     public String getFontName() {
-        return _fontName;
+        return fontName;
     }
 
     /**
@@ -94,7 +94,7 @@ public class PointBreak extends ColorBreak {
      * @param name Font name string
      */
     public void setFontName(String name) {
-        _fontName = name;
+        fontName = name;
     }
 
     /**
@@ -103,7 +103,7 @@ public class PointBreak extends ColorBreak {
      * @return Character index
      */
     public int getCharIndex() {
-        return _charIndex;
+        return charIndex;
     }
 
     /**
@@ -112,7 +112,7 @@ public class PointBreak extends ColorBreak {
      * @param idx Index
      */
     public void setCharIndex(int idx) {
-        _charIndex = idx;
+        charIndex = idx;
     }
 
     /**
@@ -121,7 +121,7 @@ public class PointBreak extends ColorBreak {
      * @return Image file path
      */
     public String getImagePath() {
-        return _imagePath;
+        return imagePath;
     }
 
     /**
@@ -130,7 +130,7 @@ public class PointBreak extends ColorBreak {
      * @param path Image file path
      */
     public void setImagePath(String path) {
-        _imagePath = path;
+        imagePath = path;
     }
 
     /**
@@ -139,7 +139,7 @@ public class PointBreak extends ColorBreak {
      * @return Outline color
      */
     public Color getOutlineColor() {
-        return _outlineColor;
+        return outlineColor;
     }
 
     /**
@@ -148,7 +148,7 @@ public class PointBreak extends ColorBreak {
      * @param c Color
      */
     public void setOutlineColor(Color c) {
-        _outlineColor = c;
+        outlineColor = c;
     }
     
     /**
@@ -173,16 +173,16 @@ public class PointBreak extends ColorBreak {
      * @return Size
      */
     public float getSize() {
-        return _size;
+        return size;
     }
 
     /**
      * Set size
      *
-     * @param size Size
+     * @param value Size
      */
-    public void setSize(float size) {
-        _size = size;
+    public void setSize(float value) {
+        size = value;
     }
 
     /**
@@ -191,17 +191,17 @@ public class PointBreak extends ColorBreak {
      * @return Point style
      */
     public PointStyle getStyle() {
-        return _style;
+        return style;
     }
 
     /**
      * Set point style
      *
-     * @param style Point style
+     * @param value Point style
      */
-    public void setStyle(PointStyle style) {
-        if (style != null)
-            _style = style;
+    public void setStyle(PointStyle value) {
+        if (value != null)
+            style = value;
     }
 
     /**
@@ -210,7 +210,7 @@ public class PointBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean getDrawOutline() {
-        return _drawOutline;
+        return drawOutline;
     }
 
     /**
@@ -219,7 +219,7 @@ public class PointBreak extends ColorBreak {
      * @param isTrue Boolean
      */
     public void setDrawOutline(boolean isTrue) {
-        _drawOutline = isTrue;
+        drawOutline = isTrue;
     }
 
     /**
@@ -228,7 +228,7 @@ public class PointBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean getDrawFill() {
-        return _drawFill;
+        return drawFill;
     }
 
     /**
@@ -237,7 +237,7 @@ public class PointBreak extends ColorBreak {
      * @param isTrue Boolean
      */
     public void setDrawFill(boolean isTrue) {
-        _drawFill = isTrue;
+        drawFill = isTrue;
     }
 
     /**
@@ -246,16 +246,16 @@ public class PointBreak extends ColorBreak {
      * @return Angle
      */
     public float getAngle() {
-        return _angle;
+        return angle;
     }
 
     /**
      * Set point angle
      *
-     * @param angle Angle
+     * @param value Angle
      */
-    public void setAngle(float angle) {
-        _angle = angle;
+    public void setAngle(float value) {
+        angle = value;
     }
     // </editor-fold>
     // <editor-fold desc="Methods">
@@ -294,17 +294,17 @@ public class PointBreak extends ColorBreak {
         aCB.setEndValue(this.getEndValue());
         aCB.setNoData(this.isNoData());
         aCB.setStartValue(this.getStartValue());
-        aCB.setMarkerType(_markerType);
-        aCB.setFontName(_fontName);
-        aCB.setCharIndex(_charIndex);
-        aCB.setImagePath(_imagePath);
-        aCB.setOutlineColor(_outlineColor);
+        aCB.setMarkerType(markerType);
+        aCB.setFontName(fontName);
+        aCB.setCharIndex(charIndex);
+        aCB.setImagePath(imagePath);
+        aCB.setOutlineColor(outlineColor);
         aCB.setOutlineSize(this.outlineSize);
-        aCB.setSize(_size);
-        aCB.setDrawOutline(_drawOutline);
-        aCB.setDrawFill(_drawFill);
-        aCB.setStyle(_style);
-        aCB.setAngle(_angle);
+        aCB.setSize(size);
+        aCB.setDrawOutline(drawOutline);
+        aCB.setDrawFill(drawFill);
+        aCB.setStyle(style);
+        aCB.setAngle(angle);
 
         return aCB;
     }
@@ -318,23 +318,23 @@ public class PointBreak extends ColorBreak {
     @Override
     public void exportToXML(Document doc, Element parent) {
         Element brk = doc.createElement("Break");
-        Attr caption = doc.createAttribute("Caption");
-        Attr startValue = doc.createAttribute("StartValue");
-        Attr endValue = doc.createAttribute("EndValue");
-        Attr color = doc.createAttribute("Color");
-        Attr isNoData = doc.createAttribute("IsNoData");
+        Attr captionAttr = doc.createAttribute("Caption");
+        Attr startValueAttr = doc.createAttribute("StartValue");
+        Attr endValueAttr = doc.createAttribute("EndValue");
+        Attr colorAttr = doc.createAttribute("Color");
+        Attr isNoDataAttr = doc.createAttribute("IsNoData");
 
-        caption.setValue(this.getCaption());
-        startValue.setValue(String.valueOf(this.getStartValue()));
-        endValue.setValue(String.valueOf(this.getEndValue()));
-        color.setValue(ColorUtil.toHexEncoding(this.getColor()));
-        isNoData.setValue(String.valueOf(this.isNoData()));
+        captionAttr.setValue(this.getCaption());
+        startValueAttr.setValue(String.valueOf(this.getStartValue()));
+        endValueAttr.setValue(String.valueOf(this.getEndValue()));
+        colorAttr.setValue(ColorUtil.toHexEncoding(this.getColor()));
+        isNoDataAttr.setValue(String.valueOf(this.isNoData()));
 
-        brk.setAttributeNode(caption);
-        brk.setAttributeNode(startValue);
-        brk.setAttributeNode(endValue);
-        brk.setAttributeNode(color);
-        brk.setAttributeNode(isNoData);
+        brk.setAttributeNode(captionAttr);
+        brk.setAttributeNode(startValueAttr);
+        brk.setAttributeNode(endValueAttr);
+        brk.setAttributeNode(colorAttr);
+        brk.setAttributeNode(isNoDataAttr);
 
         parent.appendChild(brk);
     }

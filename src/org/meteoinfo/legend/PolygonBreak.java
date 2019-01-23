@@ -24,32 +24,35 @@ import java.util.HashMap;
 public class PolygonBreak extends ColorBreak {
     // <editor-fold desc="Variables">
 
-    private Color _outlineColor;
-    private float _outlineSize;
-    private boolean _drawOutline;
-    private boolean _drawFill;
+    private Color outlineColor;
+    private float outlineSize;
+    private boolean drawOutline;
+    private boolean drawFill;
     //private boolean usingHatchStyle;
     private HatchStyle style;
     private int styleSize;
-    private Color _backColor;
+    private Color backColor;
     //private int _transparencyPerc;
-    private boolean _isMaskout;
+    private boolean isMaskout;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 
+    /**
+     * Constructor
+     */
     public PolygonBreak() {
         super();
-        this.setBreakType(BreakTypes.PolygonBreak);
-        _outlineColor = Color.black;
-        _outlineSize = 1.0f;
-        _drawOutline = true;
-        _drawFill = true;
+        this.breakType = BreakTypes.PolygonBreak;
+        outlineColor = Color.black;
+        outlineSize = 1.0f;
+        drawOutline = true;
+        drawFill = true;
         //usingHatchStyle = false;
         style = HatchStyle.NONE;
         styleSize = 8;
-        _backColor = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+        backColor = new Color(1.0f, 1.0f, 1.0f, 0.0f);
         //_transparencyPerc = 0;
-        _isMaskout = false;
+        isMaskout = false;
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
@@ -60,7 +63,7 @@ public class PolygonBreak extends ColorBreak {
      * @return Outline color
      */
     public Color getOutlineColor() {
-        return _outlineColor;
+        return outlineColor;
     }
 
     /**
@@ -69,7 +72,7 @@ public class PolygonBreak extends ColorBreak {
      * @param c Outline color
      */
     public void setOutlineColor(Color c) {
-        _outlineColor = c;
+        outlineColor = c;
     }
 
     /**
@@ -78,7 +81,7 @@ public class PolygonBreak extends ColorBreak {
      * @return Outline size
      */
     public float getOutlineSize() {
-        return _outlineSize;
+        return outlineSize;
     }
 
     /**
@@ -87,7 +90,7 @@ public class PolygonBreak extends ColorBreak {
      * @param size Outline size
      */
     public void setOutlineSize(float size) {
-        _outlineSize = size;
+        outlineSize = size;
     }
 
     /**
@@ -96,7 +99,7 @@ public class PolygonBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean isDrawOutline() {
-        return _drawOutline;
+        return drawOutline;
     }
 
     /**
@@ -105,7 +108,7 @@ public class PolygonBreak extends ColorBreak {
      * @param isTrue Boolean
      */
     public void setDrawOutline(boolean isTrue) {
-        _drawOutline = isTrue;
+        drawOutline = isTrue;
     }
 
     /**
@@ -114,7 +117,7 @@ public class PolygonBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean isDrawFill() {
-        return _drawFill;
+        return drawFill;
     }
 
     /**
@@ -123,7 +126,7 @@ public class PolygonBreak extends ColorBreak {
      * @param isTrue Boolean
      */
     public void setDrawFill(boolean isTrue) {
-        _drawFill = isTrue;
+        drawFill = isTrue;
     }
 
     /**
@@ -132,7 +135,7 @@ public class PolygonBreak extends ColorBreak {
      * @return Background color
      */
     public Color getBackColor() {
-        return _backColor;
+        return backColor;
     }
 
     /**
@@ -141,7 +144,7 @@ public class PolygonBreak extends ColorBreak {
      * @param c Background color
      */
     public void setBackColor(Color c) {
-        _backColor = c;
+        backColor = c;
     }
     
     /**
@@ -198,7 +201,7 @@ public class PolygonBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean isMaskout() {
-        return _isMaskout;
+        return isMaskout;
     }
 
     /**
@@ -207,7 +210,7 @@ public class PolygonBreak extends ColorBreak {
      * @param isTrue Boolean
      */
     public void setMaskout(boolean isTrue) {
-        _isMaskout = isTrue;
+        isMaskout = isTrue;
     }
     // </editor-fold>
     // <editor-fold desc="Methods">
@@ -249,16 +252,16 @@ public class PolygonBreak extends ColorBreak {
         aCB.setEndValue(this.getEndValue());
         aCB.setNoData(this.isNoData());
         aCB.setStartValue(this.getStartValue());
-        aCB.setOutlineColor(_outlineColor);
-        aCB.setOutlineSize(_outlineSize);
-        aCB.setDrawOutline(_drawOutline);
-        aCB.setDrawFill(_drawFill);
+        aCB.setOutlineColor(outlineColor);
+        aCB.setOutlineSize(outlineSize);
+        aCB.setDrawOutline(drawOutline);
+        aCB.setDrawFill(drawFill);
         //aCB.setUsingHatchStyle(usingHatchStyle);
         aCB.setStyle(style);
         aCB.setStyleSize(styleSize);
-        aCB.setBackColor(_backColor);
+        aCB.setBackColor(backColor);
         //aCB.TransparencyPercent = _transparencyPerc;
-        aCB.setMaskout(_isMaskout);
+        aCB.setMaskout(isMaskout);
 
         return aCB;
     }

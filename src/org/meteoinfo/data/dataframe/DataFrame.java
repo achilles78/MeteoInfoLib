@@ -712,6 +712,18 @@ public class DataFrame implements Iterable {
         }
         this.columns.add(column);
     }
+    
+    /**
+     * Add column data
+     *
+     * @param column Column
+     * @param s Column data series
+     * @throws InvalidRangeException
+     */
+    public void addColumn(Column column, Series s) throws InvalidRangeException {
+        Array a = s.getData();
+        this.addColumn(column, a);
+    }
 
     /**
      * Add column data

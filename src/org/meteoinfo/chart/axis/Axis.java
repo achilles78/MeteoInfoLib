@@ -201,28 +201,28 @@ public class Axis implements Cloneable {
      */
     public Axis(Axis axis) {
         this(axis.getLabel(), axis.isXAxis());
-        this.setAutoTick(axis.isAutoTick());
-        this.setDrawLabel(axis.isDrawLabel());
-        this.setDrawTickLabel(axis.isDrawTickLabel());
-        this.setDrawTickLine(axis.isDrawTickLine());
-        this.setInsideTick(axis.isInsideTick());
-        this.setInverse(axis.isInverse());
-        this.setLabelColor(axis.getLabelColor());
-        this.setLineWidth(axis.getLineWidth());
-        this.setLineStyle(axis.getLineStyle());
+        this.autoTick = axis.isAutoTick();
+        this.drawLabel = axis.isDrawLabel();
+        this.drawTickLabel = axis.isDrawTickLabel();
+        this.drawTickLine = axis.isDrawTickLine();
+        this.insideTick = axis.isInsideTick();
+        this.inverse = axis.isInverse();
+        this.label.setColor(axis.getLabelColor());
+        this.lineWidth = axis.getLineWidth();
+        this.lineStyle = axis.getLineStyle();
         //this.setLineStroke(axis.getLineStroke());
-        this.setLocation(axis.getLocation());
-        this.setMaxValue(axis.getMaxValue());
-        this.setMinValue(axis.getMinValue());
-        this.setMinorTickNum(axis.getMinorTickNum());
-        this.setMinorTickVisible(axis.isMinorTickVisible());
-        this.setShift(axis.getShift());
-        this.setTickColor(axis.getTickColor());
-        this.setTickDeltaValue(axis.getTickDeltaValue());
-        this.setTickLabelColor(axis.getTickLabelColor());
-        this.setTickLabelFont(axis.getTickLabelFont());
-        this.setTickLength(axis.getTickLength());
-        this.setVisible(axis.isVisible());
+        this.location = axis.getLocation();
+        this.maxValue = axis.getMaxValue();
+        this.minValue = axis.getMinValue();
+        this.minorTickNum = axis.getMinorTickNum();
+        this.minorTickVisible = axis.isMinorTickVisible();
+        this.shift = axis.getShift();
+        this.tickColor = axis.getTickColor();
+        this.tickDeltaValue = axis.getTickDeltaValue();
+        this.tickLabelColor = axis.getTickLabelColor();
+        this.tickLabelFont = axis.getTickLabelFont();
+        this.tickLength = axis.getTickLength();
+        this.visible = axis.isVisible();
         
     }
 

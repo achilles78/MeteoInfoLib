@@ -301,7 +301,7 @@ public class MapLayout extends JPanel implements IWebMapPanel {
         _defLabelBreak.setText("Text");
         _defLabelBreak.setFont(new Font(GlobalUtil.getDefaultFontName(), Font.PLAIN, 12));
         _defPolylineBreak.setColor(Color.red);
-        _defPolylineBreak.setSize(2);
+        _defPolylineBreak.setWidth(2);
         _defPolygonBreak.setColor(new Color(104, 255, 104, 125));
     }
 

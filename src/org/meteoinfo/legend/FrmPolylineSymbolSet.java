@@ -375,7 +375,7 @@ public class FrmPolylineSymbolSet extends javax.swing.JDialog {
     private void jSpinner_SizeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinner_SizeStateChanged
         // TODO add your handling code here:
         float size = Float.parseFloat(this.jSpinner_Size.getValue().toString());
-        _polylineBreak.setSize(size);
+        _polylineBreak.setWidth(size);
         if (_parent.getClass() == LegendView.class) {
             ((LegendView) _parent).setLegendBreak_Size(size);
         }
@@ -507,7 +507,7 @@ public class FrmPolylineSymbolSet extends javax.swing.JDialog {
         isLoading = true;
 
         this.jLabel_Color.setBackground(_polylineBreak.getColor());
-        this.jSpinner_Size.setValue(_polylineBreak.getSize());
+        this.jSpinner_Size.setValue(_polylineBreak.getWidth());
         this.jCheckBox_DrawShape.setSelected(_polylineBreak.isDrawShape());
         this.jCheckBox_DrawPointSymbol.setSelected(_polylineBreak.getDrawSymbol());
         this.jSpinner_SymbolSize.setValue(_polylineBreak.getSymbolSize());

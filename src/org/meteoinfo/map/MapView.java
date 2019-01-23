@@ -174,6 +174,7 @@ import static org.meteoinfo.layer.LayerDrawType.Streamline;
 import static org.meteoinfo.layer.LayerDrawType.Vector;
 import org.meteoinfo.layer.VisibleScale;
 import org.meteoinfo.layer.WebMapLayer;
+import org.meteoinfo.legend.ArrowBreak;
 import org.meteoinfo.legend.LegendType;
 import static org.meteoinfo.legend.LegendType.GraduatedColor;
 import static org.meteoinfo.legend.LegendType.SingleSymbol;
@@ -383,7 +384,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         _defLabelBreak.setText("Text");
         _defLabelBreak.setFont(new Font(GlobalUtil.getDefaultFontName(), Font.PLAIN, 12));
         _defPolylineBreak.setColor(Color.red);
-        _defPolylineBreak.setSize(2);
+        _defPolylineBreak.setWidth(2);
         _defPolygonBreak.setColor(new Color(104, 255, 104, 125));
     }
 
@@ -4232,7 +4233,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             LegendScheme aLS = _lonLatLayer.getLegendScheme();
             PolylineBreak aPLB = (PolylineBreak) aLS.getLegendBreaks().get(0);
             aPLB.setColor(_gridLineColor);
-            aPLB.setSize(_gridLineSize);
+            aPLB.setWidth(_gridLineSize);
             aPLB.setStyle(_gridLineStyle);
 
             drawLonLatLayer(_lonLatLayer, g, 0);
@@ -4720,7 +4721,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         //g.setStroke(new BasicStroke(1));
         switch (aLS.getLegendType()) {
             case SingleSymbol:
-                PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(0);
+                ArrowBreak aPB = (ArrowBreak) aLS.getLegendBreaks().get(0);
                 aColor = aPB.getColor();
                 for (WindArrow aArraw : windArraws) {
                     aPoint = aArraw.getPoint();
@@ -4752,7 +4753,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     }
                     int blNum = 0;
                     for (int i = 0; i < aLS.getLegendBreaks().size(); i++) {
-                        aPB = (PointBreak) aLS.getLegendBreaks().get(i);
+                        aPB = (ArrowBreak) aLS.getLegendBreaks().get(i);
                         if (value == Double.parseDouble(aPB.getStartValue().toString()) || (value > Double.parseDouble(aPB.getStartValue().toString())
                                 && value < Double.parseDouble(aPB.getEndValue().toString()))
                                 || (blNum == aLS.getLegendBreaks().size() && value == Double.parseDouble(aPB.getEndValue().toString()))) {
@@ -4948,7 +4949,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         LegendScheme aLS = _lonLatLayer.getLegendScheme();
         PolylineBreak aPLB = (PolylineBreak) aLS.getLegendBreaks().get(0);
         aPLB.setColor(_gridLineColor);
-        aPLB.setSize(_gridLineSize);
+        aPLB.setWidth(_gridLineSize);
         aPLB.setStyle(_gridLineStyle);
 
         for (PolylineShape aPLS : (List<PolylineShape>) aLayer.getShapes()) {
@@ -4985,7 +4986,7 @@ public class MapView extends JPanel implements IWebMapPanel {
             aColor = _selectColor;
         }
         float[] dashPattern = getDashPattern(aPLB.getStyle());
-        BasicStroke pen = new BasicStroke(aPLB.getSize(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f);
+        BasicStroke pen = new BasicStroke(aPLB.getWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f);
         g.setColor(aColor);
         g.setStroke(pen);
 
@@ -5356,7 +5357,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         }
 
         Color aColor = aPLB.getColor();
-        Float size = aPLB.getSize();
+        Float size = aPLB.getWidth();
         if (!isIdentifer) {
             if (aPLS.isSelected()) {
                 aColor = _selectColor;
@@ -5441,7 +5442,7 @@ public class MapView extends JPanel implements IWebMapPanel {
         GeneralPath path = new GeneralPath(GeneralPath.WIND_EVEN_ODD, len1);
 
         Color aColor = aPLB.getColor();
-        Float size = aPLB.getSize();
+        Float size = aPLB.getWidth();
         if (!isIdentifer) {
             if (aPLS.isSelected()) {
                 aColor = _selectColor;
@@ -5573,7 +5574,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     }
                     PolylineBreak aPLB = (PolylineBreak) ls.findLegendBreak(v);
                     Color aColor = aPLB.getColor();
-                    Float size = aPLB.getSize();
+                    Float size = aPLB.getWidth();
                     float[] dashPattern = getDashPattern(aPLB.getStyle());
                     BasicStroke pen = new BasicStroke(size, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f);
                     g.setColor(aColor);
@@ -6065,7 +6066,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     PolylineShape aPLS = (PolylineShape) aShape;
                     PolylineBreak aPLB = new PolylineBreak();
                     aPLB.setColor(Color.red);
-                    aPLB.setSize(2);
+                    aPLB.setWidth(2);
                     drawPolylineShape(g, aPLS, aPLB, LonShift, false, false, true);
                     break;
                 case Polygon:
@@ -6133,7 +6134,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     PolylineShape aPLS = (PolylineShape) aShape;
                     PolylineBreak aPLB = new PolylineBreak();
                     aPLB.setColor(Color.red);
-                    aPLB.setSize(2);
+                    aPLB.setWidth(2);
                     drawPolylineShape(g, aPLS, aPLB, LonShift, false);
                     break;
                 case Polygon:

@@ -247,6 +247,15 @@ public class LegendScheme {
     public void setLegendBreaks(List<ColorBreak> breaks) {
         legendBreaks = breaks;
     }
+    
+    /**
+     * Set a legendBreak
+     * @param i Index
+     * @param value Legend break
+     */
+    public void setLegendBreak(int i, ColorBreak value) {
+        this.legendBreaks.set(i, value);
+    }
 
     /**
      * Get if has no data
@@ -699,7 +708,7 @@ public class LegendScheme {
                     endValue.setValue(String.valueOf(aPLB.getEndValue()));
                     color.setValue(ColorUtil.toHexEncoding(aPLB.getColor()));
                     drawShape.setValue(String.valueOf(aPLB.isDrawShape()));
-                    size.setValue(String.valueOf(aPLB.getSize()));
+                    size.setValue(String.valueOf(aPLB.getWidth()));
                     style.setValue(aPLB.getStyle().toString());
                     drawSymbol.setValue(String.valueOf(aPLB.getDrawSymbol()));
                     symbolSize.setValue(String.valueOf(aPLB.getSymbolSize()));
@@ -934,7 +943,7 @@ public class LegendScheme {
                             aPLB.setEndValue(brk.getAttributes().getNamedItem("EndValue").getNodeValue());
                             aPLB.setColor(ColorUtil.parseToColor(brk.getAttributes().getNamedItem("Color").getNodeValue()));
                             aPLB.setDrawPolyline(Boolean.parseBoolean(brk.getAttributes().getNamedItem("DrawShape").getNodeValue()));
-                            aPLB.setSize(Float.parseFloat(brk.getAttributes().getNamedItem("Size").getNodeValue()));
+                            aPLB.setWidth(Float.parseFloat(brk.getAttributes().getNamedItem("Size").getNodeValue()));
                             aPLB.setStyle(LineStyles.valueOf(brk.getAttributes().getNamedItem("Style").getNodeValue().toUpperCase()));
                             aPLB.setDrawSymbol(Boolean.parseBoolean(brk.getAttributes().getNamedItem("DrawSymbol").getNodeValue()));
                             aPLB.setSymbolSize(Float.parseFloat(brk.getAttributes().getNamedItem("SymbolSize").getNodeValue()));

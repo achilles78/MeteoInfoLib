@@ -440,7 +440,7 @@ public class HYSPLITTrajDataInfo_bak extends DataInfo implements TrajDataInfo {
             plb.setDrawSymbol(true);
             plb.setSymbolFillColor(plb.getSymbolColor());
             plb.setSymbolInterval(6);
-            plb.setSize(2);
+            plb.setWidth(2);
             if (i == PointStyle.values().length) {
                 i = 0;
             }

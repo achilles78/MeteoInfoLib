@@ -1,4 +1,4 @@
- /* Copyright 2012 Yaqiang Wang,
+/* Copyright 2012 Yaqiang Wang,
  * yaqiang.wang@gmail.com
  * 
  * This library is free software; you can redistribute it and/or modify it
@@ -24,52 +24,75 @@ import java.util.HashMap;
 public class PolylineBreak extends ColorBreak {
     // <editor-fold desc="Variables">
 
-    private float _size;
-    private LineStyles _style;
-    private boolean _drawPolyline;
-    private boolean _drawSymbol;
-    private float _symbolSize;
-    private PointStyle _symbolStyle;
-    private Color _symbolColor;
+    private float width;
+    private LineStyles style;
+    private boolean drawPolyline;
+    private boolean drawSymbol;
+    private float symbolSize;
+    private PointStyle symbolStyle;
+    private Color symbolColor;
     private Color symbolFillColor;
     private boolean fillSymbol;
-    private int _symbolInterval;
+    private int symbolInterval;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 
+    /**
+     * Constructor
+     */
     public PolylineBreak() {
         super();
-        this.setBreakType(BreakTypes.PolylineBreak);
-        _size = 1.0f;
-        _style = LineStyles.SOLID;
-        _drawPolyline = true;
-        _drawSymbol = false;
-        _symbolSize = 8.0f;
-        _symbolStyle = PointStyle.UpTriangle;
-        _symbolColor = this.getColor();
-        symbolFillColor = _symbolColor;
+        this.breakType = BreakTypes.PolylineBreak;
+        width = 1.0f;
+        style = LineStyles.SOLID;
+        drawPolyline = true;
+        drawSymbol = false;
+        symbolSize = 8.0f;
+        symbolStyle = PointStyle.UpTriangle;
+        symbolColor = this.color;
+        symbolFillColor = symbolColor;
         fillSymbol = false;
-        _symbolInterval = 1;
+        symbolInterval = 1;
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
 
     /**
-     * Get line size
+     * Get line width
      *
-     * @return Size
+     * @return Line width
      */
-    public float getSize() {
-        return _size;
+    public float getWidth() {
+        return width;
     }
 
     /**
-     * Set line size
+     * Set line width
      *
-     * @param size Size
+     * @param size Line width
      */
+    public void setWidth(float size) {
+        width = size;
+    }
+    
+    /**
+     * Get line width
+     *
+     * @return Line width
+     */
+    @Deprecated
+    public float getSize() {
+        return width;
+    }
+
+    /**
+     * Set line width
+     *
+     * @param size Line width
+     */
+    @Deprecated
     public void setSize(float size) {
-        _size = size;
+        width = size;
     }
 
     /**
@@ -78,17 +101,18 @@ public class PolylineBreak extends ColorBreak {
      * @return Line style
      */
     public LineStyles getStyle() {
-        return _style;
+        return style;
     }
 
     /**
      * Set line style
      *
-     * @param style Line style
+     * @param value Line style
      */
-    public void setStyle(LineStyles style) {
-        if (style != null)
-            _style = style;
+    public void setStyle(LineStyles value) {
+        if (value != null) {
+            style = value;
+        }
     }
 
     /**
@@ -97,7 +121,7 @@ public class PolylineBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean getDrawPolyline() {
-        return _drawPolyline;
+        return drawPolyline;
     }
 
     /**
@@ -106,7 +130,7 @@ public class PolylineBreak extends ColorBreak {
      * @param isTrue Boolean
      */
     public void setDrawPolyline(boolean isTrue) {
-        _drawPolyline = isTrue;
+        drawPolyline = isTrue;
     }
 
     /**
@@ -115,7 +139,7 @@ public class PolylineBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean getDrawSymbol() {
-        return _drawSymbol;
+        return drawSymbol;
     }
 
     /**
@@ -124,7 +148,7 @@ public class PolylineBreak extends ColorBreak {
      * @param isTrue
      */
     public void setDrawSymbol(boolean isTrue) {
-        _drawSymbol = isTrue;
+        drawSymbol = isTrue;
     }
 
     /**
@@ -133,7 +157,7 @@ public class PolylineBreak extends ColorBreak {
      * @return Symbol size
      */
     public float getSymbolSize() {
-        return _symbolSize;
+        return symbolSize;
     }
 
     /**
@@ -142,7 +166,7 @@ public class PolylineBreak extends ColorBreak {
      * @param size Symbol size
      */
     public void setSymbolSize(float size) {
-        _symbolSize = size;
+        symbolSize = size;
     }
 
     /**
@@ -151,7 +175,7 @@ public class PolylineBreak extends ColorBreak {
      * @return Symbol style
      */
     public PointStyle getSymbolStyle() {
-        return _symbolStyle;
+        return symbolStyle;
     }
 
     /**
@@ -160,8 +184,9 @@ public class PolylineBreak extends ColorBreak {
      * @param style Symbol style
      */
     public void setSymbolStyle(PointStyle style) {
-        if (style != null)
-            _symbolStyle = style;
+        if (style != null) {
+            symbolStyle = style;
+        }
     }
 
     /**
@@ -170,7 +195,7 @@ public class PolylineBreak extends ColorBreak {
      * @return Symbol color
      */
     public Color getSymbolColor() {
-        return _symbolColor;
+        return symbolColor;
     }
 
     /**
@@ -179,38 +204,42 @@ public class PolylineBreak extends ColorBreak {
      * @param c Symbol color
      */
     public void setSymbolColor(Color c) {
-        _symbolColor = c;
+        symbolColor = c;
     }
-    
+
     /**
      * Get symbol fill color
+     *
      * @return Symbol fill color
      */
-    public Color getSymbolFillColor(){
+    public Color getSymbolFillColor() {
         return this.symbolFillColor;
     }
-    
+
     /**
      * Set symbol fill color
+     *
      * @param value Symbol fill color
      */
-    public void setSymbolFillColor(Color value){
+    public void setSymbolFillColor(Color value) {
         this.symbolFillColor = value;
     }
-    
+
     /**
      * Get if fill symbol
+     *
      * @return Boolean
      */
-    public boolean isFillSymbol(){
+    public boolean isFillSymbol() {
         return this.fillSymbol;
     }
-    
+
     /**
      * Set if fill symbol
+     *
      * @param value Boolean
      */
-    public void setFillSymbol(boolean value){
+    public void setFillSymbol(boolean value) {
         this.fillSymbol = value;
     }
 
@@ -220,7 +249,7 @@ public class PolylineBreak extends ColorBreak {
      * @return Symbol interval
      */
     public int getSymbolInterval() {
-        return _symbolInterval;
+        return symbolInterval;
     }
 
     /**
@@ -229,7 +258,7 @@ public class PolylineBreak extends ColorBreak {
      * @param interval Symbol interval
      */
     public void setSymbolInterval(int interval) {
-        _symbolInterval = interval;
+        symbolInterval = interval;
     }
 
     /**
@@ -238,7 +267,7 @@ public class PolylineBreak extends ColorBreak {
      * @return Boolean
      */
     public boolean isUsingDashStyle() {
-        switch (_style) {
+        switch (style) {
             case SOLID:
             case DASH:
             case DOT:
@@ -249,54 +278,55 @@ public class PolylineBreak extends ColorBreak {
                 return false;
         }
     }
+
     // </editor-fold>
     // <editor-fold desc="Methods">
     /**
      * Get property object
+     *
      * @return Custom property object
      */
     @Override
-        public Object getPropertyObject()
-        {
-            HashMap objAttr = new HashMap();
-            objAttr.put("Color", "Color");
-            objAttr.put("Size", "Size");
-            objAttr.put("Style", "Style");
-            objAttr.put("DrawPolyline", "DrawPolyline");
-            objAttr.put("DrawSymbol", "DrawSymbol");
-            objAttr.put("SymbolSize", "SymbolSize");
-            objAttr.put("SymbolStyle", "SymbolStyle");
-            objAttr.put("SymbolColor", "SymbolColor");
-            objAttr.put("SymbolInterval", "SymbolInterval");
-            return objAttr;
-        }
+    public Object getPropertyObject() {
+        HashMap objAttr = new HashMap();
+        objAttr.put("Color", "Color");
+        objAttr.put("Width", "Width");
+        objAttr.put("Style", "Style");
+        objAttr.put("DrawPolyline", "DrawPolyline");
+        objAttr.put("DrawSymbol", "DrawSymbol");
+        objAttr.put("SymbolSize", "SymbolSize");
+        objAttr.put("SymbolStyle", "SymbolStyle");
+        objAttr.put("SymbolColor", "SymbolColor");
+        objAttr.put("SymbolInterval", "SymbolInterval");
+        return objAttr;
+    }
 
-        /**
-         * Clone
-         * @return PolylineBreak
-         */
+    /**
+     * Clone
+     *
+     * @return PolylineBreak
+     */
     @Override
-        public Object clone()
-        {
-            PolylineBreak aCB = new PolylineBreak();
-            aCB.setCaption(this.getCaption());
-            aCB.setColor(this.getColor());
-            aCB.setDrawShape(this.isDrawShape());
-            aCB.setEndValue(this.getEndValue());
-            aCB.setNoData(this.isNoData());
-            aCB.setStartValue(this.getStartValue());            
-            aCB.setSize(_size);           
-            aCB.setStyle(_style);
-            aCB.setDrawPolyline(_drawPolyline);
-            aCB.setDrawSymbol( _drawSymbol);
-            aCB.setFillSymbol(fillSymbol);
-            aCB.setSymbolSize(_symbolSize);
-            aCB.setSymbolColor(_symbolColor);
-            aCB.setSymbolFillColor(symbolFillColor);
-            aCB.setSymbolStyle(_symbolStyle);
-            aCB.setSymbolInterval(_symbolInterval);
+    public Object clone() {
+        PolylineBreak aCB = new PolylineBreak();
+        aCB.setCaption(this.getCaption());
+        aCB.setColor(this.getColor());
+        aCB.setDrawShape(this.isDrawShape());
+        aCB.setEndValue(this.getEndValue());
+        aCB.setNoData(this.isNoData());
+        aCB.setStartValue(this.getStartValue());
+        aCB.setWidth(width);
+        aCB.setStyle(style);
+        aCB.setDrawPolyline(drawPolyline);
+        aCB.setDrawSymbol(drawSymbol);
+        aCB.setFillSymbol(fillSymbol);
+        aCB.setSymbolSize(symbolSize);
+        aCB.setSymbolColor(symbolColor);
+        aCB.setSymbolFillColor(symbolFillColor);
+        aCB.setSymbolStyle(symbolStyle);
+        aCB.setSymbolInterval(symbolInterval);
 
-            return aCB;
-        }
+        return aCB;
+    }
     // </editor-fold>
 }

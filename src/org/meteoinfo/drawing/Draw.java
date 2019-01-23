@@ -53,13 +53,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import org.meteoinfo.chart.plot.XAlign;
 import org.meteoinfo.chart.plot.YAlign;
+import org.meteoinfo.legend.ArrowBreak;
 import org.meteoinfo.legend.ColorBreakCollection;
 import org.meteoinfo.legend.HatchStyle;
 import org.meteoinfo.shape.EllipseShape;
@@ -593,7 +593,7 @@ public class Draw {
      * @param zoom Zoom
      * @return Border rectangle
      */
-    public static Rectangle2D drawArraw(PointF sP, WindArrow aArraw, PointBreak pb, Graphics2D g, double zoom) {
+    public static Rectangle2D drawArraw(PointF sP, WindArrow aArraw, ArrowBreak pb, Graphics2D g, double zoom) {
         PointF eP = new PointF(0, 0);
         //PointF eP1 = new PointF(0, 0);
         double len = aArraw.length;
@@ -612,9 +612,12 @@ public class Draw {
         }
 
         g.setColor(pb.getColor());
-        g.setStroke(new BasicStroke(pb.getOutlineSize()));
+        float width = pb.getWidth();
+        g.setStroke(new BasicStroke(width));
         g.draw(new Line2D.Float(sP.X, sP.Y, eP.X, eP.Y));
-        drawArraw(g, eP, angle);
+        float headWidth = pb.getHeadWidth();
+        float headLength = pb.getHeadLength();
+        drawArraw(g, eP, angle, headLength, headWidth, pb.getOverhang());
         return new Rectangle2D.Double(Math.min(sP.X, eP.X), Math.min(sP.Y, eP.Y),
                 Math.abs(eP.X - sP.X), Math.abs(eP.Y - sP.Y));
     }
@@ -688,6 +691,59 @@ public class Draw {
         }
         path.closePath();
         g.fill(path);
+
+        if (angle != 0) {
+            g.setTransform(tempTrans);
+        }
+    }
+    
+    /**
+     * Draw arraw
+     *
+     * @param g Graphics2D
+     * @param sP Start point
+     * @param angle Angle
+     * @param length Arrow length
+     * @param width Arrow width
+     * @param overhang Overhang
+     */
+    public static void drawArraw(Graphics2D g, PointF sP, double angle, float length, float width,
+            float overhang) {        
+        PointF[] pt;
+        Rectangle.Float rect = new Rectangle.Float(-length, -width * 0.5f, length, width);
+        if (overhang == 1) {
+            pt = new PointF[3];
+            pt[0] = new PointF(rect.x, rect.y);
+            pt[1] = new PointF(rect.x + rect.width, rect.y + (rect.height / 2));
+            pt[2] = new PointF(rect.x, rect.y + rect.height);
+        } else {            
+            pt = new PointF[5];
+            pt[0] = new PointF(rect.x, rect.y);
+            pt[1] = new PointF(rect.x + rect.width, rect.y + (rect.height / 2));
+            pt[2] = new PointF(rect.x, rect.y + rect.height);
+            pt[3] = new PointF(rect.x + rect.width * overhang, pt[1].Y);
+            pt[4] = pt[0];
+        }
+        GeneralPath path = new GeneralPath(GeneralPath.WIND_EVEN_ODD, pt.length);
+        path.moveTo(pt[0].X, pt[0].Y);
+        for (int i = 1; i < pt.length; i++) {
+            path.lineTo(pt[i].X, pt[i].Y);
+        }        
+
+        AffineTransform tempTrans = g.getTransform();
+        if (angle != 0) {
+            AffineTransform myTrans = new AffineTransform();
+            myTrans.translate(tempTrans.getTranslateX() + sP.X, tempTrans.getTranslateY() + sP.Y);
+            double angle1 = angle - 90;
+            myTrans.rotate(angle1 * Math.PI / 180);
+            g.setTransform(myTrans);
+        }      
+        if (overhang == 1) {
+            g.draw(path);
+        } else {
+            path.closePath();
+            g.fill(path);
+        }
 
         if (angle != 0) {
             g.setTransform(tempTrans);
@@ -2451,7 +2507,7 @@ public class Draw {
         if (aPLB.isUsingDashStyle()) {
             g.setColor(aPLB.getColor());
             float[] dashPattern = getDashPattern(aPLB.getStyle());
-            g.setStroke(new BasicStroke(aPLB.getSize(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+            g.setStroke(new BasicStroke(aPLB.getWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
             drawPolyline(points, g);
 
             //Draw symbol            
@@ -2506,7 +2562,7 @@ public class Draw {
                     }
 
                     g.setColor(Color.blue);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
                 case WARMFRONT:
@@ -2525,7 +2581,7 @@ public class Draw {
                     }
 
                     g.setColor(Color.red);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
                 case OCCLUDEDFRONT:
@@ -2557,7 +2613,7 @@ public class Draw {
                     }
 
                     g.setColor(aColor);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
                 case STATIONARYFRONT:
@@ -2588,12 +2644,12 @@ public class Draw {
                     }
 
                     g.setColor(Color.blue);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
                 case ARROWLINE:
                     g.setColor(aPLB.getColor());
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     //float[] dashPattern = getDashPattern(aPLB.getStyle());
                     //g.setStroke(new BasicStroke(aPLB.getSize(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
                     drawPolyline(points, g);
@@ -2640,7 +2696,7 @@ public class Draw {
 
                 aPLB = (PolylineBreak) pbc.get(i);
                 Color aColor = aPLB.getColor();
-                Float size = aPLB.getSize();
+                Float size = aPLB.getWidth();
                 float[] dashPattern = getDashPattern(aPLB.getStyle());
                 BasicStroke pen = new BasicStroke(size, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f);
                 g.setColor(aColor);
@@ -2675,7 +2731,7 @@ public class Draw {
         if (aPLB.isUsingDashStyle()) {
             g.setColor(aPLB.getColor());
             float[] dashPattern = getDashPattern(aPLB.getStyle());
-            g.setStroke(new BasicStroke(aPLB.getSize(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+            g.setStroke(new BasicStroke(aPLB.getWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
             if (mvIdx.size() > 0) {
                 drawPolyline(points, g, mvIdx);
             } else {
@@ -2742,7 +2798,7 @@ public class Draw {
                     }
 
                     g.setColor(Color.blue);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
                 case WARMFRONT:
@@ -2761,7 +2817,7 @@ public class Draw {
                     }
 
                     g.setColor(Color.red);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
                 case OCCLUDEDFRONT:
@@ -2793,7 +2849,7 @@ public class Draw {
                     }
 
                     g.setColor(aColor);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
                 case STATIONARYFRONT:
@@ -2824,7 +2880,7 @@ public class Draw {
                     }
 
                     g.setColor(Color.blue);
-                    g.setStroke(new BasicStroke(aPLB.getSize()));
+                    g.setStroke(new BasicStroke(aPLB.getWidth()));
                     drawPolyline(points, g);
                     break;
             }
@@ -2862,7 +2918,7 @@ public class Draw {
 
             g.setColor(aPLB.getColor());
             float[] dashPattern = getDashPattern(aPLB.getStyle());
-            g.setStroke(new BasicStroke(aPLB.getSize(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+            g.setStroke(new BasicStroke(aPLB.getWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
 
             if (aPLB.getDrawPolyline()) {
                 drawPolyline(points, g);
@@ -3012,7 +3068,7 @@ public class Draw {
 
             g.setColor(aPLB.getColor());
             float[] dashPattern = getDashPattern(aPLB.getStyle());
-            g.setStroke(new BasicStroke(aPLB.getSize(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+            g.setStroke(new BasicStroke(aPLB.getWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
 
             if (aPLB.getDrawPolyline()) {
                 drawPolyline(points, g);

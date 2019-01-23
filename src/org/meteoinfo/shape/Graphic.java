@@ -460,7 +460,7 @@ public class Graphic {
                 Attr symbolInterval = doc.createAttribute("SymbolInterval");
 
                 //legendType.InnerText = "PolylineBreak";
-                size.setValue(String.valueOf(aPLB.getSize()));
+                size.setValue(String.valueOf(aPLB.getWidth()));
                 style.setValue(aPLB.getStyle().toString());
                 drawSymbol.setValue(String.valueOf(aPLB.getDrawSymbol()));
                 symbolSize.setValue(String.valueOf(aPLB.getSymbolSize()));
@@ -671,7 +671,7 @@ public class Graphic {
                     PolylineBreak aPLB = new PolylineBreak();
                     try {
                         aPLB.setColor(color);
-                        aPLB.setSize(Float.parseFloat(legendNode.getAttributes().getNamedItem("Size").getNodeValue()));
+                        aPLB.setWidth(Float.parseFloat(legendNode.getAttributes().getNamedItem("Size").getNodeValue()));
                         aPLB.setStyle(LineStyles.valueOf(legendNode.getAttributes().getNamedItem("Style").getNodeValue()));
                         aPLB.setDrawSymbol(Boolean.parseBoolean(legendNode.getAttributes().getNamedItem("DrawSymbol").getNodeValue()));
                         aPLB.setSymbolSize(Float.parseFloat(legendNode.getAttributes().getNamedItem("SymbolSize").getNodeValue()));

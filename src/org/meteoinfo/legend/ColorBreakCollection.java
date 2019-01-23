@@ -25,7 +25,7 @@ public class ColorBreakCollection extends ColorBreak implements Iterator{
     public ColorBreakCollection(){
         this.index = 0;
         this.colorBreaks = new ArrayList<>();
-        this._breakType = BreakTypes.ColorBreakCollection;
+        this.breakType = BreakTypes.ColorBreakCollection;
     }
     
     /**

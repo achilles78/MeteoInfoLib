@@ -42,6 +42,7 @@ import org.meteoinfo.global.Extent;
 import org.meteoinfo.global.MIMath;
 import org.meteoinfo.global.PointD;
 import org.meteoinfo.global.PointF;
+import org.meteoinfo.legend.ArrowBreak;
 import org.meteoinfo.legend.BarBreak;
 import static org.meteoinfo.legend.BreakTypes.LabelBreak;
 import org.meteoinfo.legend.ColorBreak;
@@ -254,7 +255,7 @@ public class Plot2D extends AbstractPlot2D {
                         this.drawWindBarb(g, (WindBarb) shape, (PointBreak) cb, area);
                         break;
                     case WindArraw:
-                        this.drawWindArrow(g, (WindArrow) shape, (PointBreak) cb, area);
+                        this.drawWindArrow(g, (WindArrow) shape, (ArrowBreak) cb, area);
                         break;
                     case Image:
                         this.drawImage(g, gg, area);
@@ -354,7 +355,7 @@ public class Plot2D extends AbstractPlot2D {
                         this.drawWindBarb(g, (WindBarb) shape, (PointBreak) cb, area);
                         break;
                     case WindArraw:
-                        this.drawWindArrow(g, (WindArrow) shape, (PointBreak) cb, area);
+                        this.drawWindArrow(g, (WindArrow) shape, (ArrowBreak) cb, area);
                         break;
                     case Image:
                         this.drawImage(g, gg, area);
@@ -441,7 +442,7 @@ public class Plot2D extends AbstractPlot2D {
         Draw.drawWindBarb(pf, aPS, aPB, g);
     }
 
-    private void drawWindArrow(Graphics2D g, WindArrow aPS, PointBreak aPB, Rectangle2D area) {
+    private void drawWindArrow(Graphics2D g, WindArrow aPS, ArrowBreak aPB, Rectangle2D area) {
         PointD p = aPS.getPoint();
         double[] sXY = projToScreen(p.X, p.Y, area);
         PointF pf = new PointF((float) sXY[0], (float) sXY[1]);

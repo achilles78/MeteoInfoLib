@@ -302,7 +302,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
             case PolylineZ:
             PolylineBreak aPLB = new PolylineBreak();
             aPLB.setDrawPolyline(true);
-            aPLB.setSize(0.1F);
+            aPLB.setWidth(0.1F);
             aPLB.setColor(Color.red);
             aPLB.setStartValue(0);
             aPLB.setEndValue(0);
