@@ -59,7 +59,9 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import org.meteoinfo.chart.plot.XAlign;
 import org.meteoinfo.chart.plot.YAlign;
+import org.meteoinfo.data.ArrayMath;
 import org.meteoinfo.legend.ArrowBreak;
+import org.meteoinfo.legend.ArrowLineBreak;
 import org.meteoinfo.legend.ColorBreakCollection;
 import org.meteoinfo.legend.HatchStyle;
 import org.meteoinfo.shape.EllipseShape;
@@ -504,6 +506,7 @@ public class Draw {
 
     /**
      * Draw arrow line
+     *
      * @param points Line points
      * @param pb Legend
      * @param arrowSize ArrowSize
@@ -696,7 +699,7 @@ public class Draw {
             g.setTransform(tempTrans);
         }
     }
-    
+
     /**
      * Draw arraw
      *
@@ -708,36 +711,39 @@ public class Draw {
      * @param overhang Overhang
      */
     public static void drawArraw(Graphics2D g, PointF sP, double angle, float length, float width,
-            float overhang) {        
+            float overhang) {
         PointF[] pt;
-        Rectangle.Float rect = new Rectangle.Float(-length, -width * 0.5f, length, width);
+        float x = -length;
+        float y = -width * 0.5f;
+        //Rectangle.Float rect = new Rectangle.Float(x, y, length, width);
         if (overhang == 1) {
             pt = new PointF[3];
-            pt[0] = new PointF(rect.x, rect.y);
-            pt[1] = new PointF(rect.x + rect.width, rect.y + (rect.height / 2));
-            pt[2] = new PointF(rect.x, rect.y + rect.height);
-        } else {            
+            pt[0] = new PointF(x, y);
+            pt[1] = new PointF(x + length, y + (width / 2));
+            pt[2] = new PointF(x, y + width);
+        } else {
+            x += length * (1 - overhang);
             pt = new PointF[5];
-            pt[0] = new PointF(rect.x, rect.y);
-            pt[1] = new PointF(rect.x + rect.width, rect.y + (rect.height / 2));
-            pt[2] = new PointF(rect.x, rect.y + rect.height);
-            pt[3] = new PointF(rect.x + rect.width * overhang, pt[1].Y);
+            pt[0] = new PointF(x, y);
+            pt[1] = new PointF(x + length, y + (width / 2));
+            pt[2] = new PointF(x, y + width);
+            pt[3] = new PointF(x + length * overhang, pt[1].Y);
             pt[4] = pt[0];
         }
         GeneralPath path = new GeneralPath(GeneralPath.WIND_EVEN_ODD, pt.length);
         path.moveTo(pt[0].X, pt[0].Y);
         for (int i = 1; i < pt.length; i++) {
             path.lineTo(pt[i].X, pt[i].Y);
-        }        
+        }
 
         AffineTransform tempTrans = g.getTransform();
-        if (angle != 0) {
-            AffineTransform myTrans = new AffineTransform();
-            myTrans.translate(tempTrans.getTranslateX() + sP.X, tempTrans.getTranslateY() + sP.Y);
-            double angle1 = angle - 90;
+        AffineTransform myTrans = new AffineTransform();
+        myTrans.translate(tempTrans.getTranslateX() + sP.X, tempTrans.getTranslateY() + sP.Y);
+        double angle1 = angle - 90;
+        if (angle1 != 0) {
             myTrans.rotate(angle1 * Math.PI / 180);
-            g.setTransform(myTrans);
-        }      
+        }
+        g.setTransform(myTrans);
         if (overhang == 1) {
             g.draw(path);
         } else {
@@ -745,9 +751,70 @@ public class Draw {
             g.fill(path);
         }
 
-        if (angle != 0) {
-            g.setTransform(tempTrans);
+        g.setTransform(tempTrans);
+    }
+
+    /**
+     * Draw arraw
+     *
+     * @param g Graphics2D
+     * @param sP Start point
+     * @param angle Angle
+     * @param length Arrow length
+     * @param width Arrow width
+     * @param overhang Overhang
+     * @param fillColor Arrow fill color
+     * @param outlineColor Arrow outline color
+     */
+    public static void drawArraw(Graphics2D g, PointF sP, double angle, float length, float width,
+            float overhang, Color fillColor, Color outlineColor) {
+        PointF[] pt;
+        float x = -length;
+        float y = -width * 0.5f;
+        //Rectangle.Float rect = new Rectangle.Float(x, y, length, width);
+        if (overhang == 1) {
+            pt = new PointF[3];
+            pt[0] = new PointF(x, y);
+            pt[1] = new PointF(x + length, 0);
+            pt[2] = new PointF(x, y + width);
+        } else {
+            pt = new PointF[5];
+            pt[0] = new PointF(x, y);
+            pt[1] = new PointF(x + length, 0);
+            pt[2] = new PointF(x, y + width);
+            pt[3] = new PointF(x + length * overhang, pt[1].Y);
+            pt[4] = pt[0];
         }
+        GeneralPath path = new GeneralPath(GeneralPath.WIND_EVEN_ODD, pt.length);
+        path.moveTo(pt[0].X, pt[0].Y);
+        for (int i = 1; i < pt.length; i++) {
+            path.lineTo(pt[i].X, pt[i].Y);
+        }
+
+        AffineTransform tempTrans = g.getTransform();
+        AffineTransform myTrans = new AffineTransform();
+        myTrans.translate(tempTrans.getTranslateX() + sP.X, tempTrans.getTranslateY() + sP.Y);
+        double angle1 = angle - 90;
+        if (angle1 != 0) {
+            myTrans.rotate(angle1 * Math.PI / 180);
+        }
+        g.setTransform(myTrans);
+        if (overhang == 1) {
+            g.setColor(fillColor);
+            g.draw(path);
+        } else {
+            if (fillColor != null) {
+                path.closePath();
+                g.setColor(fillColor);
+                g.fill(path);
+            }
+            if (outlineColor != null) {
+                g.setColor(outlineColor);
+                g.draw(path);
+            }
+        }
+
+        g.setTransform(tempTrans);
     }
 
     /**
@@ -1025,8 +1092,8 @@ public class Draw {
         int[] xPoints;
         int[] yPoints;
         float aSize = aPB.getSize();
-        boolean drawFill = aPB.getDrawFill();
-        boolean drawOutline = aPB.getDrawOutline();
+        boolean drawFill = aPB.isDrawFill();
+        boolean drawOutline = aPB.isDrawOutline();
         Color color = aPB.getColor();
         Color outlineColor = aPB.getOutlineColor();
         float outlineSize = aPB.getOutlineSize();
@@ -1341,8 +1408,8 @@ public class Draw {
         int[] xPoints;
         int[] yPoints;
         float aSize = aPB.getSize();
-        boolean drawFill = aPB.getDrawFill();
-        boolean drawOutline = aPB.getDrawOutline();
+        boolean drawFill = aPB.isDrawFill();
+        boolean drawOutline = aPB.isDrawOutline();
         Color color = aPB.getColor();
         Color outlineColor = aPB.getOutlineColor();
         float outlineSize = aPB.getOutlineSize();
@@ -2500,10 +2567,85 @@ public class Draw {
      * Draw polyline
      *
      * @param points The points
+     * @param alb The arrow line break
+     * @param g Graphics2D
+     */
+    public static void drawPolyline(PointF[] points, ArrowLineBreak alb, Graphics2D g) {
+        int n = points.length;
+        PointF aPoint = points[n - 2];
+        PointF bPoint = points[n - 1];
+        double U = bPoint.X - aPoint.X;
+        double V = bPoint.Y - aPoint.Y;
+        double radian = Math.atan(V / U);
+        double angle = radian * 180 / Math.PI;
+        angle = angle + 90;
+        if (U < 0) {
+            angle = angle + 180;
+        }
+        if (angle >= 360) {
+            angle = angle - 360;
+        }
+        double dx = alb.getArrowHeadLength() * Math.cos(radian) * (1 - alb.getArrowOverhang());
+        double dy = alb.getArrowHeadLength() * Math.sin(radian) * (1 - alb.getArrowOverhang());
+        if (angle > 180) {
+            dx = -dx;
+            dy = -dy;
+        }
+        points[n -  1] = new PointF(bPoint.X - (float)dx, bPoint.Y - (float)dy);
+
+        g.setColor(alb.getColor());
+        float[] dashPattern = getDashPattern(alb.getStyle());
+        g.setStroke(new BasicStroke(alb.getWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+        drawPolyline(points, g);
+
+        //Draw symbol            
+        if (alb.getDrawSymbol()) {
+            Object rend = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Rectangle clip = g.getClipBounds();
+            PointF p;
+            if (clip != null) {
+                g.setClip(null);
+                for (int i = 0; i < points.length; i++) {
+                    p = new PointF(points[i].X, points[i].Y);
+                    if (p.X >= clip.x && p.X <= clip.x + clip.width && p.Y >= clip.y && p.Y <= clip.y + clip.height) {
+                        if (i % alb.getSymbolInterval() == 0) {
+                            drawPoint(alb.getSymbolStyle(), p, alb.getSymbolFillColor(), alb.getSymbolColor(),
+                                    alb.getSymbolSize(), true, alb.isFillSymbol(), g);
+                        }
+                    }
+                }
+                g.setClip(clip);
+            } else {
+                for (int i = 0; i < points.length; i++) {
+                    if (i % alb.getSymbolInterval() == 0) {
+                        p = new PointF(points[i].X, points[i].Y);
+                        drawPoint(alb.getSymbolStyle(), p, alb.getSymbolFillColor(), alb.getSymbolColor(),
+                                alb.getSymbolSize(), true, alb.isFillSymbol(), g);
+                    }
+                }
+            }
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, rend);
+        }
+
+        //Draw arrow        
+        Draw.drawArraw(g, bPoint, angle, alb.getArrowHeadLength(), alb.getArrowHeadWidth(),
+                alb.getArrowOverhang(), alb.getArrowFillColor(), alb.getArrowOutlineColor());
+    }
+
+    /**
+     * Draw polyline
+     *
+     * @param points The points
      * @param aPLB The polyline break
      * @param g Graphics2D
      */
     public static void drawPolyline(PointF[] points, PolylineBreak aPLB, Graphics2D g) {
+        if (aPLB instanceof ArrowLineBreak) {
+            drawPolyline(points, (ArrowLineBreak)aPLB, g);
+            return;
+        }
+        
         if (aPLB.isUsingDashStyle()) {
             g.setColor(aPLB.getColor());
             float[] dashPattern = getDashPattern(aPLB.getStyle());

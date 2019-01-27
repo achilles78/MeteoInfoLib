@@ -7,6 +7,7 @@ package org.meteoinfo.chart.plot;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,9 @@ import org.meteoinfo.global.PointD;
 import org.meteoinfo.global.util.BigDecimalUtil;
 import org.meteoinfo.layer.ImageLayer;
 import org.meteoinfo.layer.VectorLayer;
+import org.meteoinfo.legend.ArrowBreak;
+import org.meteoinfo.legend.ArrowLineBreak;
+import org.meteoinfo.legend.ArrowPolygonBreak;
 import org.meteoinfo.legend.BarBreak;
 import org.meteoinfo.legend.ColorBreak;
 import org.meteoinfo.legend.ColorBreakCollection;
@@ -4104,6 +4108,103 @@ public class GraphicFactory {
 
         return gc;
     }
+    
+    /**
+     * Create arrow polygon
+     * 
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param dx The length of arrow along x direction
+     * @param dy The length of arrow along y direction
+     * @param ab The arrow polygon break
+     * @return Arrow polygon graphic
+     */
+    public static Graphic createArrow(double x, double y, double dx, double dy, ArrowPolygonBreak ab) {
+        double[] r = ArrayMath.uv2ds(dx, dy);
+        double length = r[1];
+        if (ab.isLengthIncludesHead()) {
+            length = length - ab.getHeadLength();
+        }
+        
+        AffineTransform atf = new AffineTransform();
+        atf.translate(x, y);
+        atf.rotate(dx, dy);
+        
+        float width = ab.getWidth();   
+        float headLength = ab.getHeadLength();
+        float overhang = ab.getOverhang();
+        float lenShift = headLength * overhang;
+        double[] srcPts = new double[8 * 2];
+        srcPts[0] = 0;
+        srcPts[1] = -width * 0.5;
+        srcPts[2] = 0;
+        srcPts[3] = width * 0.5;
+        srcPts[4] = length + lenShift;
+        srcPts[5] = width * 0.5;
+        srcPts[6] = length;
+        srcPts[7] = ab.getHeadWidth() * 0.5;
+        srcPts[8] = length + ab.getHeadLength();
+        srcPts[9] = 0;
+        srcPts[10] = length;
+        srcPts[11] = -ab.getHeadWidth() * 0.5;
+        srcPts[12] = length + lenShift;
+        srcPts[13] = -width * 0.5;
+        srcPts[14] = 0;
+        srcPts[15] = -width * 0.5;
+        atf.transform(srcPts, 0, srcPts, 0, 8);
+        List<PointD> points = new ArrayList<>();
+        for (int i = 0; i < srcPts.length; i+=2) {
+            points.add(new PointD(srcPts[i], srcPts[i + 1]));
+        }
+        PolygonShape pgs = new PolygonShape();
+        pgs.setPoints(points);
+        
+        return new Graphic(pgs, ab);
+    }
+    
+    /**
+     * Create arrow line
+     * 
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param dx The length of arrow along x direction
+     * @param dy The length of arrow along y direction
+     * @param ab The arrow line break
+     * @return Arrow line graphic
+     */
+    public static Graphic createArrowLine(double x, double y, double dx, double dy, ArrowLineBreak ab) {
+        List<PointD> points = new ArrayList<>();
+        points.add(new PointD(x, y));
+        points.add(new PointD(x + dx, y + dy));
+        PolylineShape pls = new PolylineShape();
+        pls.setPoints(points);
+        
+        return new Graphic(pls, ab);
+    }
+    
+    /**
+     * Create arrow line
+     * 
+     * @param x X coordinates
+     * @param y Y coordinates
+     * @param ab The arrow line break
+     * @param iscurve Is curve or not
+     * @return Arrow line graphic
+     */
+    public static Graphic createArrowLine(Array x, Array y, ArrowLineBreak ab, boolean iscurve) {
+        List<PointD> points = new ArrayList<>();
+        for (int i = 0; i < x.getSize(); i++) {
+            points.add(new PointD(x.getDouble(i), y.getDouble(i)));
+        }
+        PolylineShape pls;
+        if (iscurve)
+            pls = new CurveLineShape();
+        else
+            pls = new PolylineShape();
+        pls.setPoints(points);
+        
+        return new Graphic(pls, ab);
+    }
 
     /**
      * Create wind arrows
@@ -4247,6 +4348,23 @@ public class GraphicFactory {
 
         return gc;
     }
+    
+//    /**
+//     * Create annotate
+//     * @param text The text
+//     * @param x X coordinate
+//     * @param y Y coordinate
+//     * @param xText X coordinate of the text
+//     * @param yText Y coordinate of the text
+//     * @param ab Arrow line break
+//     * @return Arrow line break and text
+//     */
+//    public static GraphicCollection createAnnotate(ChartText text, float x, float y, 
+//            float xText, float yText, ArrowLineBreak ab) {
+//        GraphicCollection gc = new GraphicCollection();
+//        Graphic gg = createArrowLine(x, y, xText - x, xText - y, ab);
+//        gc.add(gg)
+//    }
 
     /**
      * Create pie arc polygons

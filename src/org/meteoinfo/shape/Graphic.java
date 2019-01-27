@@ -361,8 +361,8 @@ public class Graphic {
                 outlineColor.setValue(ColorUtil.toHexEncoding(aPB.getOutlineColor()));
                 size.setValue(String.valueOf(aPB.getSize()));
                 style.setValue(aPB.getStyle().toString());
-                drawOutline.setValue(String.valueOf(aPB.getDrawOutline()));
-                drawFill.setValue(String.valueOf(aPB.getDrawFill()));
+                drawOutline.setValue(String.valueOf(aPB.isDrawOutline()));
+                drawFill.setValue(String.valueOf(aPB.isDrawFill()));
                 markerType.setValue(aPB.getMarkerType().toString());
                 fontName.setValue(aPB.getFontName());
                 charIndex.setValue(String.valueOf(aPB.getCharIndex()));

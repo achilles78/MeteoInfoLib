@@ -209,7 +209,7 @@ public class PointBreak extends ColorBreak {
      *
      * @return Boolean
      */
-    public boolean getDrawOutline() {
+    public boolean isDrawOutline() {
         return drawOutline;
     }
 
@@ -227,7 +227,7 @@ public class PointBreak extends ColorBreak {
      *
      * @return Boolean
      */
-    public boolean getDrawFill() {
+    public boolean isDrawFill() {
         return drawFill;
     }
 

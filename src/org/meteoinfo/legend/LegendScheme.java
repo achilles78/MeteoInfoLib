@@ -650,8 +650,8 @@ public class LegendScheme {
                     outlineSize.setValue(String.valueOf(aPB.getOutlineSize()));
                     size.setValue(String.valueOf(aPB.getSize()));
                     style.setValue(aPB.getStyle().toString());
-                    drawOutline.setValue(String.valueOf(aPB.getDrawOutline()));
-                    drawFill.setValue(String.valueOf(aPB.getDrawFill()));
+                    drawOutline.setValue(String.valueOf(aPB.isDrawOutline()));
+                    drawFill.setValue(String.valueOf(aPB.isDrawFill()));
                     isNoData.setValue(String.valueOf(aPB.isNoData()));
                     markerType.setValue(aPB.getMarkerType().toString());
                     fontName.setValue(aPB.getFontName());

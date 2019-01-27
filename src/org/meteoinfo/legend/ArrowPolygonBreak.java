@@ -9,52 +9,52 @@ package org.meteoinfo.legend;
  *
  * @author Yaqiang Wang
  */
-public class ArrowBreak extends PointBreak {
+public class ArrowPolygonBreak extends PolygonBreak {
     // <editor-fold desc="Variables">
     private float width;
     private float headWidth;
     private float headLength;
     private float overhang;
+    private boolean lengthIncludesHead;
     // </editor-fold>
     // <editor-fold desc="Constructor">
     /**
      * Constructor
      */
-    public ArrowBreak() {
+    public ArrowPolygonBreak() {
         super();
-        this.outlineColor = null;
-        this.width = 1;
+        this.width = 0.001f;
         this.headWidth = this.width * 3;
         this.headLength = this.headWidth * 1.5f;
         this.overhang = 0;
+        this.lengthIncludesHead = false;
     }
     
     /**
-     * Constructor with a PointBreak
-     * @param pb A PointBreak
+     * Constructor with a PolylgonBreak
+     * @param pb A PolygonBreak
      */
-    public ArrowBreak(PointBreak pb) {
+    public ArrowPolygonBreak(PolygonBreak pb) {
+        this.backColor = pb.backColor;
+        this.breakType = pb.breakType;
         this.caption = pb.caption;
         this.color = pb.color;
         this.drawShape = pb.drawShape;
         this.startValue = pb.startValue;
         this.endValue = pb.endValue;
         this.isNoData = pb.isNoData;
-        this.markerType = pb.markerType;
-        this.fontName = pb.fontName;
-        this.charIndex = pb.charIndex;
-        this.imagePath = pb.imagePath;
+        this.isMaskout = pb.isMaskout;
         this.outlineColor = pb.outlineColor;
         this.outlineSize = pb.outlineSize;
-        this.size = pb.size;
         this.drawOutline = pb.drawOutline;
         this.drawFill = pb.drawFill;
         this.style = pb.style;
-        this.angle = pb.angle;
-        this.width = 1;
+        this.styleSize = pb.styleSize;
+        this.width = 0.001f;
         this.headWidth = this.width * 3;
         this.headLength = this.headWidth * 1.5f;
         this.overhang = 0;
+        this.lengthIncludesHead = false;
     }
     // </editor-fold>
     // <editor-fold desc="Get Set Methods">
@@ -120,6 +120,22 @@ public class ArrowBreak extends PointBreak {
      */
     public void setOverhang(float value) {
         this.overhang = value;
+    }
+    
+    /**
+     * Get length includes head or not
+     * @return Boolean
+     */
+    public boolean isLengthIncludesHead() {
+        return this.lengthIncludesHead;
+    }
+    
+    /**
+     * Set length includes head or not
+     * @param value Boolean
+     */
+    public void setLengthIncludesHead(boolean value) {
+        this.lengthIncludesHead = value;
     }
     // </editor-fold>
     // <editor-fold desc="Methods">

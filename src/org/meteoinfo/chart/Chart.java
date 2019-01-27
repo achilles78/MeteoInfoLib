@@ -155,6 +155,10 @@ public class Chart {
      * @return Current plot
      */
     public Plot getCurrentPlot() {
+        if (this.plots.isEmpty()) {
+            return null;
+        }
+        
         if (this.currentPlot < 0 || this.currentPlot >= this.plots.size()) {
             this.currentPlot = this.plots.size() - 1;
         }

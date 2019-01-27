@@ -24,16 +24,16 @@ import java.util.HashMap;
 public class PolygonBreak extends ColorBreak {
     // <editor-fold desc="Variables">
 
-    private Color outlineColor;
-    private float outlineSize;
-    private boolean drawOutline;
-    private boolean drawFill;
+    protected Color outlineColor;
+    protected float outlineSize;
+    protected boolean drawOutline;
+    protected boolean drawFill;
     //private boolean usingHatchStyle;
-    private HatchStyle style;
-    private int styleSize;
-    private Color backColor;
+    protected HatchStyle style;
+    protected int styleSize;
+    protected Color backColor;
     //private int _transparencyPerc;
-    private boolean isMaskout;
+    protected boolean isMaskout;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 

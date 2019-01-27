@@ -24,16 +24,16 @@ import java.util.HashMap;
 public class PolylineBreak extends ColorBreak {
     // <editor-fold desc="Variables">
 
-    private float width;
-    private LineStyles style;
-    private boolean drawPolyline;
-    private boolean drawSymbol;
-    private float symbolSize;
-    private PointStyle symbolStyle;
-    private Color symbolColor;
-    private Color symbolFillColor;
-    private boolean fillSymbol;
-    private int symbolInterval;
+    protected float width;
+    protected LineStyles style;
+    protected boolean drawPolyline;
+    protected boolean drawSymbol;
+    protected float symbolSize;
+    protected PointStyle symbolStyle;
+    protected Color symbolColor;
+    protected Color symbolFillColor;
+    protected boolean fillSymbol;
+    protected int symbolInterval;
     // </editor-fold>
     // <editor-fold desc="Constructor">
 

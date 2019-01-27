@@ -335,7 +335,7 @@ public class ChartColorBar extends ChartLegend {
                 case Point:
                     PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(idx);
                     DrawShape = aPB.isDrawShape();
-                    DrawFill = aPB.getDrawFill();
+                    DrawFill = aPB.isDrawFill();
                     FillColor = aPB.getColor();
                     break;
                 case Polyline:
@@ -599,7 +599,7 @@ public class ChartColorBar extends ChartLegend {
                 case Point:
                     PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(idx);
                     DrawShape = aPB.isDrawShape();
-                    DrawFill = aPB.getDrawFill();
+                    DrawFill = aPB.isDrawFill();
                     FillColor = aPB.getColor();
                     break;
                 case Polyline:

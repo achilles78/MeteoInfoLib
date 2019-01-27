@@ -566,11 +566,11 @@ public class FrmPointSymbolSet extends javax.swing.JDialog {
         
         this.jLabel_Color.setBackground(_pointBreak.getColor());
         this.jSpinner_Size.setValue(_pointBreak.getSize());
-        this.jCheckBox_DrawOutline.setSelected(_pointBreak.getDrawOutline());
+        this.jCheckBox_DrawOutline.setSelected(_pointBreak.isDrawOutline());
         this.jLabel_OutlineColor.setBackground(_pointBreak.getOutlineColor());
         this.jSpinner_OutlineSize.setValue(_pointBreak.getOutlineSize());
         this.jCheckBox_DrawShape.setSelected(_pointBreak.isDrawShape());
-        this.jCheckBox_DrawFill.setSelected(_pointBreak.getDrawFill());
+        this.jCheckBox_DrawFill.setSelected(_pointBreak.isDrawFill());
         this.jSpinner_Angle.setValue(_pointBreak.getAngle());
         this.jComboBox_MarkerType.removeAllItems();
         for (MarkerType t : MarkerType.values()) {

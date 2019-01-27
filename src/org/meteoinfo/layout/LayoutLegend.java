@@ -722,7 +722,7 @@ public class LayoutLegend extends LayoutElement {
                 case Point:
                     PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(idx);
                     DrawShape = aPB.isDrawShape();
-                    DrawFill = aPB.getDrawFill();
+                    DrawFill = aPB.isDrawFill();
                     FillColor = aPB.getColor();
                     if (aLS.getLegendType() == LegendType.UniqueValue) {
                         caption = aPB.getCaption();
@@ -923,7 +923,7 @@ public class LayoutLegend extends LayoutElement {
                 case Point:
                     PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(idx);
                     DrawShape = aPB.isDrawShape();
-                    DrawFill = aPB.getDrawFill();
+                    DrawFill = aPB.isDrawFill();
                     FillColor = aPB.getColor();
                     break;
                 case Polyline:
@@ -1112,7 +1112,7 @@ public class LayoutLegend extends LayoutElement {
                 case Point:
                     PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(i);
                     DrawShape = aPB.isDrawShape();
-                    DrawFill = aPB.getDrawFill();
+                    DrawFill = aPB.isDrawFill();
                     FillColor = aPB.getColor();
                     if (aLS.getLegendType() == LegendType.UniqueValue) {
                         caption = aPB.getCaption();
@@ -1288,7 +1288,7 @@ public class LayoutLegend extends LayoutElement {
                 case Point:
                     PointBreak aPB = (PointBreak) aLS.getLegendBreaks().get(i);
                     DrawShape = aPB.isDrawShape();
-                    DrawFill = aPB.getDrawFill();
+                    DrawFill = aPB.isDrawFill();
                     FillColor = aPB.getColor();
                     break;
                 case Polyline:
