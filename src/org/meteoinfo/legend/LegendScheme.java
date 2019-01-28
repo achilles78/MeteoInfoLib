@@ -566,6 +566,22 @@ public class LegendScheme {
         
         return ls;
     }
+    
+    /**
+     * Convert point legend to arrow legend
+     */
+    public void asArrow() {        
+        if (this.getShapeType() != ShapeTypes.Point)
+            return;
+        
+        if (this.legendBreaks.get(0) instanceof ArrowBreak) {
+            return;
+        }
+        
+        for (int i = 0; i < this.legendBreaks.size(); i++) {
+            this.legendBreaks.set(i, new ArrowBreak((PointBreak)this.legendBreaks.get(i)));
+        }
+    }
 
     /**
      * Export to xml document

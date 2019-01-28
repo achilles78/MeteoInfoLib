@@ -25,7 +25,7 @@ public class ArrowLineBreak extends PolylineBreak {
      */
     public ArrowLineBreak() {
         super();
-        this.arrowHeadWidth = this.width * 3;
+        this.arrowHeadWidth = this.width * 5;
         this.arrowHeadLength = this.arrowHeadWidth * 1.5f;
         this.arrowOverhang = 0;
         this.ArrowFillColor = this.color;
@@ -55,7 +55,7 @@ public class ArrowLineBreak extends PolylineBreak {
         this.symbolStyle = pb.symbolStyle;
         this.tag = pb.tag;
         this.width = pb.width;
-        this.arrowHeadWidth = this.width * 3;
+        this.arrowHeadWidth = this.width * 5;
         this.arrowHeadLength = this.arrowHeadWidth * 1.5f;
         this.arrowOverhang = 0;
         this.ArrowFillColor = this.color;

@@ -50,6 +50,7 @@ import org.meteoinfo.global.Extent;
 import org.meteoinfo.layer.ImageLayer;
 import org.meteoinfo.layer.RasterLayer;
 import org.meteoinfo.layer.WorldFilePara;
+import org.meteoinfo.legend.ArrowBreak;
 import org.meteoinfo.legend.LegendType;
 import org.meteoinfo.legend.PointBreak;
 import org.meteoinfo.legend.PolygonBreak;
@@ -1125,7 +1126,7 @@ public class DrawMeteoData {
     public static VectorLayer createGridVectorLayer(GridData uData, GridData vData,
             String lName, boolean isUV) {
         LegendScheme ls = LegendManage.createSingleSymbolLegendScheme(ShapeTypes.Point, Color.blue, 10);
-
+        ls.asArrow();
         return createGridVectorLayer(uData, vData, uData, ls, false, lName, isUV);
     }
 
@@ -1134,14 +1135,15 @@ public class DrawMeteoData {
      *
      * @param uData U or wind direction grid data
      * @param vData V or wind speed grid data
-     * @param aLS Legend scheme
+     * @param ls Legend scheme
      * @param lName Layer name
      * @param isUV if is U/V
      * @return Vector layer
      */
     public static VectorLayer createGridVectorLayer(GridData uData, GridData vData,
-            LegendScheme aLS, String lName, boolean isUV) {
-        return createGridVectorLayer(uData, vData, uData, aLS, false, lName, isUV);
+            LegendScheme ls, String lName, boolean isUV) {
+        ls.asArrow();
+        return createGridVectorLayer(uData, vData, uData, ls, false, lName, isUV);
     }
 
     /**
@@ -1162,6 +1164,7 @@ public class DrawMeteoData {
         for (int i = 0; i < ls.getBreakNum(); i++) {
             aPB = (PointBreak) ls.getLegendBreaks().get(i);
             aPB.setSize(10);
+            ls.setLegendBreak(i, new ArrowBreak(aPB));
         }
 
         return createGridVectorLayer(uData, vData, gridData, ls, true, lName, isUV);
@@ -1173,14 +1176,15 @@ public class DrawMeteoData {
      * @param uData U or wind direction grid data
      * @param vData V or wind speed grid data
      * @param gridData The grid data
-     * @param aLS Legend scheme
+     * @param ls Legend scheme
      * @param lName Layer name
      * @param isUV if is U/V
      * @return Vector layer
      */
     public static VectorLayer createGridVectorLayer(GridData uData, GridData vData, GridData gridData,
-            LegendScheme aLS, String lName, boolean isUV) {
-        return createGridVectorLayer(uData, vData, gridData, aLS, true, lName, isUV);
+            LegendScheme ls, String lName, boolean isUV) {
+        ls.asArrow();
+        return createGridVectorLayer(uData, vData, gridData, ls, true, lName, isUV);
     }
 
     /**
@@ -1189,14 +1193,14 @@ public class DrawMeteoData {
      * @param uData U or wind direction grid data
      * @param vData V or wind speed grid data
      * @param gridData The grid data
-     * @param aLS Legend scheme
+     * @param ls Legend scheme
      * @param ifColor If draw color wind
      * @param lName Layer name
      * @param isUV if is U/V
      * @return Vector layer
      */
     public static VectorLayer createGridVectorLayer(GridData uData, GridData vData, GridData gridData,
-            LegendScheme aLS, boolean ifColor, String lName, boolean isUV) {
+            LegendScheme ls, boolean ifColor, String lName, boolean isUV) {        
         GridData windDirData;
         GridData windSpeedData;
         if (isUV) {
@@ -1275,19 +1279,20 @@ public class DrawMeteoData {
 
         aLayer.setLayerName(lName);
         if (ifColor && ifAdd) {
-            aLS.setFieldName(columnName);
+            ls.setFieldName(columnName);
         } else {
-            aLS.setFieldName("WindSpeed");
+            ls.setFieldName("WindSpeed");
         }
-        LegendScheme ls = aLS.convertTo(ShapeTypes.Point);
-        if (aLS.getShapeType() != ls.getShapeType()) {
+        LegendScheme nls = ls.convertTo(ShapeTypes.Point);
+        nls.asArrow();
+        if (ls.getShapeType() != nls.getShapeType()) {
             PointBreak aPB;
-            for (i = 0; i < ls.getBreakNum(); i++) {
-                aPB = (PointBreak) ls.getLegendBreaks().get(i);
+            for (i = 0; i < nls.getBreakNum(); i++) {
+                aPB = (PointBreak) nls.getLegendBreaks().get(i);
                 aPB.setSize(10);
             }
         }
-        aLayer.setLegendScheme(ls);
+        aLayer.setLegendScheme(nls);
         aLayer.setLayerDrawType(LayerDrawType.Vector);
 
         return aLayer;
@@ -1305,7 +1310,7 @@ public class DrawMeteoData {
     public static VectorLayer createGridBarbLayer(GridData uData, GridData vData,
             String lName, boolean isUV) {
         LegendScheme ls = LegendManage.createSingleSymbolLegendScheme(ShapeTypes.Point, Color.blue, 10);
-
+        ls.asArrow();
         return createGridBarbLayer(uData, vData, uData, ls, false, lName, isUV);
     }
 
@@ -1314,14 +1319,15 @@ public class DrawMeteoData {
      *
      * @param uData U grid data
      * @param vData V grid data
-     * @param aLS Legend schemer
+     * @param ls Legend schemer
      * @param lName Layer name
      * @param isUV If is U/V
      * @return Vector layer
      */
     public static VectorLayer createGridBarbLayer(GridData uData, GridData vData,
-            LegendScheme aLS, String lName, boolean isUV) {
-        return createGridBarbLayer(uData, vData, uData, aLS, false, lName, isUV);
+            LegendScheme ls, String lName, boolean isUV) {
+        ls.asArrow();
+        return createGridBarbLayer(uData, vData, uData, ls, false, lName, isUV);
     }
 
     /**
@@ -2070,6 +2076,7 @@ public class DrawMeteoData {
      */
     public static VectorLayer createSTVectorLayer(StationData uData, StationData vData, StationData stData,
             LegendScheme aLS, String layerName, boolean isUV) {
+        aLS.asArrow();
         StationData windDirData;
         StationData windSpeedData;
         if (isUV) {
@@ -2360,6 +2367,7 @@ public class DrawMeteoData {
      */
     public static VectorLayer createSTVectorLayer(StationData uData, StationData vData,
             LegendScheme aLS, String layerName, boolean isUV) {
+        aLS.asArrow();
         StationData windDirData;
         StationData windSpeedData;
         if (isUV) {

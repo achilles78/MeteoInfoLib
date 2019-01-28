@@ -24,7 +24,7 @@ public class ArrowBreak extends PointBreak {
         super();
         this.outlineColor = null;
         this.width = 1;
-        this.headWidth = this.width * 3;
+        this.headWidth = this.width * 5;
         this.headLength = this.headWidth * 1.5f;
         this.overhang = 0;
     }
@@ -52,7 +52,7 @@ public class ArrowBreak extends PointBreak {
         this.style = pb.style;
         this.angle = pb.angle;
         this.width = 1;
-        this.headWidth = this.width * 3;
+        this.headWidth = this.width * 5;
         this.headLength = this.headWidth * 1.5f;
         this.overhang = 0;
     }
