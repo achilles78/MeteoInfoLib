@@ -413,6 +413,8 @@ public class ArrayUtil {
             return (Array) data;
         } else if (data instanceof ArrayList) {
             return array((List<Object>) data);
+        } else if (data.getClass().isArray()) {
+            return Array.factory(data);
         } else {
             return null;
         }
@@ -1706,6 +1708,28 @@ public class ArrayUtil {
             return r;
         }
     }
+    
+     /**
+     * Convert array to N-Dimension double Java array
+     *
+     * @param a Array a
+     * @param dtype Data type string
+     * @return N-D Java array
+     */
+    public static Object copyToNDJavaArray(Array a, String dtype) {
+        if (dtype == null) {
+            return copyToNDJavaArray(a);
+        }
+        
+        switch (dtype.toLowerCase()) {
+            case "double":
+                return copyToNDJavaArray_Double(a);
+            case "long":
+                return copyToNDJavaArray_Long(a);
+            default:
+                return copyToNDJavaArray(a);
+        }
+    }
 
     /**
      * Convert array to N-Dimension double Java array
@@ -1736,6 +1760,25 @@ public class ArrayUtil {
         Object javaArray;
         try {
             javaArray = java.lang.reflect.Array.newInstance(Long.TYPE, a.getShape());
+        } catch (IllegalArgumentException | NegativeArraySizeException e) {
+            throw new IllegalArgumentException(e);
+        }
+        IndexIterator iter = a.getIndexIterator();
+        reflectArrayCopyOut(javaArray, a, iter);
+
+        return javaArray;
+    }
+    
+    /**
+     * Convert array to N-Dimension double Java array
+     *
+     * @param a Array a
+     * @return N-D Java array
+     */
+    public static Object copyToNDJavaArray_Double(Array a) {
+        Object javaArray;
+        try {
+            javaArray = java.lang.reflect.Array.newInstance(Double.TYPE, a.getShape());
         } catch (IllegalArgumentException | NegativeArraySizeException e) {
             throw new IllegalArgumentException(e);
         }
