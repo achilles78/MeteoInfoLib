@@ -1576,33 +1576,28 @@ public class ArrayUtil {
             if (axis == -1) {
                 axis = n - 1;
             }
-            int nn = shape[axis];
-            int[] nshape = new int[n];
-            for (int i = 0; i < n; i++) {
-                if (i == axis) {
-                    nshape[i] = shape[n - 1];
-                } else if (i == n - 1) {
-                    nshape[i] = shape[axis];
-                } else {
-                    nshape[i] = shape[i];
-                }
-            }
-            Array r = Array.factory(a.getDataType(), nshape);
+            int nn = shape[axis];            
+            Array r = Array.factory(a.getDataType(), shape);
             Index indexr = r.getIndex();
             int[] current;
-            int idx;
-            for (int i = 0; i < r.getSize(); i++) {
-                current = indexr.getCurrentCounter();
-                List<Range> ranges = new ArrayList<>();
+            List<Range> ranges = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                if (i == axis) {
+                    ranges.add(new Range(0, 0, 1));
+                } else {
+                    ranges.add(new Range(0, shape[i] - 1, 1));
+                }
+            }
+            IndexIterator rii = r.sectionNoReduce(ranges).getIndexIterator();
+            while(rii.hasNext()) {
+                rii.next();
+                current = rii.getCurrentCounter();
+                ranges = new ArrayList<>();
                 for (int j = 0; j < n; j++) {
                     if (j == axis) {
                         ranges.add(new Range(0, shape[j] - 1, 1));
-                    } else {
-                        idx = j;
-                        if (idx > axis) {
-                            idx -= 1;
-                        }
-                        ranges.add(new Range(current[idx], current[idx], 1));
+                    } else {                        
+                        ranges.add(new Range(current[j], current[j], 1));
                     }
                 }
                 List tlist = new ArrayList();
@@ -1612,17 +1607,16 @@ public class ArrayUtil {
                 }
                 Collections.sort(tlist);
                 for (int j = 0; j < nn; j++) {
-                    r.setObject(i, tlist.get(j));
-                    indexr.incr();
-                    i++;
+                    indexr.set(current);
+                    r.setObject(indexr, tlist.get(j));
+                    current[axis] = current[axis] + 1;
                 }
-                i--;
             }
-
+            
             return r;
         }
     }
-
+    
     /**
      * Get sorted array index along an axis
      *
@@ -1659,32 +1653,27 @@ public class ArrayUtil {
                 axis = n - 1;
             }
             int nn = shape[axis];
-            int[] nshape = new int[n];
-            for (int i = 0; i < n; i++) {
-                if (i == axis) {
-                    nshape[i] = shape[n - 1];
-                } else if (i == n - 1) {
-                    nshape[i] = shape[axis];
-                } else {
-                    nshape[i] = shape[i];
-                }
-            }
-            Array r = Array.factory(DataType.INT, nshape);
+            Array r = Array.factory(DataType.INT, shape);
             Index indexr = r.getIndex();
             int[] current;
-            int idx;
-            for (int i = 0; i < r.getSize(); i++) {
-                current = indexr.getCurrentCounter();
-                List<Range> ranges = new ArrayList<>();
+            List<Range> ranges = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                if (i == axis) {
+                    ranges.add(new Range(0, 0, 1));
+                } else {
+                    ranges.add(new Range(0, shape[i] - 1, 1));
+                }
+            }
+            IndexIterator rii = r.sectionNoReduce(ranges).getIndexIterator();
+            while (rii.hasNext()) {
+                rii.next();
+                current = rii.getCurrentCounter();
+                ranges = new ArrayList<>();
                 for (int j = 0; j < n; j++) {
                     if (j == axis) {
                         ranges.add(new Range(0, shape[j] - 1, 1));
                     } else {
-                        idx = j;
-                        if (idx > axis) {
-                            idx -= 1;
-                        }
-                        ranges.add(new Range(current[idx], current[idx], 1));
+                        ranges.add(new Range(current[j], current[j], 1));
                     }
                 }
                 List stlist = new ArrayList();
@@ -1698,11 +1687,10 @@ public class ArrayUtil {
                 Integer[] indexes = comparator.createIndexArray();
                 Arrays.sort(indexes, comparator);
                 for (int j = 0; j < nn; j++) {
-                    r.setInt(i, indexes[j]);
-                    indexr.incr();
-                    i++;
+                    indexr.set(current);
+                    r.setObject(indexr, indexes[j]);
+                    current[axis] = current[axis] + 1;
                 }
-                i--;
             }
 
             return r;
@@ -1816,6 +1804,72 @@ public class ArrayUtil {
         for (int i = 0; i < ja.length; i++) {
             ja[i] = iter.getLongNext();
         }
+    }
+    
+    /**
+     * Return a new array with sub-arrays along an axis deleted
+     * @param a Input array
+     * @param idx Index
+     * @param axis The axis
+     * @return 
+     */
+    public static Array delete(Array a, int idx, int axis) {
+        int[] shape = a.getShape();
+        int n  = shape.length;
+        int[] nshape = new int[n];
+        for (int i = 0; i < n; i++){
+            if (i == axis)
+                nshape[i] = shape[i] - 1;
+            else
+                nshape[i] = shape[i];
+        }
+        Array r = Array.factory(a.getDataType(), nshape);
+        IndexIterator ii = a.getIndexIterator();
+        int[] current;
+        int i = 0;
+        while(ii.hasNext()) {
+            ii.next();
+            current = ii.getCurrentCounter();
+            if (current[axis] != idx) {
+                r.setObject(i, ii.getObjectCurrent());
+                i += 1;
+            }
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Return a new array with sub-arrays along an axis deleted
+     * @param a Input array
+     * @param idx Index
+     * @param axis The axis
+     * @return 
+     */
+    public static Array delete(Array a, List<Integer> idx, int axis) {
+        int[] shape = a.getShape();
+        int n  = shape.length;
+        int[] nshape = new int[n];
+        for (int i = 0; i < n; i++){
+            if (i == axis)
+                nshape[i] = shape[i] - idx.size();
+            else
+                nshape[i] = shape[i];
+        }
+        Array r = Array.factory(a.getDataType(), nshape);
+        IndexIterator ii = a.getIndexIterator();
+        int[] current;
+        int i = 0;
+        while(ii.hasNext()) {
+            ii.next();
+            current = ii.getCurrentCounter();
+            if (!idx.contains(current[axis])) {
+                r.setObject(i, ii.getObjectCurrent());
+                i += 1;
+            }
+        }
+        
+        return r;
     }
 
     // </editor-fold>

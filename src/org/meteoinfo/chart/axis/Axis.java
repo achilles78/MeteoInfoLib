@@ -1705,6 +1705,24 @@ public class Axis implements Cloneable {
                     }
                 }
                 y = (maxy - miny) / 2 + miny; 
+                if (this.label.getAngle() == 90) {
+                    x_align = XAlign.CENTER;
+                    y_align = YAlign.BOTTOM;
+                } else if (this.label.getAngle() == -90) {
+                    x_align = XAlign.CENTER;
+                    y_align = YAlign.TOP;
+                    x -= this.label.getDimension(g).height;
+                } else if (this.label.getAngle() == 0) {
+                    x_align = XAlign.RIGHT;
+                    y_align = YAlign.CENTER;
+                } else if (Math.abs(this.label.getAngle()) == 180) {
+                    x_align = XAlign.LEFT;
+                    y_align = YAlign.TOP;
+                    y -= this.label.getDimension(g).height;
+                } else if (this.label.getAngle() > 0 && this.label.getAngle() < 90) {
+                    x_align = XAlign.RIGHT;
+                    y_align = YAlign.TOP;
+                }
             } else {
                 x = sx + this.tickSpace;                
                 if (this.drawTickLine) {

@@ -665,5 +665,33 @@ public class ChartText extends Shape {
             g.setTransform(tempTrans);
         }
     }
+    
+    /**
+     * Clone
+     * @return Cloned object
+     */
+    @Override
+    public Object clone() {
+        ChartText ct = new ChartText();
+        ct.angle = this.angle;
+        ct.background = this.background;
+        ct.color = this.color;
+        ct.coordinates = this.coordinates;
+        ct.drawBackground = this.drawBackground;
+        ct.drawNeatline = this.drawNeatline;
+        ct.font = this.font;
+        ct.gap = this.gap;
+        ct.lineSpace = this.lineSpace;
+        ct.neatLineColor = this.neatLineColor;
+        ct.neatLineSize = this.neatLineSize;
+        ct.text = this.text;
+        ct.useExternalFont = this.useExternalFont;
+        ct.x = this.x;
+        ct.xAlign = this.xAlign;
+        ct.y = this.y;
+        ct.yAlign = this.yAlign;
+        
+        return ct;
+    }
     // </editor-fold>
 }
