@@ -2859,7 +2859,80 @@ public class ArrayMath {
 
         return hasNaN;
     }
-
+    
+    /**
+     * Remove NaN values in an array
+     * @param a The array
+     * @return The array withou NaN values
+     */
+    public static Array removeNaN(Array a) {
+        List d = new ArrayList<>();
+        for (int i = 0; i < a.getSize(); i++) {
+            if (!Double.isNaN(a.getDouble(i))) {
+                d.add(a.getObject(i));
+            }
+        }
+        
+        if (d.isEmpty()) {
+            return null;
+        }
+        
+        Array r = ArrayUtil.factory(a.getDataType(), new int[]{d.size()});
+        for (int i = 0; i < d.size(); i++) {
+            r.setObject(i, d.get(i));
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Remove NaN values in arrays
+     * @param a The arrays
+     * @return The array withou NaN values
+     */
+    public static Array[] removeNaN(Array... a) {
+        if (a.length == 1) {
+            Array r0 = removeNaN(a[0]);            
+            return r0 == null ? null : new Array[]{removeNaN(a[0])};
+        }
+        
+        List d = new ArrayList<>();
+        int n = (int)a[0].getSize();
+        int m = a.length;
+        boolean isNan;
+        for (int i = 0; i < n; i++) {
+            isNan = false;
+            for (Array aa : a) {
+                if (Double.isNaN(aa.getDouble(i))) {
+                    isNan = true;
+                    break;
+                }
+            }
+            if (!isNan) {
+                for (Array aa :a) {
+                    d.add(aa.getObject(i));
+                }
+            }
+        }
+        
+        if (d.isEmpty()) {
+            return null;
+        }
+        
+        int len = d.size() / m;
+        Array[] r = new Array[m];
+        for (int i = 0; i < m; i++) {
+            r[i] = ArrayUtil.factory(a[i].getDataType(), new int[]{len});
+            int jj = i;
+            for (int j = 0; j < len; j++) {
+                r[i].setObject(j, d.get(jj));
+                jj += m;
+            }
+        }
+        
+        return r;
+    }
+    
     /**
      * Return the indices of the elements that are non-zero.
      *
@@ -3007,9 +3080,15 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitInvert(Array a) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
-        for (int i = 0; i < a.getSize(); i++) {
-            r.setObject(i, ~a.getInt(i));
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
+        if (a.getDataType() == DataType.BOOLEAN) {
+            for (int i = 0; i < a.getSize(); i++) {
+                r.setObject(i, !a.getBoolean(i));
+            }
+        } else {
+            for (int i = 0; i < a.getSize(); i++) {
+                r.setObject(i, ~a.getInt(i));
+            }
         }
 
         return r;
@@ -3822,7 +3901,7 @@ public class ArrayMath {
                 iter.setObjectNext(v);
             }
         }
-        r = Array.factory(a.getDataType(), a.getShape(), r.getStorage());
+        r = ArrayUtil.factory(a.getDataType(), a.getShape(), r.getStorage());
         return r;
     }
 
@@ -3847,7 +3926,7 @@ public class ArrayMath {
             iter.setObjectCurrent(v.getObject(index));
             index.incr();
         }
-        r = Array.factory(a.getDataType(), a.getShape(), r.getStorage());
+        r = ArrayUtil.factory(a.getDataType(), a.getShape(), r.getStorage());
         return r;
     }
 
@@ -3860,7 +3939,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array setSection_Mix(Array a, List<Object> ranges, Number v) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         int n = a.getRank();
         IndexIterator iter = r.getIndexIterator();
         Index aidx = a.getIndex();

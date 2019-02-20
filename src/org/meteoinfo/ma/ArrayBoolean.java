@@ -17,6 +17,11 @@ public class ArrayBoolean extends ucar.ma2.ArrayBoolean {
         super(ints);
     }
     
+    public ArrayBoolean(ucar.ma2.Array a) {        
+        super(a.getShape());
+        this.storage = (boolean[])a.getStorage();
+    }
+    
     @Override
     public int getInt(Index i) {
         return storage[i.currentElement()] ? 1 : 0;

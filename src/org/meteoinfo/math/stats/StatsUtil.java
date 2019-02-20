@@ -22,6 +22,7 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
+import ucar.ma2.MAMath;
 import ucar.ma2.Range;
 
 /**
@@ -135,6 +136,20 @@ public class StatsUtil {
      * @return Pearson correlation and p-value.
      */
     public static double[] pearsonr(Array x, Array y) {
+        if (ArrayMath.containsNaN(x) || ArrayMath.containsNaN(y)) {
+            Array[] xy = ArrayMath.removeNaN(x, y);
+            if (xy == null) {
+                return new double[]{Double.NaN, Double.NaN};
+            }
+            
+            x = xy[0];
+            y = xy[1];
+        }
+        
+        if (MAMath.isEqual(x, y)) {
+            return new double[]{1, 0};
+        }
+        
         int m = (int)x.getSize();
         int n = 1;
         double[][] aa = new double[m][n * 2];
@@ -194,8 +209,8 @@ public class StatsUtil {
                     ranges.add(new Range(current[idx], current[idx], 1));
                 }
             }
-            Array xx = x.section(ranges);
-            Array yy = y.section(ranges);
+            Array xx = ArrayMath.section(x, ranges);
+            Array yy = ArrayMath.section(y, ranges);
             double[] rp = pearsonr(xx, yy);
             r.setDouble(i, rp[0]);
             pv.setDouble(i, rp[1]);

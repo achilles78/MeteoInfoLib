@@ -398,6 +398,37 @@ public class ArrayUtil {
     // </editor-fold>
     // <editor-fold desc="Create">
     /**
+     * Array factory
+     * @param dt Data type
+     * @param shape Shape
+     * @return Array
+     */
+    public static Array factory(DataType dt, int[] shape) {
+        Array r = Array.factory(dt, shape);
+        if (dt == DataType.BOOLEAN) {
+            return new ArrayBoolean(r);
+        }
+        
+        return r;
+    }
+    
+    /**
+     * Array factory
+     * @param dt Data type
+     * @param shape Shape
+     * @param storage Array values
+     * @return Array
+     */
+    public static Array factory(DataType dt, int[] shape, Object storage) {
+        Array r = Array.factory(dt, shape, storage);
+        if (dt == DataType.BOOLEAN) {
+            return new ArrayBoolean(r);
+        }
+        
+        return r;
+    }
+    
+    /**
      * Create an array
      *
      * @param data Object
