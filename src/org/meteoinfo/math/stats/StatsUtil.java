@@ -135,7 +135,7 @@ public class StatsUtil {
      * @return Pearson correlation and p-value.
      */
     public static double[] pearsonr(Array x, Array y) {
-        int m = x.getShape()[0];
+        int m = (int)x.getSize();
         int n = 1;
         double[][] aa = new double[m][n * 2];
         for (int i = 0; i < m; i++) {
@@ -152,6 +152,57 @@ public class StatsUtil {
         double r = pc.getCorrelationMatrix().getEntry(0, 1);
         double pvalue = pc.getCorrelationPValues().getEntry(0, 1);
         return new double[]{r, pvalue};
+    }
+    
+    /**
+     * Calculates a Pearson correlation coefficient.
+     *
+     * @param x X data
+     * @param y Y data
+     * @param axis Special axis for calculation
+     * @return Pearson correlation and p-value.
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public static Array[] pearsonr(Array x, Array y, int axis) throws InvalidRangeException {
+        int[] dataShape = x.getShape();
+        int[] shape = new int[dataShape.length - 1];
+        int idx;
+        for (int i = 0; i < dataShape.length; i++) {
+            idx = i;
+            if (idx == axis) {
+                continue;
+            } else if (idx > axis) {
+                idx -= 1;
+            }
+            shape[idx] = dataShape[i];
+        }
+        Array r = Array.factory(DataType.DOUBLE, shape);
+        Array pv = Array.factory(DataType.DOUBLE, shape);
+        Index indexr = r.getIndex();
+        int[] current;
+        for (int i = 0; i < r.getSize(); i++) {
+            current = indexr.getCurrentCounter();
+            List<Range> ranges = new ArrayList<>();
+            for (int j = 0; j < dataShape.length; j++) {
+                if (j == axis) {
+                    ranges.add(new Range(0, dataShape[j] - 1, 1));
+                } else {
+                    idx = j;
+                    if (idx > axis) {
+                        idx -= 1;
+                    }
+                    ranges.add(new Range(current[idx], current[idx], 1));
+                }
+            }
+            Array xx = x.section(ranges);
+            Array yy = y.section(ranges);
+            double[] rp = pearsonr(xx, yy);
+            r.setDouble(i, rp[0]);
+            pv.setDouble(i, rp[1]);
+            indexr.incr();
+        }
+        
+        return new Array[]{r, pv};
     }
     
     /**
