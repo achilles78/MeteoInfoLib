@@ -1902,7 +1902,11 @@ public class NetCDFDataInfo extends DataInfo implements IGridDataInfo, IStationD
 
             //MODIS NetCDF data
             if (attName.equals("_FillValue")) {
-                missingValue = Double.parseDouble(att.getValue(0).toString());
+                try {
+                    missingValue = Double.parseDouble(att.getValue(0).toString());
+                } catch (NumberFormatException e) {
+                    
+                }
             }
         }
 
