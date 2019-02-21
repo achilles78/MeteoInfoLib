@@ -2978,7 +2978,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitAnd(Array a, Number b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) & b.intValue());
         }
@@ -2994,14 +2994,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitAnd(Array a, Array b) {
-        Array r;
-        DataType dt = a.getDataType();
-        if (dt == DataType.BOOLEAN) {
-            r = new ArrayBoolean(a.getShape());
-        } else {
-            r = Array.factory(a.getDataType(), a.getShape());
-        }
-
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) & b.getInt(i));
         }
@@ -3017,7 +3010,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitOr(Array a, Number b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) | b.intValue());
         }
@@ -3033,7 +3026,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitOr(Array a, Array b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) | b.getInt(i));
         }
@@ -3049,7 +3042,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitXor(Array a, Number b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) ^ b.intValue());
         }
@@ -3065,7 +3058,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array bitXor(Array a, Array b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) ^ b.getInt(i));
         }
@@ -3102,7 +3095,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array leftShift(Array a, Number b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) << b.intValue());
         }
@@ -3118,7 +3111,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array leftShift(Array a, Array b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) << b.getInt(i));
         }
@@ -3134,7 +3127,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array rightShift(Array a, Number b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) >> b.intValue());
         }
@@ -3150,7 +3143,7 @@ public class ArrayMath {
      * @return Result array
      */
     public static Array rightShift(Array a, Array b) {
-        Array r = Array.factory(a.getDataType(), a.getShape());
+        Array r = ArrayUtil.factory(a.getDataType(), a.getShape());
         for (int i = 0; i < a.getSize(); i++) {
             r.setObject(i, a.getInt(i) >> b.getInt(i));
         }
