@@ -77,7 +77,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
 
-        jButton_ImportLegend.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Open.Image.png"))); // NOI18N
+        jButton_ImportLegend.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Open.Image.png"))); // NOI18N
         jButton_ImportLegend.setToolTipText("Import Legend");
         jButton_ImportLegend.setFocusable(false);
         jButton_ImportLegend.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -89,7 +89,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         });
         jToolBar1.add(jButton_ImportLegend);
 
-        jButton_ExportLegend.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Save.Image.png"))); // NOI18N
+        jButton_ExportLegend.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Save.Image.png"))); // NOI18N
         jButton_ExportLegend.setToolTipText("Export Legend");
         jButton_ExportLegend.setFocusable(false);
         jButton_ExportLegend.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -102,7 +102,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         jToolBar1.add(jButton_ExportLegend);
         jToolBar1.add(jSeparator1);
 
-        jButton_AddBreak.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Add.Image.png"))); // NOI18N
+        jButton_AddBreak.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Add.Image.png"))); // NOI18N
         jButton_AddBreak.setToolTipText("Add Break");
         jButton_AddBreak.setFocusable(false);
         jButton_AddBreak.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -114,7 +114,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         });
         jToolBar1.add(jButton_AddBreak);
 
-        jButton_RemoveBreak.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Del.Image.png"))); // NOI18N
+        jButton_RemoveBreak.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Del.Image.png"))); // NOI18N
         jButton_RemoveBreak.setToolTipText("Remove Break");
         jButton_RemoveBreak.setFocusable(false);
         jButton_RemoveBreak.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -126,7 +126,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         });
         jToolBar1.add(jButton_RemoveBreak);
 
-        jButton_RemoveAllBreaks.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_DelAll.Image.png"))); // NOI18N
+        jButton_RemoveAllBreaks.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_DelAll.Image.png"))); // NOI18N
         jButton_RemoveAllBreaks.setToolTipText("Remove All Breaks");
         jButton_RemoveAllBreaks.setFocusable(false);
         jButton_RemoveAllBreaks.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -139,7 +139,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         jToolBar1.add(jButton_RemoveAllBreaks);
         jToolBar1.add(jSeparator2);
 
-        jButton_MoveBreakUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Up.Image.png"))); // NOI18N
+        jButton_MoveBreakUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Up.Image.png"))); // NOI18N
         jButton_MoveBreakUp.setToolTipText("Move Break Up");
         jButton_MoveBreakUp.setFocusable(false);
         jButton_MoveBreakUp.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -151,7 +151,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         });
         jToolBar1.add(jButton_MoveBreakUp);
 
-        jButton_MoveBreakDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Down.Image.png"))); // NOI18N
+        jButton_MoveBreakDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Down.Image.png"))); // NOI18N
         jButton_MoveBreakDown.setToolTipText("Move Break Down");
         jButton_MoveBreakDown.setFocusable(false);
         jButton_MoveBreakDown.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -163,7 +163,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         });
         jToolBar1.add(jButton_MoveBreakDown);
 
-        jButton_ReverseBreaks.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Reverse.Image.png"))); // NOI18N
+        jButton_ReverseBreaks.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Reverse.Image.png"))); // NOI18N
         jButton_ReverseBreaks.setToolTipText("Reverse Breaks");
         jButton_ReverseBreaks.setFocusable(false);
         jButton_ReverseBreaks.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -176,7 +176,7 @@ public class FrmLegendSet extends javax.swing.JDialog {
         jToolBar1.add(jButton_ReverseBreaks);
         jToolBar1.add(jSeparator3);
 
-        jButton_MakeBreaks.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_MakeBreaks.Image.png"))); // NOI18N
+        jButton_MakeBreaks.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_MakeBreaks.Image.png"))); // NOI18N
         jButton_MakeBreaks.setFocusable(false);
         jButton_MakeBreaks.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton_MakeBreaks.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);

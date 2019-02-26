@@ -676,7 +676,7 @@ public class MapLayout extends JPanel implements IWebMapPanel {
             case Map_ZoomIn:
                 if (isInLayoutMaps(pageP)) {
                     this.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().
-                            getImage(this.getClass().getResource("/org/meteoinfo/resources/zoom_in_32x32x32.png")), new Point(8, 8), "Zoom In"));
+                            getImage(this.getClass().getResource("/images/zoom_in_32x32x32.png")), new Point(8, 8), "Zoom In"));
 
                     this.repaint();
                 }
@@ -684,7 +684,7 @@ public class MapLayout extends JPanel implements IWebMapPanel {
             case Map_Pan:
                 if (isInLayoutMaps(pageP)) {
                     this.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().
-                            getImage(this.getClass().getResource("/org/meteoinfo/resources/Pan_Open_32x32x32.png")), new Point(8, 8), "Pan"));
+                            getImage(this.getClass().getResource("/images/Pan_Open_32x32x32.png")), new Point(8, 8), "Pan"));
 
                     Rectangle mapRect = pageToScreen(_currentLayoutMap.getBounds());
                     g.setClip(mapRect);
@@ -842,25 +842,25 @@ public class MapLayout extends JPanel implements IWebMapPanel {
             case Map_ZoomIn:
                 if (isInLayoutMaps(pageP)) {
                     this.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().
-                            getImage(this.getClass().getResource("/org/meteoinfo/resources/zoom_in_32x32x32.png")), new Point(8, 8), "Zoom In"));
+                            getImage(this.getClass().getResource("/images/zoom_in_32x32x32.png")), new Point(8, 8), "Zoom In"));
                 }
                 break;
             case Map_ZoomOut:
                 if (isInLayoutMaps(pageP)) {
                     this.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().
-                            getImage(this.getClass().getResource("/org/meteoinfo/resources/zoom_out_32x32x32.png")), new Point(8, 8), "Zoom Out"));
+                            getImage(this.getClass().getResource("/images/zoom_out_32x32x32.png")), new Point(8, 8), "Zoom Out"));
                 }
                 break;
             case Map_Pan:
                 if (isInLayoutMaps(pageP)) {
                     this.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().
-                            getImage(this.getClass().getResource("/org/meteoinfo/resources/Pan_Open_32x32x32.png")), new Point(8, 8), "Pan"));
+                            getImage(this.getClass().getResource("/images/Pan_Open_32x32x32.png")), new Point(8, 8), "Pan"));
                 }
                 break;
             case Map_Identifer:
                 if (isInLayoutMaps(pageP)) {
                     this.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().
-                            getImage(this.getClass().getResource("/org/meteoinfo/resources/identifer_32x32x32.png")), new Point(8, 8), "Identifer"));
+                            getImage(this.getClass().getResource("/images/identifer_32x32x32.png")), new Point(8, 8), "Identifer"));
                 }
                 break;
             case Map_SelectFeatures_Rectangle:
@@ -948,7 +948,7 @@ public class MapLayout extends JPanel implements IWebMapPanel {
                             _editingVertices);
                     if (_editingVerticeIndex >= 0) {
                         this.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(Toolkit.getDefaultToolkit().
-                                getImage(this.getClass().getResource("/org/meteoinfo/resources/VertexEdit_32x32x32.png")), new Point(8, 8), "Vertices edit"));
+                                getImage(this.getClass().getResource("/images/VertexEdit_32x32x32.png")), new Point(8, 8), "Vertices edit"));
                     }
                 }
                 break;

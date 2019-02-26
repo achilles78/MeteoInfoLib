@@ -296,23 +296,23 @@ public class ChartPanel extends JPanel {
                 customCursor = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
                 break;
             case ZOOM_IN:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/zoom_in_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/zoom_in_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Zoom In");
                 break;
             case ZOOM_OUT:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/zoom_out_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/zoom_out_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Zoom In");
                 break;
             case PAN:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/Pan_Open_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/Pan_Open_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Pan");
                 break;
             case IDENTIFER:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/identifer_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/identifer_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Identifer");
                 break;
             case ROTATE:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/rotate.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/rotate.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Identifer");
                 break;
         }

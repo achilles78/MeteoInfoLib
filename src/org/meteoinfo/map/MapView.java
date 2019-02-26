@@ -646,19 +646,19 @@ public class MapView extends JPanel implements IWebMapPanel {
 
         switch (mt) {
             case Zoom_In:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/zoom_in_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/zoom_in_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Zoom In");
                 break;
             case Zoom_Out:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/zoom_out_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/zoom_out_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Zoom Out");
                 break;
             case Pan:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/Pan_Open_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/Pan_Open_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Pan");
                 break;
             case Identifer:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/identifer_32x32x32.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/identifer_32x32x32.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(8, 8), "Identifer");
                 break;
             case SelectFeatures_Rectangle:
@@ -667,7 +667,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                 break;
             case Edit_Tool:
             case Edit_FeatureVertices:
-                image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/Edit_tool.png"));
+                image = toolkit.getImage(this.getClass().getResource("/images/Edit_tool.png"));
                 customCursor = toolkit.createCustomCursor(image, new Point(2, 2), "Edit Tool");
                 break;
             case New_Label:
@@ -1726,7 +1726,7 @@ public class MapView extends JPanel implements IWebMapPanel {
                     this.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                 } else {
                     Toolkit toolkit = Toolkit.getDefaultToolkit();
-                    Image image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/Edit_tool.png"));
+                    Image image = toolkit.getImage(this.getClass().getResource("/images/Edit_tool.png"));
                     this.setCursor(toolkit.createCustomCursor(image, new Point(2, 2), "Edit Tool"));
                 }
                 break;
@@ -1851,13 +1851,13 @@ public class MapView extends JPanel implements IWebMapPanel {
                                 _editingVertices);
                         Toolkit toolkit = Toolkit.getDefaultToolkit();
                         if (_editingVerticeIndex >= 0) {
-                            Image image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/VertexEdit_32x32x32.png"));
+                            Image image = toolkit.getImage(this.getClass().getResource("/images/VertexEdit_32x32x32.png"));
                             this.setCursor(toolkit.createCustomCursor(image, new Point(8, 8), "Vertices edit"));
                         } else if (this.isOnRing(new Point(e.getX(), e.getY()), eShape) >= 0) {
-                            Image image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/insert_vertice.png"));
+                            Image image = toolkit.getImage(this.getClass().getResource("/images/insert_vertice.png"));
                             this.setCursor(toolkit.createCustomCursor(image, new Point(8, 8), "Insert Vertice"));
                         } else {
-                            Image image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/Edit_tool.png"));
+                            Image image = toolkit.getImage(this.getClass().getResource("/images/Edit_tool.png"));
                             this.setCursor(toolkit.createCustomCursor(image, new Point(2, 2), "Edit Tool"));
                         }
                     }
@@ -1870,10 +1870,10 @@ public class MapView extends JPanel implements IWebMapPanel {
                             _editingVertices);
                     Toolkit toolkit = Toolkit.getDefaultToolkit();
                     if (_editingVerticeIndex >= 0) {
-                        Image image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/VertexEdit_32x32x32.png"));
+                        Image image = toolkit.getImage(this.getClass().getResource("/images/VertexEdit_32x32x32.png"));
                         this.setCursor(toolkit.createCustomCursor(image, new Point(8, 8), "Vertices edit"));
                     } else if (this.isOnRing(new Point(e.getX(), e.getY()), eShape) >= 0) {
-                        Image image = toolkit.getImage(this.getClass().getResource("/org/meteoinfo/resources/insert_vertice.png"));
+                        Image image = toolkit.getImage(this.getClass().getResource("/images/insert_vertice.png"));
                         this.setCursor(toolkit.createCustomCursor(image, new Point(8, 8), "Insert Vertice"));
                     } else {
                         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));

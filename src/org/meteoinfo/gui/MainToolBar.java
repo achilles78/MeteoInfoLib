@@ -62,7 +62,7 @@ public class MainToolBar extends JToolBar {
         this.jLabel_Status = jLabel_Status;
         
         jButton_Select = new JButton();
-        jButton_Select.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_None.Image.png"))); // NOI18N
+        jButton_Select.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_None.Image.png"))); // NOI18N
         jButton_Select.setToolTipText("Select");
         jButton_Select.setFocusable(false);
         jButton_Select.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -76,7 +76,7 @@ public class MainToolBar extends JToolBar {
         this.add(jButton_Select);
 
         jButton_ZoomIn = new JButton();
-        jButton_ZoomIn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_ZoomIn.Image.png"))); // NOI18N
+        jButton_ZoomIn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_ZoomIn.Image.png"))); // NOI18N
         jButton_ZoomIn.setToolTipText("Zoom In");
         jButton_ZoomIn.setFocusable(false);
         jButton_ZoomIn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -90,7 +90,7 @@ public class MainToolBar extends JToolBar {
         this.add(jButton_ZoomIn);
 
         jButton_ZoomOut = new JButton();
-        jButton_ZoomOut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_ZoomOut.Image.png"))); // NOI18N
+        jButton_ZoomOut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_ZoomOut.Image.png"))); // NOI18N
         jButton_ZoomOut.setToolTipText("Zoom Out");
         jButton_ZoomOut.setFocusable(false);
         jButton_ZoomOut.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -104,7 +104,7 @@ public class MainToolBar extends JToolBar {
         this.add(jButton_ZoomOut);
 
         jButton_Pan = new JButton();
-        jButton_Pan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_Pan.Image.png"))); // NOI18N
+        jButton_Pan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_Pan.Image.png"))); // NOI18N
         jButton_Pan.setToolTipText("Pan");
         jButton_Pan.setFocusable(false);
         jButton_Pan.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -118,7 +118,7 @@ public class MainToolBar extends JToolBar {
         this.add(jButton_Pan);
 
         jButton_FullExtent = new JButton();
-        jButton_FullExtent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_FullExent.Image.png"))); // NOI18N
+        jButton_FullExtent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_FullExent.Image.png"))); // NOI18N
         jButton_FullExtent.setToolTipText("Full Extent");
         jButton_FullExtent.setFocusable(false);
         jButton_FullExtent.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -132,7 +132,7 @@ public class MainToolBar extends JToolBar {
         this.add(jButton_FullExtent);
         
         jButton_ZoomToLayer = new JButton();
-        jButton_ZoomToLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_ZoomToLayer.Image.png"))); // NOI18N
+        jButton_ZoomToLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_ZoomToLayer.Image.png"))); // NOI18N
         jButton_ZoomToLayer.setToolTipText("Zoom to Layer");
         jButton_ZoomToLayer.setFocusable(false);
         jButton_ZoomToLayer.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -146,7 +146,7 @@ public class MainToolBar extends JToolBar {
         this.add(jButton_ZoomToLayer);
 
         jButton_Identifer = new JButton();
-        jButton_Identifer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/information.png"))); // NOI18N
+        jButton_Identifer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/information.png"))); // NOI18N
         jButton_Identifer.setToolTipText("Identifer");
         jButton_Identifer.setFocusable(false);
         jButton_Identifer.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -161,7 +161,7 @@ public class MainToolBar extends JToolBar {
         this.add(new Separator());
 
         jButton_Label = new JButton();
-        jButton_Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/meteoinfo/resources/TSB_LabelSet.Image.png"))); // NOI18N
+        jButton_Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/TSB_LabelSet.Image.png"))); // NOI18N
         jButton_Label.setToolTipText("Label");
         jButton_Label.setFocusable(false);
         jButton_Label.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);

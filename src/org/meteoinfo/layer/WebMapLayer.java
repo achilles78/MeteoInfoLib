@@ -180,7 +180,7 @@ public class WebMapLayer extends MapLayer {
 
         // make a dummy loading image
         try {
-            URL url = this.getClass().getResource("/org/meteoinfo/resources/loading.png");
+            URL url = this.getClass().getResource("/images/loading.png");
             this.setLoadingImage(ImageIO.read(url));
         } catch (Throwable ex) {
             System.out.println("could not load 'loading.png'");

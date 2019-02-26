@@ -739,7 +739,7 @@ public class LayersLegend extends JPanel {
             if (aLayerObj.getLayerType() == LayerTypes.VectorLayer) {
                 JMenuItem attrTableMI = new JMenuItem("Attribute Table");
                 try {
-                    ImageIcon icon = new ImageIcon(this.getClass().getResource("/org/meteoinfo/resources/AttributeTable.png"));
+                    ImageIcon icon = new ImageIcon(this.getClass().getResource("/images/AttributeTable.png"));
                     attrTableMI.setIcon(icon);
                 } catch (Exception ex) {
                 }
@@ -757,7 +757,7 @@ public class LayersLegend extends JPanel {
             JMenuItem zoomToLayerMI = new JMenuItem("Zoom To Layer");
             ImageIcon icon = null;
             try {
-                icon = new ImageIcon(this.getClass().getResource("/org/meteoinfo/resources/ZoomToLayer.png"));
+                icon = new ImageIcon(this.getClass().getResource("/images/ZoomToLayer.png"));
                 zoomToLayerMI.setIcon(icon);
             } catch (Exception ex) {
             }
@@ -805,7 +805,7 @@ public class LayersLegend extends JPanel {
             if (aLayerObj.getLayerType() == LayerTypes.VectorLayer) {
                 JMenuItem labelMI = new JMenuItem("Label");
                 try {
-                    icon = new ImageIcon(this.getClass().getResource("/org/meteoinfo/resources/Label.png"));
+                    icon = new ImageIcon(this.getClass().getResource("/images/Label.png"));
                     labelMI.setIcon(icon);
                 } catch (Exception ex) {
                 }
@@ -834,7 +834,7 @@ public class LayersLegend extends JPanel {
             //Properties
             JMenuItem propMI = new JMenuItem("Properties");
             try {
-                icon = new ImageIcon(this.getClass().getResource("/org/meteoinfo/resources/Properties.png"));
+                icon = new ImageIcon(this.getClass().getResource("/images/Properties.png"));
                 propMI.setIcon(icon);
             } catch (Exception ex) {
             }
@@ -1487,7 +1487,7 @@ public class LayersLegend extends JPanel {
 
         Image icon;
         try {
-            icon = ImageIO.read(this.getClass().getResource("/org/meteoinfo/resources/Layers.png"));
+            icon = ImageIO.read(this.getClass().getResource("/images/Layers.png"));
             g.drawImage(icon, sP.x + Constants.EXPAND_BOX_SIZE + Constants.CHECK_LEFT_PAD, sP.y, this);
         } catch (IOException ex) {
             Logger.getLogger(LayersLegend.class.getName()).log(Level.SEVERE, null, ex);

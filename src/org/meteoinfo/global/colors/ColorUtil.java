@@ -344,7 +344,7 @@ public class ColorUtil {
      * @throws IOException
      */
     public static ColorMap[] getColorTables_old() throws IOException {
-        String pdir = "/org/meteoinfo/resources/colortables";
+        String pdir = "/images/colortables";
         List<String> fns = new ArrayList<>();
         fns.add("grads_rainbow.rgb");
         fns.add("GHRSST_anomaly.rgb");

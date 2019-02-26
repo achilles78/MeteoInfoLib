@@ -116,7 +116,7 @@ public class FontUtil {
      */
     public static Font getWeatherFont() {
         Font font = null;
-        InputStream is = Draw.class.getResourceAsStream("/org/meteoinfo/resources/WeatherSymbol.ttf");
+        InputStream is = Draw.class.getResourceAsStream("/images/WeatherSymbol.ttf");
         try {
             font = Font.createFont(Font.TRUETYPE_FONT, is);
         } catch (FontFormatException | IOException ex) {

@@ -50,7 +50,7 @@ public class FrmAttriData extends javax.swing.JFrame {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         BufferedImage image = null;
         try {
-            image = ImageIO.read(this.getClass().getResource("/org/meteoinfo/resources/AttributeTable.png"));
+            image = ImageIO.read(this.getClass().getResource("/images/AttributeTable.png"));
             this.setIconImage(image);
         } catch (Exception e) {
         }    

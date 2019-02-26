@@ -32,7 +32,7 @@ public class ChartForm extends javax.swing.JFrame {
         
         BufferedImage image = null;
         try {
-            image = ImageIO.read(this.getClass().getResource("/org/meteoinfo/resources/MeteoInfo.png"));
+            image = ImageIO.read(this.getClass().getResource("/images/MeteoInfo.png"));
         } catch (Exception e) {
         }
         this.setIconImage(image);
